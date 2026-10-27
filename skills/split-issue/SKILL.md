@@ -1,8 +1,7 @@
 ---
 name: split-issue
-description: Split one issue (GitHub, GitLab, local files, Jira, Linear or Redmine) into task issues, one per role, in this conversation - propose the plan, change it with the user, and create the sub-issues only after the user's explicit yes. Safe at any stage - existing sub-issues are not duplicated and no labels are added.
+description: Use when an issue is too big for one agent and should become tasks. Splits one issue (GitHub, GitLab, local files, Jira, Linear or Redmine) into task issues, one per role, in this conversation - propose the plan, change it with the user, and create the sub-issues only after the user's explicit yes. Safe at any stage - existing sub-issues are not duplicated and no labels are added.
 argument-hint: "<issue number>"
-disable-model-invocation: true
 ---
 
 Split issue $ARGUMENTS into task issues, one per role. Talk to the user in

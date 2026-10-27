@@ -52,12 +52,17 @@ page in [`docs/manual.html`](docs/manual.html):
 | `/agent-team:split-issue <n>` | one issue into one task per role, created only after your yes |
 | `/agent-team:dispatch` | starts the tasks whose dependencies are merged |
 | `/agent-team:upgrade` | a new plugin version, or a new profile, merged with your changes |
+| `/agent-team:next` | where the project stands and which command to run next; read-only |
+
+Claude can propose `next`, `design-studio`, `create-issues`, `split-issue` and
+`dispatch` by itself when they fit; each shows its plan and asks before changing
+anything. `setup` and `upgrade` run only when you type them.
 
 ## Repository layout
 
 ```
 .claude-plugin/     plugin manifest and marketplace (plugin "agent-team")
-skills/             the six skills above (also usable from Codex and OpenCode)
+skills/             the seven skills above (also usable from Codex and OpenCode)
 scripts/            template_sync.py (install and upgrade), build_manual.py (the HTML manual)
 template/           the project template the plugin installs
 docs/manual/        the user manual, one Markdown file per chapter

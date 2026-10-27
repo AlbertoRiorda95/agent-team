@@ -103,3 +103,15 @@ With a tracker, the lead can pick work from it:
 The default starter for trackers other than GitHub and GitLab prints the
 command to start each task; with `"starter": "command"` it can open a new
 terminal session for you instead ([9. Reference](09-reference.md#starters)).
+
+## From your phone
+
+To drive the session from the Claude app, start it with Remote Control:
+
+```bash
+claude --remote-control "my-project"     # or type /remote-control in a session
+```
+
+Then open the session in the app and ask "what's next?" (Claude runs `next`) or
+type `/agent-team:dispatch`. The terminal must stay running: the work happens
+on your computer, the app is only a window on it.

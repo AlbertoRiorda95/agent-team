@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="light dark">
-<meta name="manual-source" content="sha256:03d399e5746d0a199267ebbe4abe2ba0f5f28234f2a4e655ef2b86f5e6b37bdb">
+<meta name="manual-source" content="sha256:483b60e0943e6b40b7e9793485f3007fb118300afd0b37e508220260bbc375ac">
 <meta name="manual-builder" content="python-markdown 3.11.2">
 <title>Agent team: user manual</title>
 <style>
@@ -64,7 +64,7 @@ h1{font-size:26px}
 <nav aria-label="Contents">
 <p class="brand">Agent team</p>
 <p class="sub">User manual</p>
-<ol><li><a href="#c00">Agent team: user manual</a></li><li><a href="#c01">1. What Agent team is</a><ol><li><a href="#c01-you-are-the-lead">You are the lead</a></li><li><a href="#c01-the-team">The team</a></li><li><a href="#c01-how-work-flows">How work flows</a></li><li><a href="#c01-three-scenarios">Three scenarios</a></li><li><a href="#c01-what-you-get-in-the-repository">What you get in the repository</a></li></ol></li><li><a href="#c02">2. Install</a><ol><li><a href="#c02-in-claude-code">In Claude Code</a></li><li><a href="#c02-in-codex-or-opencode">In Codex or OpenCode</a></li><li><a href="#c02-without-the-plugin">Without the plugin</a></li><li><a href="#c02-updating-the-plugin">Updating the plugin</a></li><li><a href="#c02-what-each-tool-needs">What each tool needs</a></li></ol></li><li><a href="#c03">3. Set up a project</a><ol><li><a href="#c03-the-steps">The steps</a></li><li><a href="#c03-the-profile">The profile</a></li><li><a href="#c03-what-you-get">What you get</a></li><li><a href="#c03-after-the-setup">After the setup</a></li></ol></li><li><a href="#c04">4. Run the project</a><ol><li><a href="#c04-design">Design</a></li><li><a href="#c04-issues">Issues</a></li><li><a href="#c04-split">Split</a></li><li><a href="#c04-start">Start</a></li><li><a href="#c04-review-and-merge">Review and merge</a></li><li><a href="#c04-alignment">Alignment</a></li><li><a href="#c04-team-tasks">Team tasks</a></li><li><a href="#c04-on-demand-roles">On-demand roles</a></li><li><a href="#c04-long-sessions">Long sessions</a></li></ol></li><li><a href="#c05">5. Scenario: local</a><ol><li><a href="#c05-why-use-it">Why use it</a></li><li><a href="#c05-profile">Profile</a></li><li><a href="#c05-with-claude-code">With Claude Code</a></li><li><a href="#c05-with-codex">With Codex</a></li><li><a href="#c05-with-opencode">With OpenCode</a></li><li><a href="#c05-several-tools-in-one-project">Several tools in one project</a></li><li><a href="#c05-issues-in-the-local-scenario">Issues in the local scenario</a></li></ol></li><li><a href="#c06">6. Scenario: remote repository</a><ol><li><a href="#c06-why-use-it">Why use it</a></li><li><a href="#c06-profile">Profile</a></li><li><a href="#c06-github">GitHub</a></li><li><a href="#c06-gitlab">GitLab</a></li><li><a href="#c06-costs-and-safety">Costs and safety</a></li></ol></li><li><a href="#c07">7. Scenario: custom orchestrator</a><ol><li><a href="#c07-why-use-it">Why use it</a></li><li><a href="#c07-the-connection-points">The connection points</a></li><li><a href="#c07-option-a-multica-a-board-with-agents-as-team-members">Option A: Multica, a board with agents as team members</a></li><li><a href="#c07-option-b-your-own-orchestrator">Option B: your own orchestrator</a></li><li><a href="#c07-litellm-one-gateway-for-many-providers">LiteLLM: one gateway for many providers</a></li></ol></li><li><a href="#c08">8. Change and upgrade</a><ol><li><a href="#c08-change-the-profile">Change the profile</a></li><li><a href="#c08-upgrade-to-a-new-plugin-version">Upgrade to a new plugin version</a></li><li><a href="#c08-how-your-changes-are-kept">How your changes are kept</a></li><li><a href="#c08-a-project-set-up-by-hand">A project set up by hand</a></li></ol></li><li><a href="#c09">9. Reference</a><ol><li><a href="#c09-skills">Skills</a></li><li><a href="#c09-scripts">Scripts</a></li><li><a href="#c09-configuration">Configuration</a></li><li><a href="#c09-starters">Starters</a></li><li><a href="#c09-labels">Labels</a></li><li><a href="#c09-ci-secrets-and-variables">CI secrets and variables</a></li><li><a href="#c09-where-the-tools-find-things">Where the tools find things</a></li><li><a href="#c09-token-costs">Token costs</a></li><li><a href="#c09-this-manual">This manual</a></li></ol></li></ol>
+<ol><li><a href="#c00">Agent team: user manual</a></li><li><a href="#c01">1. What Agent team is</a><ol><li><a href="#c01-you-are-the-lead">You are the lead</a></li><li><a href="#c01-the-team">The team</a></li><li><a href="#c01-how-work-flows">How work flows</a></li><li><a href="#c01-three-scenarios">Three scenarios</a></li><li><a href="#c01-what-you-get-in-the-repository">What you get in the repository</a></li></ol></li><li><a href="#c02">2. Install</a><ol><li><a href="#c02-in-claude-code">In Claude Code</a></li><li><a href="#c02-in-codex-or-opencode">In Codex or OpenCode</a></li><li><a href="#c02-without-the-plugin">Without the plugin</a></li><li><a href="#c02-updating-the-plugin">Updating the plugin</a></li><li><a href="#c02-what-each-tool-needs">What each tool needs</a></li></ol></li><li><a href="#c03">3. Set up a project</a><ol><li><a href="#c03-the-steps">The steps</a></li><li><a href="#c03-the-profile">The profile</a></li><li><a href="#c03-what-you-get">What you get</a></li><li><a href="#c03-after-the-setup">After the setup</a></li></ol></li><li><a href="#c04">4. Run the project</a><ol><li><a href="#c04-design">Design</a></li><li><a href="#c04-issues">Issues</a></li><li><a href="#c04-split">Split</a></li><li><a href="#c04-start">Start</a></li><li><a href="#c04-review-and-merge">Review and merge</a></li><li><a href="#c04-alignment">Alignment</a></li><li><a href="#c04-team-tasks">Team tasks</a></li><li><a href="#c04-on-demand-roles">On-demand roles</a></li><li><a href="#c04-long-sessions">Long sessions</a></li></ol></li><li><a href="#c05">5. Scenario: local</a><ol><li><a href="#c05-why-use-it">Why use it</a></li><li><a href="#c05-profile">Profile</a></li><li><a href="#c05-with-claude-code">With Claude Code</a></li><li><a href="#c05-with-codex">With Codex</a></li><li><a href="#c05-with-opencode">With OpenCode</a></li><li><a href="#c05-several-tools-in-one-project">Several tools in one project</a></li><li><a href="#c05-issues-in-the-local-scenario">Issues in the local scenario</a></li><li><a href="#c05-from-your-phone">From your phone</a></li></ol></li><li><a href="#c06">6. Scenario: remote repository</a><ol><li><a href="#c06-why-use-it">Why use it</a></li><li><a href="#c06-profile">Profile</a></li><li><a href="#c06-github">GitHub</a></li><li><a href="#c06-gitlab">GitLab</a></li><li><a href="#c06-costs-and-safety">Costs and safety</a></li></ol></li><li><a href="#c07">7. Scenario: custom orchestrator</a><ol><li><a href="#c07-why-use-it">Why use it</a></li><li><a href="#c07-the-connection-points">The connection points</a></li><li><a href="#c07-option-a-multica-a-board-with-agents-as-team-members">Option A: Multica, a board with agents as team members</a></li><li><a href="#c07-option-b-your-own-orchestrator">Option B: your own orchestrator</a></li><li><a href="#c07-litellm-one-gateway-for-many-providers">LiteLLM: one gateway for many providers</a></li></ol></li><li><a href="#c08">8. Change and upgrade</a><ol><li><a href="#c08-change-the-profile">Change the profile</a></li><li><a href="#c08-upgrade-to-a-new-plugin-version">Upgrade to a new plugin version</a></li><li><a href="#c08-how-your-changes-are-kept">How your changes are kept</a></li><li><a href="#c08-a-project-set-up-by-hand">A project set up by hand</a></li></ol></li><li><a href="#c09">9. Reference</a><ol><li><a href="#c09-skills">Skills</a></li><li><a href="#c09-scripts">Scripts</a></li><li><a href="#c09-configuration">Configuration</a></li><li><a href="#c09-starters">Starters</a></li><li><a href="#c09-labels">Labels</a></li><li><a href="#c09-ci-secrets-and-variables">CI secrets and variables</a></li><li><a href="#c09-where-the-tools-find-things">Where the tools find things</a></li><li><a href="#c09-token-costs">Token costs</a></li><li><a href="#c09-this-manual">This manual</a></li></ol></li></ol>
 </nav>
 <main>
 <section class="chapter" id="c00">
@@ -342,8 +342,16 @@ as <code>/agent-team:&lt;skill&gt;</code>:</p>
 <td><code>/agent-team:upgrade</code></td>
 <td>bring the project to a new plugin version or a new profile</td>
 </tr>
+<tr>
+<td><code>/agent-team:next</code></td>
+<td>see where the project stands and which command to run next (read-only)</td>
+</tr>
 </tbody>
 </table></div>
+<p>Claude can propose <code>next</code>, <code>design-studio</code>, <code>create-issues</code>, <code>split-issue</code> and
+<code>dispatch</code> by itself when they fit; each shows its plan and asks before changing
+anything. <code>setup</code> and <code>upgrade</code> run only when you type them, so they can also
+be typed from the Claude app.</p>
 <p>To try a local checkout without installing: <code>claude --plugin-dir ./agent-team</code>.</p>
 <h2 id="c02-in-codex-or-opencode">In Codex or OpenCode</h2>
 <p>Both read skills from <code>~/.agents/skills/</code>. Clone the repository once and link
@@ -837,6 +845,13 @@ With a tracker, the lead can pick work from it:</p>
 <p>The default starter for trackers other than GitHub and GitLab prints the
 command to start each task; with <code>"starter": "command"</code> it can open a new
 terminal session for you instead (<a href="#c09-starters">9. Reference</a>).</p>
+<h2 id="c05-from-your-phone">From your phone</h2>
+<p>To drive the session from the Claude app, start it with Remote Control:</p>
+<pre><code class="language-bash">claude --remote-control &quot;my-project&quot;     # or type /remote-control in a session
+</code></pre>
+<p>Then open the session in the app and ask "what's next?" (Claude runs <code>next</code>) or
+type <code>/agent-team:dispatch</code>. The terminal must stay running: the work happens
+on your computer, the app is only a window on it.</p>
 </section>
 <section class="chapter" id="c06">
 <h1 id="c06-6-scenario-remote-repository">6. Scenario: remote repository</h1>
@@ -1394,6 +1409,11 @@ python3 ~/agent-team/scripts/template_sync.py apply  --template ~/agent-team/tem
 <td>new plugin version or new profile, keeping your changes</td>
 </tr>
 <tr>
+<td><code>next</code></td>
+<td></td>
+<td>where the project stands and the command to run next; reads only</td>
+</tr>
+<tr>
 <td></td>
 <td><code>/handoff</code></td>
 <td>a short note so a fresh session continues the work</td>
@@ -1405,6 +1425,9 @@ python3 ~/agent-team/scripts/template_sync.py apply  --template ~/agent-team/tem
 </tr>
 </tbody>
 </table></div>
+<p>Claude can propose <code>next</code>, <code>design-studio</code>, <code>create-issues</code>, <code>split-issue</code> and
+<code>dispatch</code> by itself; each shows its plan and asks before changing anything.
+<code>setup</code> and <code>upgrade</code> run only when you type them.</p>
 <p>In Claude Code the plugin skills are <code>/agent-team:&lt;name&gt;</code>; in Codex and
 OpenCode ask for them by name. Template skills live in the project
 (<code>.claude/skills/</code>, <code>.agents/skills/</code>).</p>

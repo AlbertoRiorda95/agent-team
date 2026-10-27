@@ -21,6 +21,12 @@ as `/agent-team:<skill>`:
 | `/agent-team:split-issue <n>` | split one issue into one task per role |
 | `/agent-team:dispatch` | start the tasks that are ready |
 | `/agent-team:upgrade` | bring the project to a new plugin version or a new profile |
+| `/agent-team:next` | see where the project stands and which command to run next (read-only) |
+
+Claude can propose `next`, `design-studio`, `create-issues`, `split-issue` and
+`dispatch` by itself when they fit; each shows its plan and asks before changing
+anything. `setup` and `upgrade` run only when you type them, so they can also
+be typed from the Claude app.
 
 To try a local checkout without installing: `claude --plugin-dir ./agent-team`.
 

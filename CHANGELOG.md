@@ -3,6 +3,24 @@
 Every release has **Upgrade notes**: the steps `/agent-team:upgrade` cannot do
 by changing files, because they need your hands on the platform or a decision.
 
+## 1.3.0 - 2026-10-27
+
+### Skills
+- New `/agent-team:next`: reads the profile, the design, the specs and the
+  tracker, says where the project stands and which command to run next.
+  Read-only.
+- `design-studio`, `create-issues`, `split-issue` and `dispatch` can now be
+  proposed by Claude itself (no more `disable-model-invocation`), so they are
+  found from the Claude app or Remote Control, where slash commands cannot be
+  browsed. Each shows its plan and asks before changing anything; their
+  descriptions say when to use them. `setup` and `upgrade` stay manual.
+
+### Documentation
+- Commands tables updated; new "From your phone" section in the local scenario.
+
+### Upgrade notes
+- None.
+
 ## 1.2.0 - 2026-10-27
 
 ### Documentation

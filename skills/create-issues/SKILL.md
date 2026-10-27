@@ -1,8 +1,7 @@
 ---
 name: create-issues
-description: Create the milestones and issues (GitHub, GitLab, local files, Jira, Linear or Redmine) from the roadmap and the ready specs in docs/design/, after showing the plan. Idempotent - existing issues and milestones are skipped, nothing is closed or labeled - so it can be run again at any stage, for example after every design studio session.
+description: Use when the roadmap and ready specs in docs/design/ should become issues. Creates the milestones and issues (GitHub, GitLab, local files, Jira, Linear or Redmine) from the roadmap and the ready specs, but only after showing the plan and getting the user's yes; nothing is created before. Idempotent - existing issues and milestones are skipped, nothing is closed or labeled - so it can be run again at any stage, for example after every design studio session.
 argument-hint: "[--team]"
-disable-model-invocation: true
 ---
 
 Create the issues of the project's roadmap and ready specs. Talk to the user in

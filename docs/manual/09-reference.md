@@ -10,8 +10,13 @@
 | `split-issue` | | one issue into one task per role, after your approval |
 | `dispatch` | | starts the ready tasks with the project's starter |
 | `upgrade` | | new plugin version or new profile, keeping your changes |
+| `next` | | where the project stands and the command to run next; reads only |
 | | `/handoff` | a short note so a fresh session continues the work |
 | | `design-system` | the project's tokens and visual rules, preloaded by designer and frontend |
+
+Claude can propose `next`, `design-studio`, `create-issues`, `split-issue` and
+`dispatch` by itself; each shows its plan and asks before changing anything.
+`setup` and `upgrade` run only when you type them.
 
 In Claude Code the plugin skills are `/agent-team:<name>`; in Codex and
 OpenCode ask for them by name. Template skills live in the project

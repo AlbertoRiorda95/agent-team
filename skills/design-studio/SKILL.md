@@ -1,8 +1,7 @@
 ---
 name: design-studio
-description: Interactive design session with the user for the project design or one feature, new or a revision of an existing spec. Interviews in rounds and writes the spec in docs/design/; never touches code, issues or workflows, so it is safe at any stage of the project.
+description: Use when the user wants to design the project or a feature, or to revise an existing spec. Interactive session that interviews in rounds and writes the spec in docs/design/; it asks before writing and never touches code, issues or workflows, so it is safe at any stage of the project.
 argument-hint: "<feature> | project"
-disable-model-invocation: true
 ---
 
 Run a design studio session for: $ARGUMENTS

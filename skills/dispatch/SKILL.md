@@ -1,8 +1,7 @@
 ---
 name: dispatch
-description: Start the task issues that are ready - no open dependency, a free slot for their role - with the project's starter (agent:<role> label on GitHub, pipeline on GitLab, a configured command such as an orchestrator, on any tracker), after showing the plan. Safe at any time - it never starts what is running, blocked, on hold or on-demand.
+description: Use when the user wants work to begin or to move on after a merge. Starts the task issues that are ready - no open dependency, a free slot for their role - with the project's starter (agent:<role> label on GitHub, pipeline on GitLab, a configured command such as an orchestrator, on any tracker), but only after showing the plan and getting the user's yes. Safe at any time - it never starts what is running, blocked, on hold or on-demand.
 argument-hint: "[--per-role N] [--max N] [--milestone M1 | --all]"
-disable-model-invocation: true
 ---
 
 Start the task issues that can run now. Talk to the user in their language.
