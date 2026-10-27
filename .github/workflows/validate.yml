@@ -31,7 +31,7 @@ jobs:
       - name: Scripts
         run: |
           for f in $(git ls-files '*.sh'); do bash -n "$f"; done
-          python3 -m py_compile $(git ls-files '*.py')
+          git ls-files -z '*.py' | xargs -0 python3 -m py_compile
       - name: Profiles (every sample profile renders, loads and lints; switching profiles)
         run: |
           export PATH="$HOME/.local/bin:$PATH"
