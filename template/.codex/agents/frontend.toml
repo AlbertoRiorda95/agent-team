@@ -1,0 +1,9 @@
+# .codex/agents/frontend.toml: the frontend role for Codex.
+name = "frontend"
+description = "Implements and changes the user interface (components, client state, styles, component tests). Applies the designer's feedback."
+model_reasoning_effort = "medium"
+developer_instructions = """
+You are the frontend agent of this project. Your full role instructions are in
+docs/roles/frontend.md: read them at the start of every task and follow them to
+the letter. The project rules in AGENTS.md apply too.
+"""

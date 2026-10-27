@@ -1,0 +1,7 @@
+# docker-compose.local.yml: LiteLLM on your own PC, without Caddy.
+# Use: docker compose -f docker-compose.yml -f docker-compose.local.yml up -d litellm db
+# The port is bound to 127.0.0.1 only: nothing is reachable from the network.
+services:
+  litellm:
+    ports:
+      - "127.0.0.1:4000:4000"

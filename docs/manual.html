@@ -1,0 +1,1701 @@
+<!DOCTYPE html>
+<!-- Generated from docs/manual/*.md by scripts/build_manual.py: do not edit by hand. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="manual-source" content="sha256:324603243c37d8bdb4ef47f57be7d33e8e60b18f7e70081300879f98565c6387">
+<meta name="manual-builder" content="python-markdown 3.11.2">
+<title>Agent team: user manual</title>
+<style>
+:root{--bg:#fbfaf8;--panel:#f3f1ec;--text:#1f1d1a;--muted:#6b665d;--line:#e2ddd3;--accent:#b4532a;
+--accent-soft:#f6e7df;--code:#f0ede6;--link:#9a4320}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#171614;--panel:#1f1d1a;--text:#ece8e1;
+--muted:#a39d92;--line:#2f2c27;--accent:#e08a5f;--accent-soft:#3a271d;--code:#26231f;--link:#f0a47c}}
+:root[data-theme="dark"]{--bg:#171614;--panel:#1f1d1a;--text:#ece8e1;--muted:#a39d92;--line:#2f2c27;
+--accent:#e08a5f;--accent-soft:#3a271d;--code:#26231f;--link:#f0a47c}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:16px}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.65 ui-sans-serif,system-ui,-apple-system,
+"Segoe UI",Roboto,sans-serif;-webkit-text-size-adjust:100%}
+.layout{display:grid;grid-template-columns:280px minmax(0,1fr);min-height:100vh}
+nav{position:sticky;top:0;height:100vh;overflow:auto;background:var(--panel);border-right:1px solid var(--line);
+padding:24px 18px}
+nav .brand{font-weight:700;font-size:15px;letter-spacing:.02em;margin:0 0 4px}
+nav .sub{color:var(--muted);font-size:13px;margin:0 0 18px}
+nav ol{list-style:none;margin:0;padding:0}
+nav li{margin:0}
+nav a{display:block;color:var(--text);text-decoration:none;font-size:14px;padding:5px 8px;border-radius:6px}
+nav a:hover{background:var(--accent-soft)}
+nav ol ol a{color:var(--muted);font-size:13px;padding:3px 8px 3px 20px}
+main{max-width:860px;padding:40px 48px 96px;width:100%}
+section.chapter{padding-top:8px;margin-bottom:56px}
+section.chapter+section.chapter{border-top:1px solid var(--line);padding-top:40px}
+h1{font-size:32px;line-height:1.2;margin:0 0 18px;letter-spacing:-.01em}
+h2{font-size:23px;margin:40px 0 12px;line-height:1.3}
+h3{font-size:18px;margin:28px 0 8px}
+p,ul,ol{margin:0 0 14px}
+li{margin:3px 0}
+a{color:var(--link)}
+code{font:13.5px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;background:var(--code);
+padding:1px 5px;border-radius:4px}
+pre{background:var(--code);padding:14px 16px;border-radius:8px;overflow-x:auto;margin:0 0 16px;
+border:1px solid var(--line)}
+pre code{background:none;padding:0;font-size:13px}
+.table{overflow-x:auto;margin:0 0 18px;border:1px solid var(--line);border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14.5px}
+th,td{text-align:left;vertical-align:top;padding:8px 12px;border-bottom:1px solid var(--line)}
+th{background:var(--panel);font-weight:600}
+tr:last-child td{border-bottom:0}
+.meta{color:var(--muted);font-size:13px;margin-top:64px;border-top:1px solid var(--line);padding-top:16px}
+.toggle{display:none}
+@media (max-width:900px){
+.layout{display:block}
+nav{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line);padding:16px}
+nav ol ol{display:none}
+main{padding:24px 16px 64px}
+h1{font-size:26px}
+}
+</style>
+</head>
+<body>
+<div class="layout">
+<nav aria-label="Contents">
+<p class="brand">Agent team</p>
+<p class="sub">User manual</p>
+<ol><li><a href="#c00">Agent team: user manual</a></li><li><a href="#c01">1. What Agent team is</a><ol><li><a href="#c01-you-are-the-lead">You are the lead</a></li><li><a href="#c01-the-team">The team</a></li><li><a href="#c01-how-work-flows">How work flows</a></li><li><a href="#c01-three-scenarios">Three scenarios</a></li><li><a href="#c01-what-you-get-in-the-repository">What you get in the repository</a></li></ol></li><li><a href="#c02">2. Install</a><ol><li><a href="#c02-in-claude-code">In Claude Code</a></li><li><a href="#c02-in-codex-or-opencode">In Codex or OpenCode</a></li><li><a href="#c02-without-the-plugin">Without the plugin</a></li><li><a href="#c02-updating-the-plugin">Updating the plugin</a></li><li><a href="#c02-what-each-tool-needs">What each tool needs</a></li></ol></li><li><a href="#c03">3. Set up a project</a><ol><li><a href="#c03-the-steps">The steps</a></li><li><a href="#c03-the-profile">The profile</a></li><li><a href="#c03-what-you-get">What you get</a></li><li><a href="#c03-after-the-setup">After the setup</a></li></ol></li><li><a href="#c04">4. Run the project</a><ol><li><a href="#c04-design">Design</a></li><li><a href="#c04-issues">Issues</a></li><li><a href="#c04-split">Split</a></li><li><a href="#c04-start">Start</a></li><li><a href="#c04-review-and-merge">Review and merge</a></li><li><a href="#c04-alignment">Alignment</a></li><li><a href="#c04-team-tasks">Team tasks</a></li><li><a href="#c04-on-demand-roles">On-demand roles</a></li><li><a href="#c04-long-sessions">Long sessions</a></li></ol></li><li><a href="#c05">5. Scenario: local</a><ol><li><a href="#c05-why-use-it">Why use it</a></li><li><a href="#c05-profile">Profile</a></li><li><a href="#c05-with-claude-code">With Claude Code</a></li><li><a href="#c05-with-codex">With Codex</a></li><li><a href="#c05-with-opencode">With OpenCode</a></li><li><a href="#c05-several-tools-in-one-project">Several tools in one project</a></li><li><a href="#c05-issues-in-the-local-scenario">Issues in the local scenario</a></li></ol></li><li><a href="#c06">6. Scenario: remote repository</a><ol><li><a href="#c06-why-use-it">Why use it</a></li><li><a href="#c06-profile">Profile</a></li><li><a href="#c06-github">GitHub</a></li><li><a href="#c06-gitlab">GitLab</a></li><li><a href="#c06-costs-and-safety">Costs and safety</a></li></ol></li><li><a href="#c07">7. Scenario: custom orchestrator</a><ol><li><a href="#c07-why-use-it">Why use it</a></li><li><a href="#c07-the-connection-points">The connection points</a></li><li><a href="#c07-option-a-multica-a-board-with-agents-as-team-members">Option A: Multica, a board with agents as team members</a></li><li><a href="#c07-option-b-your-own-orchestrator">Option B: your own orchestrator</a></li><li><a href="#c07-litellm-one-gateway-for-many-providers">LiteLLM: one gateway for many providers</a></li></ol></li><li><a href="#c08">8. Change and upgrade</a><ol><li><a href="#c08-change-the-profile">Change the profile</a></li><li><a href="#c08-upgrade-to-a-new-plugin-version">Upgrade to a new plugin version</a></li><li><a href="#c08-how-your-changes-are-kept">How your changes are kept</a></li><li><a href="#c08-a-project-set-up-by-hand">A project set up by hand</a></li></ol></li><li><a href="#c09">9. Reference</a><ol><li><a href="#c09-skills">Skills</a></li><li><a href="#c09-scripts">Scripts</a></li><li><a href="#c09-configuration">Configuration</a></li><li><a href="#c09-starters">Starters</a></li><li><a href="#c09-labels">Labels</a></li><li><a href="#c09-ci-secrets-and-variables">CI secrets and variables</a></li><li><a href="#c09-where-the-tools-find-things">Where the tools find things</a></li><li><a href="#c09-token-costs">Token costs</a></li><li><a href="#c09-this-manual">This manual</a></li></ol></li></ol>
+</nav>
+<main>
+<section class="chapter" id="c00">
+<h1 id="c00-agent-team-user-manual">Agent team: user manual</h1>
+<p>Agent team turns a repository into a project you run as the lead of a
+development team. The team is made of AI agents (designer, frontend, backend
+and devops for everyday work, optimizer and security when you ask for them);
+you decide what to build, approve the plan, and merge their work.</p>
+<p>This manual explains how to install the plugin, set up a project and run it in
+each of the three ways it supports.</p>
+<div class="table"><table>
+<thead>
+<tr>
+<th>Chapter</th>
+<th>What you find</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="#c01">1. What Agent team is</a></td>
+<td>your role, the team, the three scenarios and how to choose</td>
+</tr>
+<tr>
+<td><a href="#c02">2. Install</a></td>
+<td>the plugin in Claude Code; the skills in Codex and OpenCode; without the plugin</td>
+</tr>
+<tr>
+<td><a href="#c03">3. Set up a project</a></td>
+<td>the setup skill, the project profile, the first design</td>
+</tr>
+<tr>
+<td><a href="#c04">4. Run the project</a></td>
+<td>the work loop shared by every scenario: design, issues, split, start, review</td>
+</tr>
+<tr>
+<td><a href="#c05">5. Scenario: local</a></td>
+<td>the team on your computer, with Claude Code, Codex or OpenCode</td>
+</tr>
+<tr>
+<td><a href="#c06">6. Scenario: remote repository</a></td>
+<td>the team in GitHub or GitLab CI, started from issues</td>
+</tr>
+<tr>
+<td><a href="#c07">7. Scenario: custom orchestrator</a></td>
+<td>your own tracker and runner: Multica, an orchestrator you write</td>
+</tr>
+<tr>
+<td><a href="#c08">8. Change and upgrade</a></td>
+<td>another tracker or tool, roles back, new plugin versions</td>
+</tr>
+<tr>
+<td><a href="#c09">9. Reference</a></td>
+<td>commands, configuration, labels, CI variables, files, costs</td>
+</tr>
+</tbody>
+</table></div>
+<p>The HTML version of this manual, <code>docs/manual.html</code>, is generated from these
+files (see <a href="#c09-this-manual">9. Reference</a>).</p>
+</section>
+<section class="chapter" id="c01">
+<h1 id="c01-1-what-agent-team-is">1. What Agent team is</h1>
+<p>Agent team is a way to run a software project as if you led a development
+team, where the developers are AI agents. It is a plugin for Claude Code and a
+set of skills for Codex and OpenCode, plus a project template that the plugin
+installs and keeps up to date.</p>
+<h2 id="c01-you-are-the-lead">You are the lead</h2>
+<p>You keep the decisions that a lead keeps, and you hand off the work:</p>
+<div class="table"><table>
+<thead>
+<tr>
+<th>You</th>
+<th>The team</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>decide what to build, in a design session with the designer</td>
+<td>asks the questions, writes the spec and the task breakdown</td>
+</tr>
+<tr>
+<td>approve the plan: which tasks, in which order, who does what</td>
+<td>turns the plan into issues, one per role and task</td>
+</tr>
+<tr>
+<td>choose what starts and when</td>
+<td>implements each task on its own branch and opens a merge request</td>
+</tr>
+<tr>
+<td>review and merge</td>
+<td>describes every change: evidence, risk, what it did not do</td>
+</tr>
+<tr>
+<td>settle conflicts between roles</td>
+<td>flags every change other roles rely on, instead of patching their code</td>
+</tr>
+</tbody>
+</table></div>
+<p>Nothing reaches <code>main</code> without your merge, and agents never merge, push to
+<code>main</code> or change real environments: the template blocks it in every tool it
+supports.</p>
+<h2 id="c01-the-team">The team</h2>
+<div class="table"><table>
+<thead>
+<tr>
+<th>Role</th>
+<th>Works on</th>
+<th>When</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>designer</td>
+<td>specs, design system, UI review</td>
+<td>every feature</td>
+</tr>
+<tr>
+<td>frontend</td>
+<td>interface, client state, styles, component tests</td>
+<td>every feature with a UI</td>
+</tr>
+<tr>
+<td>backend</td>
+<td>server, API contract, data model, migrations</td>
+<td>every feature with data</td>
+</tr>
+<tr>
+<td>devops</td>
+<td>CI/CD, containers, infrastructure as code (never applies it)</td>
+<td>when the feature needs it</td>
+</tr>
+<tr>
+<td>optimizer</td>
+<td>faster code with the same behavior, measured</td>
+<td>only when you ask</td>
+</tr>
+<tr>
+<td>security</td>
+<td>assessment of the running app, local or staging only</td>
+<td>only when you ask</td>
+</tr>
+</tbody>
+</table></div>
+<p>Work is split by file boundary: two agents never edit the same files in the
+same round. A role prompt is written once in <code>docs/roles/&lt;role&gt;.md</code> and used
+by every tool. You can drop roles the project does not need.</p>
+<h2 id="c01-how-work-flows">How work flows</h2>
+<p>The same loop runs in every scenario:</p>
+<ol>
+<li><strong>Design.</strong> A design studio session with you produces a spec marked
+   <code>ready: yes</code>, with its task breakdown (<a href="#c04-design">4. Run the project</a>).</li>
+<li><strong>Plan.</strong> The breakdown becomes issues in your tracker, grouped by
+   milestone; you can split any issue into one task per role.</li>
+<li><strong>Start.</strong> You start the tasks whose dependencies are done, by hand or
+   automatically.</li>
+<li><strong>Build.</strong> Each agent works on its branch and opens a merge request.</li>
+<li><strong>Review and merge.</strong> You review, merge, and the next tasks can start.</li>
+</ol>
+<p>What changes between scenarios is where the agents run and how a task starts.</p>
+<h2 id="c01-three-scenarios">Three scenarios</h2>
+<div class="table"><table>
+<thead>
+<tr>
+<th></th>
+<th>Local</th>
+<th>Remote repository</th>
+<th>Custom orchestrator</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Agents run</td>
+<td>on your computer, in your session</td>
+<td>in GitHub Actions or GitLab CI</td>
+<td>where your orchestrator runs them</td>
+</tr>
+<tr>
+<td>Tools</td>
+<td>Claude Code, Codex or OpenCode</td>
+<td>Claude Code, Codex, OpenCode, also mixed per role</td>
+<td>any of the three</td>
+</tr>
+<tr>
+<td>A task starts when</td>
+<td>you ask in the session</td>
+<td>you add a label or run a pipeline, or a merge frees it</td>
+<td>your tracker or queue says so</td>
+</tr>
+<tr>
+<td>Issues</td>
+<td>optional: none, files in the repo, or any tracker</td>
+<td>GitHub or GitLab issues</td>
+<td>Jira, Linear, Redmine, files, or GitHub/GitLab</td>
+</tr>
+<tr>
+<td>You need to be there</td>
+<td>yes, while it works</td>
+<td>no: you come back to merge requests</td>
+<td>no</td>
+</tr>
+<tr>
+<td>Set-up effort</td>
+<td>minutes</td>
+<td>an hour: secrets, labels, branch protection</td>
+<td>days: your service to run</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li><strong><a href="#c05">Local</a></strong>: the fastest start and the tightest
+  feedback loop. Good for one person, small features and exploring.</li>
+<li><strong><a href="#c06">Remote repository</a></strong>: the team works while you
+  are away and everything leaves a trail of issues, branches and merge
+  requests. Good once the project has a backlog.</li>
+<li><strong><a href="#c07">Custom orchestrator</a></strong>: for a tracker other than
+  GitHub or GitLab, your own infrastructure, queues and priorities. Good when
+  the first two are not enough for a concrete reason.</li>
+</ul>
+<p>You can move between them: the design, the specs and the issues stay the
+same, and a profile change plus an upgrade adds or removes the files of each
+scenario (<a href="#c08">8. Change and upgrade</a>).</p>
+<h2 id="c01-what-you-get-in-the-repository">What you get in the repository</h2>
+<p>The plugin installs a template, then keeps only what your project uses:</p>
+<ul>
+<li><code>AGENTS.md</code>: the rules every agent reads, in every tool;</li>
+<li><code>docs/roles/</code>: one prompt per role; <code>docs/design/</code>: the project design and
+  one spec per feature; <code>docs/agents/</code>: rules read only when they apply;</li>
+<li>the agents for your tools: <code>.claude/</code>, <code>.codex/</code>, <code>.opencode/</code>;</li>
+<li>CI that checks every merge request, whoever wrote it: build, tests, static
+  analysis, licenses, vulnerabilities, secrets;</li>
+<li>for remote work, the workflows that start the agents from issues;</li>
+<li><code>scripts/</code>: issues from specs, splits, starting ready tasks, the profile.</li>
+</ul>
+<p>The project profile, in <code>.agent-team/config.json</code>, records which tools,
+CI, tracker, roles and features you use (<a href="#c03-the-profile">3. Set up a project</a>).</p>
+</section>
+<section class="chapter" id="c02">
+<h1 id="c02-2-install">2. Install</h1>
+<p>Agent team ships as one repository, <code>claude-agent-team</code>. It is a Claude Code
+plugin, and its skills also work in Codex and OpenCode.</p>
+<h2 id="c02-in-claude-code">In Claude Code</h2>
+<pre><code class="language-bash">claude plugin marketplace add &lt;owner&gt;/claude-agent-team
+claude plugin install agent-team@agent-team
+</code></pre>
+<p>Inside a session the same steps are under <code>/plugin</code>. The commands then appear
+as <code>/agent-team:&lt;skill&gt;</code>:</p>
+<div class="table"><table>
+<thead>
+<tr>
+<th>Command</th>
+<th>Use it to</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/agent-team:setup</code></td>
+<td>install the template in a repository and configure it</td>
+</tr>
+<tr>
+<td><code>/agent-team:design-studio &lt;feature&gt;</code></td>
+<td>design the project or a feature with the designer</td>
+</tr>
+<tr>
+<td><code>/agent-team:create-issues</code></td>
+<td>turn the roadmap and the ready specs into milestones and issues</td>
+</tr>
+<tr>
+<td><code>/agent-team:split-issue &lt;n&gt;</code></td>
+<td>split one issue into one task per role</td>
+</tr>
+<tr>
+<td><code>/agent-team:dispatch</code></td>
+<td>start the tasks that are ready</td>
+</tr>
+<tr>
+<td><code>/agent-team:upgrade</code></td>
+<td>bring the project to a new plugin version or a new profile</td>
+</tr>
+</tbody>
+</table></div>
+<p>To try a local checkout without installing: <code>claude --plugin-dir ./claude-agent-team</code>.</p>
+<h2 id="c02-in-codex-or-opencode">In Codex or OpenCode</h2>
+<p>Both read skills from <code>~/.agents/skills/</code>. Clone the repository once and link
+its skills there:</p>
+<pre><code class="language-bash">git clone https://github.com/&lt;owner&gt;/claude-agent-team ~/claude-agent-team
+mkdir -p ~/.agents/skills
+ln -s ~/claude-agent-team/skills/* ~/.agents/skills/
+echo 'export AGENT_TEAM_HOME=~/claude-agent-team' &gt;&gt; ~/.bashrc   # or your shell's file
+</code></pre>
+<p>The skills use <code>AGENT_TEAM_HOME</code> where Claude Code would use the plugin
+folder. Ask for them by name ("use the setup skill", "run the design-studio
+skill for login") or, in Codex, with <code>$setup</code>, <code>$design-studio</code>.</p>
+<h2 id="c02-without-the-plugin">Without the plugin</h2>
+<p>Copy <code>template/</code> into a new repository and ask your tool to follow
+<code>SETUP.md</code>:</p>
+<pre><code class="language-bash">cp -r claude-agent-team/template my-project &amp;&amp; cd my-project &amp;&amp; git init
+claude        # or codex, or opencode
+# then: &quot;Read SETUP.md and set up this project&quot;
+</code></pre>
+<p>The setup works the same. What you miss: the commands above, and upgrades
+that merge new template versions with your changes. To get them later, run
+the upgrade from a clone (<a href="#c08-a-project-set-up-by-hand">8. Change and upgrade</a>).</p>
+<h2 id="c02-updating-the-plugin">Updating the plugin</h2>
+<pre><code class="language-bash">claude plugin marketplace update agent-team
+claude plugin update agent-team@agent-team
+</code></pre>
+<p>In Codex and OpenCode: <code>git pull</code> in the clone. Updating the plugin does not
+touch your projects: run <code>/agent-team:upgrade</code> in each one when you want the
+new template (<a href="#c08">8. Change and upgrade</a>).</p>
+<h2 id="c02-what-each-tool-needs">What each tool needs</h2>
+<div class="table"><table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>Install</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Claude Code</td>
+<td><code>curl -fsSL https://claude.ai/install.sh \| bash</code></td>
+<td>API key or Claude subscription</td>
+</tr>
+<tr>
+<td>Codex</td>
+<td><code>npm install -g @openai/codex</code></td>
+<td>trust the project once, so it reads <code>.codex/</code>; approve its hooks with <code>/hooks</code></td>
+</tr>
+<tr>
+<td>OpenCode</td>
+<td><code>curl -fsSL https://opencode.ai/install \| bash</code> or <code>npm install -g opencode-ai</code></td>
+<td>connect the providers you use with <code>/connect</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>Python 3.11 or newer and Git are needed by the scripts; <code>gh</code> or <code>glab</code> for
+GitHub or GitLab issues.</p>
+</section>
+<section class="chapter" id="c03">
+<h1 id="c03-3-set-up-a-project">3. Set up a project</h1>
+<p>Run the setup once per repository, new or existing:</p>
+<pre><code class="language-text">/agent-team:setup                  (Claude Code)
+use the setup skill                (Codex, OpenCode)
+</code></pre>
+<p>It works on a branch, <code>chore/agent-team-setup</code>, shows every change before
+making it, and ends with a commit you can review as a merge request.</p>
+<h2 id="c03-the-steps">The steps</h2>
+<ol>
+<li><strong>Profile.</strong> A few questions decide which parts of the template the
+   project gets: tools, CI, issue tracker, roles, features (below).</li>
+<li><strong>Install.</strong> Only the files of the profile are copied. Existing files are
+   never overwritten: the ones that differ are shown to you and merged with
+   your approval.</li>
+<li><strong>Interview.</strong> Project name, stack, commands, folders per role, design
+   system, models. If the repository already has code, the agent reads it
+   first and turns what it finds into proposals you only confirm.</li>
+<li><strong>Edits and checks.</strong> The agent fills in the template with your answers
+   and runs the checks: scripts, workflows, hooks, the tools' own validation.</li>
+<li><strong>Skills.</strong> It proposes skills for your stack (React, Postgres, GitHub
+   Actions...) and installs them only after your yes, in a commit of their own.</li>
+<li><strong>Project design.</strong> A <a href="#c04-design">design studio</a> session
+   writes <code>docs/design/project.md</code>: goal, users, scope, roadmap by milestone.
+   The setup is not finished without it.</li>
+<li><strong>Foundations</strong>, in a new repository: the spec of a walking skeleton
+   (structure, contract, database, tests, green CI), the first task to build.</li>
+<li><strong>Issues</strong>, if you use a tracker: the roadmap becomes milestones and
+   issues, after a dry run you approve.</li>
+</ol>
+<h2 id="c03-the-profile">The profile</h2>
+<p>The profile says which parts of the template your project uses. It lives in
+<code>.agent-team/config.json</code>:</p>
+<pre><code class="language-json">{
+  &quot;harnesses&quot;: [&quot;claude&quot;, &quot;codex&quot;],
+  &quot;runners&quot;: {&quot;optimizer&quot;: &quot;codex&quot;},
+  &quot;ci&quot;: &quot;github&quot;,
+  &quot;tracker&quot;: &quot;github&quot;,
+  &quot;roles&quot;: [&quot;designer&quot;, &quot;frontend&quot;, &quot;backend&quot;, &quot;devops&quot;, &quot;optimizer&quot;, &quot;security&quot;],
+  &quot;features&quot;: [&quot;ci-agents&quot;, &quot;split&quot;, &quot;dispatch&quot;]
+}
+</code></pre>
+<div class="table"><table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Values</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>harnesses</code></td>
+<td><code>claude</code>, <code>codex</code>, <code>opencode</code></td>
+<td>the tools people and CI use; the first one leads and runs every role not listed in <code>runners</code></td>
+</tr>
+<tr>
+<td><code>runners</code></td>
+<td>role → tool</td>
+<td>roles that run on another tool, for example the optimizer on Codex</td>
+</tr>
+<tr>
+<td><code>ci</code></td>
+<td><code>github</code>, <code>gitlab</code>, <code>both</code>, <code>none</code></td>
+<td>the CI platform of the project</td>
+</tr>
+<tr>
+<td><code>tracker</code></td>
+<td><code>github</code>, <code>gitlab</code>, <code>local</code>, <code>jira</code>, <code>linear</code>, <code>redmine</code>, <code>none</code></td>
+<td>where the issues live (<a href="#c04-issues">4. Run the project</a>)</td>
+</tr>
+<tr>
+<td><code>roles</code></td>
+<td>the six roles</td>
+<td>drop the ones you do not need</td>
+</tr>
+<tr>
+<td><code>features</code></td>
+<td><code>ci-agents</code>, <code>team-tasks</code>, <code>split</code>, <code>dispatch</code>, <code>litellm</code></td>
+<td>agents started from issues in CI; one issue run by several roles; split proposals in CI; start ready tasks at every merge; the LiteLLM gateway</td>
+</tr>
+</tbody>
+</table></div>
+<p>Every template file and section belongs to some part of the profile.
+Whatever your profile does not use is removed during setup, so you customize
+only what you use and no agent reads instructions for a tool you do not have.
+Nothing is lost: change the profile later and the upgrade brings the files
+back (<a href="#c08">8. Change and upgrade</a>).</p>
+<p><strong>Which profile for which scenario:</strong></p>
+<div class="table"><table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Typical profile</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Local</td>
+<td>your tool(s); <code>ci</code> for the project's CI; <code>tracker</code> <code>none</code> or <code>local</code>; no features</td>
+</tr>
+<tr>
+<td>Remote repository</td>
+<td>one or more tools; <code>ci</code> and <code>tracker</code> the same platform; <code>ci-agents</code>, plus <code>split</code>, <code>team-tasks</code>, <code>dispatch</code> as you like</td>
+</tr>
+<tr>
+<td>Custom orchestrator</td>
+<td>the tools your orchestrator runs; the tracker of its intake; a <code>start_command</code> (<a href="#c07">7. Scenario: custom</a>)</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="c03-what-you-get">What you get</h2>
+<div class="table"><table>
+<thead>
+<tr>
+<th>Path</th>
+<th>What it is</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>AGENTS.md</code></td>
+<td>rules for every agent and tool: boundaries, contract, alignment, merge requests, CI</td>
+</tr>
+<tr>
+<td><code>CLAUDE.md</code></td>
+<td>Claude Code only: imports <code>AGENTS.md</code>, plus a few Claude-specific notes</td>
+</tr>
+<tr>
+<td><code>docs/roles/*.md</code></td>
+<td>one prompt per role, shared by all tools</td>
+</tr>
+<tr>
+<td><code>docs/design/</code></td>
+<td><code>project.md</code>, one spec per feature, templates</td>
+</tr>
+<tr>
+<td><code>docs/agents/</code></td>
+<td>rules by situation (workflow, alignment, merge requests, CI, splitting, team tasks)</td>
+</tr>
+<tr>
+<td><code>docs/alignment/</code></td>
+<td>one entry per change that other roles rely on</td>
+</tr>
+<tr>
+<td><code>docs/api/</code></td>
+<td>the API contract, owned by backend</td>
+</tr>
+<tr>
+<td><code>.claude/</code></td>
+<td>Claude Code: agents, settings with denied commands and hooks, skills</td>
+</tr>
+<tr>
+<td><code>.codex/</code></td>
+<td>Codex: settings, the role agents, hooks, forbidden commands</td>
+</tr>
+<tr>
+<td><code>.opencode/</code>, <code>opencode.json</code></td>
+<td>OpenCode: the role agents and their permissions</td>
+</tr>
+<tr>
+<td><code>.agents/skills/</code></td>
+<td>the project skills for Codex (and OpenCode without Claude Code)</td>
+</tr>
+<tr>
+<td><code>scripts/hooks/</code></td>
+<td>hooks shared by Claude Code and Codex: block commands on real environments, handoff notes, test gate</td>
+</tr>
+<tr>
+<td><code>.github/</code>, <code>.gitlab/</code>, <code>ci/</code></td>
+<td>the project CI and, for remote work, the agent workflows</td>
+</tr>
+<tr>
+<td><code>scripts/</code></td>
+<td>issues, split, dispatch, tracker check, profile</td>
+</tr>
+<tr>
+<td><code>.agent-team/</code></td>
+<td>the profile, and the record of the installed template that makes upgrades safe</td>
+</tr>
+</tbody>
+</table></div>
+<p><code>SETUP.md</code> is the setup procedure; delete it when the setup is done.</p>
+<h2 id="c03-after-the-setup">After the setup</h2>
+<ul>
+<li>Read the open items the setup left you (secrets, labels, branch
+  protection): they depend on the scenario.</li>
+<li>Build the foundations task first, then design the first feature with
+  <code>/agent-team:design-studio &lt;feature&gt;</code>.</li>
+<li>Commit <code>.agent-team/</code>: upgrades need it.</li>
+</ul>
+</section>
+<section class="chapter" id="c04">
+<h1 id="c04-4-run-the-project">4. Run the project</h1>
+<p>This chapter is the same in every scenario: how you design, plan, start,
+review and keep the team aligned. The scenario chapters only add how agents
+run and how a task starts.</p>
+<h2 id="c04-design">Design</h2>
+<p>Large decisions are made in a design studio session between you and the
+designer, never in the middle of a task:</p>
+<pre><code class="language-text">/agent-team:design-studio login        (Claude Code, with the plugin)
+/design-studio login                   (Claude Code or OpenCode, in the project)
+use the design-studio skill for login  (Codex)
+</code></pre>
+<p>The designer asks in rounds of at most five numbered questions, each with a
+recommended answer, so you can reply in one line ("1 yes, 2 yes, 3: option B").
+Facts it can find in the repository, it looks up instead of asking. The rounds
+go from goal and user flows to screens, data and API, <strong>test seams</strong> (the
+interfaces the tests go through), the <strong>task breakdown</strong> and a readiness check.</p>
+<p>The result is a spec, <code>docs/design/&lt;feature&gt;.md</code>, written as the session goes,
+so you can stop and resume. It is marked <code>ready: yes</code> only when no question is
+left open. Its task breakdown lists one row per task: role, what, dependencies.
+The first session of a project writes <code>docs/design/project.md</code>, whose roadmap
+lists the milestones (<code>M0</code>, <code>M1</code>...) and the features in each.</p>
+<p>Agents implement only what a ready spec says: a task without one stops and
+asks. Run the design studio again to revise a spec: past decisions are kept,
+and rows that already have an issue are not rewritten.</p>
+<h2 id="c04-issues">Issues</h2>
+<p>With a tracker, the roadmap and the ready specs become issues:</p>
+<pre><code class="language-text">/agent-team:create-issues       or      python3 scripts/create-issues.py --dry-run
+                                         python3 scripts/create-issues.py
+</code></pre>
+<ul>
+<li>one <strong>milestone</strong> per roadmap milestone (a version in Jira and Redmine, a
+  project milestone in Linear);</li>
+<li>in it, one <strong>issue per row</strong> of every ready spec's breakdown, with the
+  role, the spec, the acceptance criteria and the dependencies;</li>
+<li>one <strong>"Design: <feature>"</strong> issue for every feature that has no spec yet.</li>
+</ul>
+<p>It shows the plan first and creates only on your yes. It adds no labels, so
+nothing starts on its own. Running it again creates only what is missing, so
+run it after every design session. With <code>--team</code>, a spec that allows it
+becomes one team issue instead of one issue per task.</p>
+<p>Supported trackers: GitHub, GitLab, Jira, Linear, Redmine, and plain Markdown
+files in <code>docs/tasks/</code> for a project without a tracker. Check the connection
+before the first run:</p>
+<pre><code class="language-bash">python3 scripts/tracker.py check     # which tracker, authenticated, readable; writes nothing
+python3 scripts/tracker.py list      # open issues: role, milestone, dependencies, started or not
+</code></pre>
+<p>Credentials come from environment variables, never from files:
+<code>JIRA_EMAIL</code> and <code>JIRA_API_TOKEN</code> (or <code>JIRA_PAT</code>), <code>LINEAR_API_KEY</code>,
+<code>REDMINE_API_KEY</code>; <code>gh</code> or <code>glab</code> must be logged in for GitHub and GitLab.</p>
+<h2 id="c04-split">Split</h2>
+<p>An issue written by hand ("orders: filter by date") often needs several
+roles. Splitting turns it into one task issue per role, as sub-issues in the
+same milestone:</p>
+<pre><code class="language-text">/agent-team:split-issue 42
+</code></pre>
+<p>The agent reads the issue, the spec and the existing sub-issues, and proposes
+a plan: a table of tasks with role, dependencies, acceptance criteria and the
+folders each one touches. You change it in the conversation until it is right.
+Only after your yes, the plan is posted on the issue and a script creates
+exactly those issues: the model does not create anything itself. Running it
+again creates nothing new.</p>
+<p>In the remote scenario you can also split from the issue itself
+(<a href="#c06-split-from-the-issue">6. Scenario: remote</a>).</p>
+<h2 id="c04-start">Start</h2>
+<p>A task starts when its dependencies are merged. You can start tasks one by
+one, or let dispatch pick the ready ones:</p>
+<pre><code class="language-text">/agent-team:dispatch        or      python3 scripts/dispatch.py           (the plan)
+                                     python3 scripts/dispatch.py --apply   (start it)
+</code></pre>
+<p>Dispatch takes the first open milestone, counts what is running, and starts
+the tasks whose dependencies are all closed as completed: by default one per
+role and three in total (<code>--per-role</code>, <code>--max</code>). It never starts optimizer or
+security, "Design:" issues, or issues marked <code>hold</code>.</p>
+<p>What "start" means depends on the scenario: a label that starts a CI job, a
+GitLab pipeline, a command of your orchestrator, or a printed instruction for
+a local session. That is the <em>starter</em> (<a href="#c09-starters">9. Reference</a>).</p>
+<h2 id="c04-review-and-merge">Review and merge</h2>
+<p>Every merge request describes itself in the same sections:</p>
+<ul>
+<li><strong>Summary</strong>: what changed and why.</li>
+<li><strong>Evidence</strong>: before and after; screenshots for UI changes.</li>
+<li><strong>Merge danger</strong>: can it simply be reverted, or does it migrate data or
+  break a client; who feels it.</li>
+<li><strong>Not done</strong>: what the agent decided not to do.</li>
+<li><strong>Reviewer checks</strong>: what to look at.</li>
+<li><strong>Alignment impact</strong>: the alignment entry, or "none".</li>
+</ul>
+<p>The CI checks every merge request the same way, yours or an agent's: build,
+type check, tests, UI screenshots per viewport (once you turn on the UI tests), static analysis (only the
+findings the change introduces fail it), licenses, vulnerabilities, secrets.
+Turn on branch protection so <code>main</code> only moves through merge requests that
+are up to date and green.</p>
+<p>You merge. Closing the issue frees the role's slot and its dependents can start.</p>
+<h2 id="c04-alignment">Alignment</h2>
+<p>When an agent changes something other roles rely on (the API contract, the
+data model, a shared component, a route, an environment variable), it does not
+fix their code. It writes an entry in <code>docs/alignment/</code> and flags the merge
+request with an "Alignment impact" section and, in CI, the <code>alignment-needed</code>
+label.</p>
+<ul>
+<li><strong>In a local session</strong> the lead handles it right away: designer reviews the
+  change against the specs and writes the follow-up per role, the lead
+  delegates them, the entry is closed. You are asked only when designer marks
+  a decision as yours (a breaking API change, a visible UX change).</li>
+<li><strong>In CI</strong> agents never start other agents. The label is your signal: create
+  the follow-up tasks, designer first.</li>
+</ul>
+<p>Breaking contract changes are planned as expand-contract: add the new form,
+move the callers, remove the old form last, with <code>main</code> green at every step.</p>
+<h2 id="c04-team-tasks">Team tasks</h2>
+<p>A small, tightly coupled feature can be one task for several roles: one
+issue, one branch, one merge request. A coordinator runs the roles in order,
+each one committing before the next starts. Use it when separate merge
+requests would only wait on each other; prefer separate tasks otherwise.
+Team tasks need the <code>team-tasks</code> feature and, in CI, Claude Code.</p>
+<h2 id="c04-on-demand-roles">On-demand roles</h2>
+<ul>
+<li><strong>optimizer</strong>: "use optimizer on the orders list" when a measurement shows a
+  problem. It works only with green tests, and shows timings before and after.</li>
+<li><strong>security</strong>: "run a security assessment" once the app runs, typically
+  before a release. It attacks only the hosts listed in
+  <code>docs/roles/security-scope.txt</code> (local or staging, never production) and
+  writes a report in <code>docs/security/</code>, kept out of Git. The owning roles fix
+  the findings as separate tasks.</li>
+</ul>
+<h2 id="c04-long-sessions">Long sessions</h2>
+<p>Claude Code and Codex sessions are compacted at 200,000 tokens instead of near the model's limit:
+every turn re-reads the whole context, so a long session costs more and
+forgets distant instructions. When a session has grown long or changes phase
+(design to implementation, one task to the next), ask for a <strong>handoff</strong>:
+<code>/handoff</code> in Claude Code and OpenCode, the handoff skill in Codex. It writes
+a short note in <code>.handoff/</code>; start a new session and it continues from the
+note with a small context.</p>
+</section>
+<section class="chapter" id="c05">
+<h1 id="c05-5-scenario-local">5. Scenario: local</h1>
+<p>The team runs on your computer, inside your session. You talk to a lead
+session, which delegates to the role agents and reports back. Everything in
+<a href="#c04">4. Run the project</a> applies; this chapter adds how to
+work with each tool.</p>
+<h2 id="c05-why-use-it">Why use it</h2>
+<div class="table"><table>
+<thead>
+<tr>
+<th>Good for</th>
+<th>Watch out</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Starting in minutes: no secrets, no workflows, no server</td>
+<td>You need to be there: when you close the session, the work stops</td>
+</tr>
+<tr>
+<td>A tight feedback loop: you see each step and correct it at once</td>
+<td>One machine: tasks run one after another or a few at a time, on your laptop's resources</td>
+</tr>
+<tr>
+<td>Exploring, prototypes, small features, design work</td>
+<td>Less trail: decisions live in commits and specs, not in issue threads, unless you also use a tracker</td>
+</tr>
+<tr>
+<td>Alignment handled automatically: the lead runs designer and the affected roles right away</td>
+<td>Your subscription or API budget pays for every turn of every agent</td>
+</tr>
+<tr>
+<td>Your own credentials and tools, no CI minutes</td>
+<td>Long sessions grow expensive: use handoff notes</td>
+</tr>
+</tbody>
+</table></div>
+<p>Choose it to begin with, for one-person projects, and for the design work of
+any project. Move to the <a href="#c06">remote scenario</a> when the
+backlog grows and you want the team to work while you do something else.</p>
+<h2 id="c05-profile">Profile</h2>
+<pre><code class="language-json">{&quot;harnesses&quot;: [&quot;claude&quot;], &quot;ci&quot;: &quot;github&quot;, &quot;tracker&quot;: &quot;none&quot;, &quot;features&quot;: []}
+</code></pre>
+<p>Use <code>"tracker": "local"</code> to keep issues as Markdown files in <code>docs/tasks/</code>,
+or your real tracker if the project has one: issues, splits and dispatch work
+the same. Keep <code>ci</code> for the project's own CI: it checks your merge requests
+even when nobody runs agents there.</p>
+<h2 id="c05-with-claude-code">With Claude Code</h2>
+<p>Start <code>claude</code> in the repository. The roles are subagents in <code>.claude/agents/</code>:</p>
+<pre><code class="language-text">&gt; @backend implement task 2 of docs/design/login.md
+&gt; implement the login feature from docs/design/login.md   (the lead delegates by role)
+&gt; @devops add a staging deploy job                       (it writes the config, never applies it)
+</code></pre>
+<ul>
+<li>Each agent preloads its skills and has its own context; the lead receives a
+  summary, not the whole work.</li>
+<li>Hooks: commands that change real environments are blocked for everyone; a
+  task cannot be closed while the tests fail; after each delegation the lead
+  is reminded of open alignment entries; frontend files are linted when saved.</li>
+<li>Denied commands (<code>git push --force</code>, push to <code>main</code>, merge, <code>terraform
+  apply</code>...) are in <code>.claude/settings.json</code>.</li>
+<li><strong>Agent teams</strong> (experimental in Claude Code): several agents work in
+  parallel and message each other. Turn them on with
+  <code>CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS</code> set to <code>"1"</code> in <code>.claude/settings.json</code>.
+  Good for a feature where frontend and backend must agree as they go.</li>
+</ul>
+<h2 id="c05-with-codex">With Codex</h2>
+<p>Start <code>codex</code> in the repository and trust it when asked: only then Codex
+reads <code>.codex/</code>. Approve the project hooks once with <code>/hooks</code>.</p>
+<pre><code class="language-text">&gt; have backend implement task 2 of docs/design/login.md
+&gt; spawn frontend and backend in parallel for docs/design/login.md, tasks 2 and 3
+</code></pre>
+<ul>
+<li>The roles are custom agents in <code>.codex/agents/*.toml</code>, each with its
+  reasoning effort; at most three run at once.</li>
+<li>Forbidden commands are in <code>.codex/rules/agent-team.rules</code>, and the same
+  hook as Claude Code blocks commands on real environments.</li>
+<li>Codex has no per-agent hooks: the test gate and the alignment reminder are
+  rules in <code>AGENTS.md</code> that the lead follows, not checks.</li>
+<li>Pin the model in <code>.codex/config.toml</code> if you do not want Codex's default.</li>
+</ul>
+<h2 id="c05-with-opencode">With OpenCode</h2>
+<p>Start <code>opencode</code> in the repository. The roles are agents in
+<code>.opencode/agents/</code>, usable as subagents (<code>@backend ...</code>) or as the main agent
+(switch with Tab).</p>
+<ul>
+<li>Permissions are rules in <code>opencode.json</code> and in each agent: commands on
+  real environments and merges are denied, other shell commands ask first.</li>
+<li>OpenCode has no hooks in the template: its permission rules are the
+  protection.</li>
+<li>With LiteLLM (feature <code>litellm</code>) OpenCode reaches any provider through one
+  gateway with budgets per key (<a href="#c07-litellm-one-gateway-for-many-providers">7. Scenario: custom</a>).</li>
+</ul>
+<h2 id="c05-several-tools-in-one-project">Several tools in one project</h2>
+<p>People in the same project can use different tools: list them all in
+<code>harnesses</code>. They share <code>AGENTS.md</code>, the role prompts, the specs and the
+skills; each tool reads its own folder. The design, the issues and the
+handoff notes are the same for everybody.</p>
+<h2 id="c05-issues-in-the-local-scenario">Issues in the local scenario</h2>
+<p>A local session does not need issues: give the lead a spec and a task number.
+With a tracker, the lead can pick work from it:</p>
+<pre><code class="language-text">&gt; python3 scripts/dispatch.py      shows the ready tasks
+&gt; implement issue #14              the lead reads it and delegates to its role
+</code></pre>
+<p>The default starter for trackers other than GitHub and GitLab prints the
+command to start each task; with <code>"starter": "command"</code> it can open a new
+terminal session for you instead (<a href="#c09-starters">9. Reference</a>).</p>
+</section>
+<section class="chapter" id="c06">
+<h1 id="c06-6-scenario-remote-repository">6. Scenario: remote repository</h1>
+<p>The team works in your GitHub or GitLab CI. A task is an issue; you start it
+with a label (GitHub) or a pipeline (GitLab); the agent runs in a job, pushes
+a branch and opens a merge request. You come back to review and merge.
+Everything in <a href="#c04">4. Run the project</a> applies.</p>
+<h2 id="c06-why-use-it">Why use it</h2>
+<div class="table"><table>
+<thead>
+<tr>
+<th>Good for</th>
+<th>Watch out</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>You do not need to be there: start tasks, close the laptop, review the merge requests later</td>
+<td>Slower feedback: a mistake shows up in the merge request, not while it happens</td>
+</tr>
+<tr>
+<td>Several tasks in parallel, each in a clean environment</td>
+<td>Every run costs tokens (or subscription quota) and CI minutes</td>
+</tr>
+<tr>
+<td>A full trail: issue, plan comment, branch, merge request, CI results</td>
+<td>An hour of set-up: secrets, labels, branch protection, required checks</td>
+</tr>
+<tr>
+<td>The whole team (people too) sees the same board: issues, milestones, merge requests</td>
+<td>Agents in CI never start other agents: alignment follow-ups are yours to create</td>
+</tr>
+<tr>
+<td>Merges can start the next tasks automatically</td>
+<td>Untrusted text: issues are read as task descriptions, and only members can start agents</td>
+</tr>
+<tr>
+<td>Several tools in one project, chosen per role</td>
+<td>A Codex or OpenCode job on GitLab is not yet proven on real runners: try it on a test task</td>
+</tr>
+</tbody>
+</table></div>
+<p>Choose it once the project has a backlog, when you want work to continue
+while you are away, or when several people review the team's work.</p>
+<h2 id="c06-profile">Profile</h2>
+<pre><code class="language-json">{&quot;harnesses&quot;: [&quot;claude&quot;], &quot;ci&quot;: &quot;github&quot;, &quot;tracker&quot;: &quot;github&quot;,
+ &quot;features&quot;: [&quot;ci-agents&quot;, &quot;split&quot;, &quot;team-tasks&quot;, &quot;dispatch&quot;]}
+</code></pre>
+<p>With several tools, list them and assign roles to the others:
+<code>"harnesses": ["claude", "codex"], "runners": {"optimizer": "codex"}</code>.</p>
+<h2 id="c06-github">GitHub</h2>
+<h3 id="c06-set-up-once">Set up once</h3>
+<ol>
+<li><strong>Secrets</strong> (Settings → Secrets and variables → Actions), for the tools
+   in your profile:</li>
+</ol>
+<div class="table"><table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>Secrets</th>
+<th>Variables</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Claude Code</td>
+<td><code>ANTHROPIC_API_KEY</code>, or <code>CLAUDE_CODE_OAUTH_TOKEN</code> for a subscription (<code>claude setup-token</code>)</td>
+<td></td>
+</tr>
+<tr>
+<td>Codex</td>
+<td><code>OPENAI_API_KEY</code>; <code>AGENT_PR_TOKEN</code> (optional, see below)</td>
+<td><code>CODEX_MODEL</code> (optional)</td>
+</tr>
+<tr>
+<td>OpenCode</td>
+<td>the keys of your providers, or the LiteLLM key</td>
+<td><code>OPENCODE_MODEL</code> (<code>provider/model</code>)</td>
+</tr>
+</tbody>
+</table></div>
+<p>For Claude Code, also install the GitHub app: <code>/install-github-app</code> in a
+   Claude Code session. With a subscription token, switch the workflows from
+   <code>anthropic_api_key</code> to <code>claude_code_oauth_token</code>.
+2. <strong>Labels</strong>: <code>./scripts/create-labels.sh</code> creates <code>agent:&lt;role&gt;</code> for your
+   roles, <code>agent:team</code>, <code>agent:split</code>, <code>hold</code>, <code>alignment-needed</code>, <code>ai-review</code>.
+3. <strong>Branch protection</strong> on <code>main</code>: pull requests only, the CI checks
+   required, "Require branches to be up to date before merging".
+4. <strong>Routing</strong>, with more than one tool: the <code>AGENT_RUNNERS</code> repository
+   variable says which role runs where, for example
+   <code>{"agent:frontend":"opencode","agent:optimizer":"codex"}</code>. The other roles
+   run on the first tool of the profile (<code>AGENT_DEFAULT_RUNNER</code> changes it).</p>
+<h3 id="c06-start-a-task">Start a task</h3>
+<p>Add the label <code>agent:&lt;role&gt;</code> to a task issue (or run dispatch, which adds
+them for you). The workflow <code>agents.yml</code> starts the agent of that role:</p>
+<ul>
+<li><strong>Claude Code</strong>: the agent comments its plan on the issue, works on a
+  branch, runs the tests, opens the pull request and comments its link.</li>
+<li><strong>Codex</strong>: runs without network or tokens on a checkout with the
+  dependencies installed; a second job commits its change, pushes the branch
+  and opens the pull request with Codex's summary as the description. Pull
+  requests opened with the default token do not trigger other workflows: set
+  <code>AGENT_PR_TOKEN</code> (a fine-grained token with contents and pull requests
+  write) so the CI checks them.</li>
+<li><strong>OpenCode</strong>: its GitHub action runs the role agent and opens the pull request.</li>
+</ul>
+<p>Only issues opened by the owner, members, collaborators or the repository's
+own workflows can start agents. The issue text is read as a description of
+the task, never as instructions that override the project rules.</p>
+<h3 id="c06-start-the-next-tasks-at-every-merge">Start the next tasks at every merge</h3>
+<p><code>dispatch.yml</code> runs dispatch every time an issue closes, so the tasks that
+were waiting start as soon as you merge what they depend on. It is off until
+you set the variable <code>AGENT_AUTODISPATCH</code> to <code>true</code> and the secret
+<code>AGENT_DISPATCH_TOKEN</code> (a fine-grained token with issues read and write:
+labels added with the default token do not start other workflows). Limits:
+<code>AGENT_DISPATCH_PER_ROLE</code> (default 1) and <code>AGENT_DISPATCH_MAX</code> (default 3).
+Keep them low at first: every start is an agent run.</p>
+<h3 id="c06-split-from-the-issue">Split from the issue</h3>
+<p>Add <code>agent:split</code> to an issue. Claude reads it with the specs and posts a
+proposed split as a comment; nothing is created. Then reply on the issue:</p>
+<div class="table"><table>
+<thead>
+<tr>
+<th>Reply</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>@claude ok</code></td>
+<td>the proposed issues are created as sub-issues, without labels</td>
+</tr>
+<tr>
+<td><code>@claude ok team</code></td>
+<td>one team issue instead, when the proposal suggests it</td>
+</tr>
+<tr>
+<td><code>@claude &lt;your changes&gt;</code></td>
+<td>a new proposal</td>
+</tr>
+</tbody>
+</table></div>
+<p>A script creates exactly the plan you approved; the model creates nothing.</p>
+<h3 id="c06-team-tasks">Team tasks</h3>
+<p>Add <code>agent:team</code> to an issue with a line <code>Roles: backend, frontend</code>. A
+coordinator runs the listed roles in order on one branch and opens one pull
+request with a section per role. Needs Claude Code.</p>
+<h3 id="c06-ask-and-review">Ask and review</h3>
+<ul>
+<li><code>@claude &lt;request&gt;</code> in a comment on an issue or a pull request: Claude
+  answers or makes the change on that branch.</li>
+<li>Label a pull request <code>ai-review</code> for two reviews in parallel: one against
+  the project's rules (inline comments), one against the issue and the spec.
+  They never approve or block. Remove and re-add the label to review again.</li>
+</ul>
+<p>Mentions, reviews, splits and team tasks use Claude Code. With only Codex or
+OpenCode, split locally with <code>/agent-team:split-issue</code> and review in your tool.</p>
+<h2 id="c06-gitlab">GitLab</h2>
+<p>Agents run as jobs of <code>.gitlab/ci/agents.yml</code>, included by <code>.gitlab-ci.yml</code>
+(rename the template's <code>.gitlab-ci.yml.example</code>). They start only when you
+run a pipeline with variables, never on pushes:</p>
+<div class="table"><table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>AI_FLOW_INPUT</code></td>
+<td>the task, or "carry out issue 14 following docs/roles/backend.md"</td>
+</tr>
+<tr>
+<td><code>TASK_ID</code></td>
+<td>the issue number: jobs for the same task queue instead of running together</td>
+</tr>
+<tr>
+<td><code>AI_FLOW_ROLE</code></td>
+<td>the role (needed by Codex and OpenCode)</td>
+</tr>
+<tr>
+<td><code>AI_FLOW_HARNESS</code></td>
+<td><code>claude</code>, <code>codex</code> or <code>opencode</code>; default: the first tool of the profile</td>
+</tr>
+<tr>
+<td><code>AI_FLOW_ROLES</code></td>
+<td>a team task: the roles in order, for example <code>backend, frontend</code></td>
+</tr>
+<tr>
+<td><code>SPLIT_ISSUE</code>, <code>SPLIT_CONFIRM</code>, <code>SPLIT_FEEDBACK</code></td>
+<td>the split: proposal, then <code>ok</code> or <code>team</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>Run them from CI/CD → Pipelines → Run pipeline, or let dispatch do it: on
+GitLab its starter adds the label and runs the pipeline with these variables.</p>
+<p>Masked variables: <code>ANTHROPIC_API_KEY</code> (or the subscription token),
+<code>OPENAI_API_KEY</code> for Codex, the provider keys and <code>OPENCODE_MODEL</code> for
+OpenCode, and <code>GITLAB_ACCESS_TOKEN</code> (a project access token with <code>api</code> and
+<code>write_repository</code>) for splits and for the Codex and OpenCode jobs, which
+push and open the merge request after the agent has finished. Protect <code>main</code>
+and require the pipeline to pass before merging. GitLab reads the code owners
+from <code>.gitlab/CODEOWNERS</code>.</p>
+<h2 id="c06-costs-and-safety">Costs and safety</h2>
+<ul>
+<li>Each task is one agent run; a team task is several. The CI minutes are
+  those of your plan.</li>
+<li>Agents in CI use <code>--max-turns</code> limits, compact at 200,000 tokens and never
+  run in the background, so a run ends with a merge request or a comment
+  saying why it could not.</li>
+<li>Agents never merge, never push to <code>main</code>, never apply infrastructure. The
+  CI checks their merge requests like anyone else's, and the actions in the
+  workflows are pinned to commits, with Dependabot proposing updates.</li>
+</ul>
+</section>
+<section class="chapter" id="c07">
+<h1 id="c07-7-scenario-custom-orchestrator">7. Scenario: custom orchestrator</h1>
+<p>Here the issues live in the tracker you already use, and the agents run where
+you decide, started by something you control. Agent team gives you the
+planning side (design, issues, split, dispatch) on any supported tracker, and
+one hook for the execution side: the <em>starter command</em>. What runs the agents
+is up to you; this chapter shows two ways.</p>
+<p>Everything in <a href="#c04">4. Run the project</a> applies.</p>
+<h2 id="c07-why-use-it">Why use it</h2>
+<div class="table"><table>
+<thead>
+<tr>
+<th>Good for</th>
+<th>Watch out</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Your tracker: Jira, Linear, Redmine, or GitHub/GitLab issues with your own runner</td>
+<td>You build and run the execution side: a service, a server, its updates</td>
+</tr>
+<tr>
+<td>Your infrastructure: the code never leaves your network, your runners, your credentials</td>
+<td>Protections are yours too: tokens that cannot push to <code>main</code> or merge, no production credentials where agents run</td>
+</tr>
+<tr>
+<td>Control: priorities, queues, retries, concurrency, cost per task, any mix of tools and models</td>
+<td>More moving parts to watch than a CI job</td>
+</tr>
+<tr>
+<td>A board people already use, with agents as one more kind of assignee</td>
+<td>The CI workflows in the template are for GitHub and GitLab: on other platforms, keep your own CI</td>
+</tr>
+</tbody>
+</table></div>
+<p>Choose it when the first two scenarios are not enough for a concrete reason:
+a company tracker, code that must stay on your machines, a queue with
+priorities. Otherwise start <a href="#c06">remote</a> and move later.</p>
+<h2 id="c07-the-connection-points">The connection points</h2>
+<p><strong>Planning, on your tracker.</strong> Set it in the profile and check it:</p>
+<pre><code class="language-json">{
+  &quot;harnesses&quot;: [&quot;claude&quot;, &quot;opencode&quot;],
+  &quot;ci&quot;: &quot;none&quot;,
+  &quot;tracker&quot;: &quot;jira&quot;,
+  &quot;jira&quot;: {&quot;url&quot;: &quot;https://example.atlassian.net&quot;, &quot;project&quot;: &quot;APP&quot;},
+  &quot;starter&quot;: &quot;command&quot;,
+  &quot;start_command&quot;: &quot;python3 /opt/team/enqueue.py --issue {number} --role {role} --harness {harness} --url {url}&quot;
+}
+</code></pre>
+<pre><code class="language-bash">python3 scripts/tracker.py check
+</code></pre>
+<div class="table"><table>
+<thead>
+<tr>
+<th>Concept</th>
+<th>Jira</th>
+<th>Linear</th>
+<th>Redmine</th>
+<th>Files (<code>local</code>)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Milestone</td>
+<td>version (Fix Version)</td>
+<td>project milestone</td>
+<td>version</td>
+<td><code>docs/tasks/_milestones.json</code></td>
+</tr>
+<tr>
+<td>Sub-issue</td>
+<td>sub-task</td>
+<td>sub-issue</td>
+<td>parent task</td>
+<td><code>parent</code> field</td>
+</tr>
+<tr>
+<td>Dependency</td>
+<td>"Blocks" link</td>
+<td>"blocks" relation</td>
+<td>"blocks" relation</td>
+<td>text</td>
+</tr>
+<tr>
+<td>Started</td>
+<td>label <code>agent:&lt;role&gt;</code></td>
+<td>label</td>
+<td>status (<code>started_status</code>)</td>
+<td>label</td>
+</tr>
+</tbody>
+</table></div>
+<p>Create issues, split and dispatch work as in chapter 4. The split proposal is
+approved in your session instead of with a comment.</p>
+<p><strong>Execution, through the starter.</strong> When dispatch starts a task, it marks it
+as started and runs <code>start_command</code> with the issue's data: <code>{number}</code> (12,
+APP-12), <code>{id}</code>, <code>{ref}</code>, <code>{role}</code>, <code>{title}</code>, <code>{url}</code>, <code>{tracker}</code> and
+<code>{harness}</code> (the tool for that role: <code>runners</code>, otherwise the first of the
+profile). The command is split into arguments before the values are filled
+in and runs without a shell, so an issue title cannot inject commands. A
+command that fails is reported for that task (which stays marked as started:
+remove the label to retry) and dispatch exits with an error.</p>
+<p>So your orchestrator needs one entry point that accepts a task, and a way to
+tell the tracker when the work is done (a merge request linked to the issue,
+or a status change). Two ways to build the rest follow.</p>
+<h2 id="c07-option-a-multica-a-board-with-agents-as-team-members">Option A: Multica, a board with agents as team members</h2>
+<p><a href="https://github.com/multica-ai/multica">Multica</a> is a self-hosted board where
+agents appear as team members: you assign an issue to an agent as to a
+colleague, it picks up the work, updates the status and reports blockers. A
+daemon on a server of yours runs the installed tools (Claude Code, Codex,
+OpenCode and others).</p>
+<p>How it fits:</p>
+<ul>
+<li>One agent per role in Multica, each with its tool (runtime) and model.
+  Point them to the role prompts: "follow docs/roles/<role>.md and AGENTS.md".</li>
+<li>Plan with Agent team (design studio, specs), then create and assign the
+  tasks in Multica, by hand or from <code>start_command</code> through its API.</li>
+<li>A server with at least 4 vCPUs and 8 GB of RAM (builds and tests run
+  there), the tools installed and logged in as the daemon's user, a Git token
+  that can open merge requests but never push to <code>main</code> or merge, and no
+  cluster, cloud or registry credentials on that machine.</li>
+</ul>
+<p>Good when you want a visual board for agents running on different tools.
+Multica is young and changes fast: check its README before installing.</p>
+<h2 id="c07-option-b-your-own-orchestrator">Option B: your own orchestrator</h2>
+<p>A small service that takes tasks from a queue and runs the right tool in a
+clean checkout. The starter command only enqueues; a worker does the rest:</p>
+<pre><code class="language-text">dispatch.py --apply  →  start_command (enqueue)  →  queue  →  worker
+                                                      worker: checkout, run the tool, push, open the MR,
+                                                              update the tracker with the result and the cost
+</code></pre>
+<p>The worker runs each tool non-interactively, in the repository, with the
+same prompt the CI jobs use:</p>
+<div class="table"><table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>Command</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Claude Code</td>
+<td><code>claude -p "&lt;task&gt;" --permission-mode acceptEdits --max-turns 40</code></td>
+</tr>
+<tr>
+<td>Codex</td>
+<td><code>codex exec --sandbox workspace-write --output-last-message summary.md "&lt;task&gt;"</code></td>
+</tr>
+<tr>
+<td>OpenCode</td>
+<td><code>opencode run --agent &lt;role&gt; --model &lt;provider/model&gt; "&lt;task&gt;"</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>For more control, use the tools' libraries instead of their command lines:
+the Claude Agent SDK (<code>@anthropic-ai/claude-agent-sdk</code> or <code>claude-agent-sdk</code>
+for Python) streams each step and reports the cost of the run; load the
+project settings (<code>settingSources: ["project"]</code>) so it reads <code>CLAUDE.md</code> and
+<code>.claude/</code>.</p>
+<p>Rules for the worker:</p>
+<ul>
+<li>one container or VM per task, with write access to that repository only;</li>
+<li>a Git token that can push branches and open merge requests, never push to
+  <code>main</code> or merge;</li>
+<li>no production, cluster or registry credentials;</li>
+<li>record the cost and the outcome on the task, so you notice a role that
+  burns budget.</li>
+</ul>
+<p>Good when you need priorities, retries, your own infrastructure or a
+dashboard of your own. It is your code to maintain: start with the simplest
+queue that works.</p>
+<h2 id="c07-litellm-one-gateway-for-many-providers">LiteLLM: one gateway for many providers</h2>
+<p>With OpenCode on several providers, the <code>litellm</code> feature adds
+<code>infra/litellm/</code>: a LiteLLM gateway (with Postgres and Caddy) that gives each
+role a virtual key with its own budget, and one place to see costs per role
+and model. Run it next to your orchestrator, listening only on the local
+interface, or on a small server for CI. <code>infra/litellm/key-spend.sh</code> shows
+what each key spent; <code>docker-compose.local.yml</code> runs it on your computer for
+a trial.</p>
+</section>
+<section class="chapter" id="c08">
+<h1 id="c08-8-change-and-upgrade">8. Change and upgrade</h1>
+<p>Two things change over a project's life: the plugin gets new versions, and
+your setup changes (another tracker, Codex next to Claude Code, a role back,
+the move from local to remote). Both go through the same command:</p>
+<pre><code class="language-text">/agent-team:upgrade        (Claude Code)
+use the upgrade skill      (Codex, OpenCode)
+</code></pre>
+<h2 id="c08-change-the-profile">Change the profile</h2>
+<p>Tell the upgrade what changes ("move the issues to Linear", "add Codex for
+the optimizer", "we no longer need the designer") or edit
+<code>.agent-team/config.json</code> yourself, then run the upgrade. It renders the
+template for the new profile and shows a plan:</p>
+<div class="table"><table>
+<thead>
+<tr>
+<th>Kind</th>
+<th>What happens</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>add</code></td>
+<td>a file the new profile includes: added</td>
+</tr>
+<tr>
+<td><code>update</code></td>
+<td>a template file you never changed: replaced with the new version</td>
+</tr>
+<tr>
+<td><code>merge</code></td>
+<td>changed by both you and the template: three-way merge that keeps your changes</td>
+</tr>
+<tr>
+<td><code>prune</code></td>
+<td>a file the profile no longer includes, never changed by you: removed</td>
+</tr>
+<tr>
+<td><code>out-of-profile</code></td>
+<td>a file the profile no longer includes, changed by you: kept, you decide</td>
+</tr>
+<tr>
+<td><code>removed-by-you</code></td>
+<td>a file you deleted: not added back</td>
+</tr>
+</tbody>
+</table></div>
+<p>Sections follow the same rule: drop team tasks and their section leaves
+<code>AGENTS.md</code>; add Codex back and its lines return, merged with your edits.
+Conflicts, if any, are left marked and resolved with you. The upgrade works
+on a branch and ends with a commit for you to review.</p>
+<p>Examples:</p>
+<div class="table"><table>
+<thead>
+<tr>
+<th>You want</th>
+<th>Profile change</th>
+<th>What the upgrade does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>From local to remote on GitHub</td>
+<td><code>"tracker": "github"</code>, <code>"features": ["ci-agents", "dispatch"]</code></td>
+<td>adds the agent workflows, labels script, issue scripts; then the remote set-up of <a href="#c06-set-up-once">chapter 6</a></td>
+</tr>
+<tr>
+<td>Codex instead of Claude Code</td>
+<td><code>"harnesses": ["codex"]</code></td>
+<td>adds <code>.codex/</code> and <code>.agents/skills/</code>, removes <code>.claude/</code> and <code>CLAUDE.md</code> if unchanged, switches the CI jobs</td>
+</tr>
+<tr>
+<td>Jira instead of GitHub issues</td>
+<td><code>"tracker": "jira"</code> plus its settings</td>
+<td>adds the Jira adapter, removes the GitHub workflows that need GitHub issues</td>
+</tr>
+<tr>
+<td>Security back</td>
+<td>add <code>"security"</code> to <code>roles</code></td>
+<td>adds its prompt, agents and scope file</td>
+</tr>
+</tbody>
+</table></div>
+<p>After a tool change, the upgrade lists what that tool needs once: trust and
+hooks for Codex, new CI secrets and variables.</p>
+<p>Without the plugin, <code>python3 scripts/agent-team.py prune</code> removes what left
+the profile, but only the upgrade can add things back.</p>
+<h2 id="c08-upgrade-to-a-new-plugin-version">Upgrade to a new plugin version</h2>
+<ol>
+<li>Update the plugin (<a href="#c02-updating-the-plugin">2. Install</a>).</li>
+<li>Run <code>/agent-team:upgrade</code> in the project. It reads the release notes of
+   the versions in between and explains each change, not just the file names.</li>
+<li>Review the plan, exclude what you do not want, apply.</li>
+<li>Do the steps listed in the release notes' "Upgrade notes": they are the
+   ones a file change cannot do (new secrets, labels, required checks).</li>
+</ol>
+<p>Every project stays on the template version it installed until you upgrade
+it: updating the plugin changes nothing by itself.</p>
+<h2 id="c08-how-your-changes-are-kept">How your changes are kept</h2>
+<p>The setup stores a copy of every installed template file in
+<code>.agent-team/base/</code>. The upgrade compares three versions of each file: that
+copy, your file, and the new template file. If only the template changed,
+your file is replaced; if only you changed it, nothing happens; if both
+changed, <code>git merge-file</code> merges them and marks the lines it cannot decide.</p>
+<p><code>README.md</code>, <code>docs/design-decisions.md</code>, <code>.mcp.json</code> and
+<code>docs/roles/security-scope.txt</code> are yours after setup: they are never upgraded.</p>
+<h2 id="c08-a-project-set-up-by-hand">A project set up by hand</h2>
+<p>A project copied from the template without the plugin, or set up before the
+plugin existed, has no <code>.agent-team/base/</code>. The first upgrade proposes a
+profile from what the project has, then compares each file that differs with
+you and records the result; later upgrades are automatic. Without Claude
+Code, run it from a clone:</p>
+<pre><code class="language-bash">python3 ~/claude-agent-team/scripts/template_sync.py status --template ~/claude-agent-team/template --project .
+python3 ~/claude-agent-team/scripts/template_sync.py apply  --template ~/claude-agent-team/template --project .
+</code></pre>
+</section>
+<section class="chapter" id="c09">
+<h1 id="c09-9-reference">9. Reference</h1>
+<h2 id="c09-skills">Skills</h2>
+<div class="table"><table>
+<thead>
+<tr>
+<th>Plugin skill</th>
+<th>Template skill</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>setup</code></td>
+<td></td>
+<td>installs and configures the template; first time only</td>
+</tr>
+<tr>
+<td><code>design-studio</code></td>
+<td><code>/design-studio</code></td>
+<td>design session for the project or a feature, writes the spec</td>
+</tr>
+<tr>
+<td><code>create-issues</code></td>
+<td></td>
+<td>milestones and issues from the roadmap and the ready specs</td>
+</tr>
+<tr>
+<td><code>split-issue</code></td>
+<td></td>
+<td>one issue into one task per role, after your approval</td>
+</tr>
+<tr>
+<td><code>dispatch</code></td>
+<td></td>
+<td>starts the ready tasks with the project's starter</td>
+</tr>
+<tr>
+<td><code>upgrade</code></td>
+<td></td>
+<td>new plugin version or new profile, keeping your changes</td>
+</tr>
+<tr>
+<td></td>
+<td><code>/handoff</code></td>
+<td>a short note so a fresh session continues the work</td>
+</tr>
+<tr>
+<td></td>
+<td><code>design-system</code></td>
+<td>the project's tokens and visual rules, preloaded by designer and frontend</td>
+</tr>
+</tbody>
+</table></div>
+<p>In Claude Code the plugin skills are <code>/agent-team:&lt;name&gt;</code>; in Codex and
+OpenCode ask for them by name. Template skills live in the project
+(<code>.claude/skills/</code>, <code>.agents/skills/</code>).</p>
+<h2 id="c09-scripts">Scripts</h2>
+<div class="table"><table>
+<thead>
+<tr>
+<th>Command</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>python3 scripts/agent-team.py profile</code></td>
+<td>the profile, and what is outside it</td>
+</tr>
+<tr>
+<td><code>python3 scripts/agent-team.py prune [--dry-run]</code></td>
+<td>removes files and sections outside the profile</td>
+</tr>
+<tr>
+<td><code>python3 scripts/tracker.py check \| config \| list \| show N</code></td>
+<td>the tracker: connection, settings, open issues, one issue</td>
+</tr>
+<tr>
+<td><code>python3 scripts/create-issues.py [--dry-run] [--team] [--migrate]</code></td>
+<td>milestones and issues; <code>--migrate</code> moves old "M0 · ..." parent issues to milestones</td>
+</tr>
+<tr>
+<td><code>python3 scripts/split-issue.py check \| propose \| create</code></td>
+<td>the split: validate a plan, post it, create it</td>
+</tr>
+<tr>
+<td><code>python3 scripts/dispatch.py [--apply] [--per-role N] [--max N] [--milestone M1 \| --all]</code></td>
+<td>the ready tasks; starts them with <code>--apply</code></td>
+</tr>
+<tr>
+<td><code>./scripts/create-labels.sh</code></td>
+<td>GitHub labels</td>
+</tr>
+<tr>
+<td><code>./scripts/install-skills.sh</code>, <code>./scripts/check-skills.sh</code></td>
+<td>recommended skills for your stack, and a check that the agents find them</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="c09-configuration">Configuration</h2>
+<p><code>.agent-team/config.json</code>, every key optional:</p>
+<div class="table"><table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>harnesses</code>, <code>runners</code>, <code>ci</code>, <code>roles</code>, <code>features</code></td>
+<td>the profile (<a href="#c03-the-profile">3. Set up a project</a>)</td>
+</tr>
+<tr>
+<td><code>tracker</code></td>
+<td><code>auto</code> (GitHub or GitLab from the remote, <code>local</code> without one), <code>github</code>, <code>gitlab</code>, <code>local</code>, <code>jira</code>, <code>linear</code>, <code>redmine</code>, <code>none</code></td>
+</tr>
+<tr>
+<td><code>starter</code>, <code>start_command</code></td>
+<td>how a task starts (below)</td>
+</tr>
+<tr>
+<td><code>local</code></td>
+<td><code>{"dir": "docs/tasks"}</code></td>
+</tr>
+<tr>
+<td><code>jira</code></td>
+<td><code>{"url", "project", "issue_type", "subtask_type"}</code></td>
+</tr>
+<tr>
+<td><code>linear</code></td>
+<td><code>{"team", "project"}</code>: milestones need a project</td>
+</tr>
+<tr>
+<td><code>redmine</code></td>
+<td><code>{"url", "project", "started_status", "hold_status"}</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>Environment variables <code>AGENT_TEAM_TRACKER</code>, <code>AGENT_TEAM_STARTER</code> and
+<code>AGENT_TEAM_START_COMMAND</code> override the file. Secrets only in the environment:
+<code>JIRA_EMAIL</code> + <code>JIRA_API_TOKEN</code> or <code>JIRA_PAT</code>, <code>LINEAR_API_KEY</code>, <code>REDMINE_API_KEY</code>.</p>
+<h2 id="c09-starters">Starters</h2>
+<div class="table"><table>
+<thead>
+<tr>
+<th>Starter</th>
+<th>What "start" does</th>
+<th>Default for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>label</code></td>
+<td>adds <code>agent:&lt;role&gt;</code>; on GitHub that starts the agent workflow</td>
+<td>GitHub</td>
+</tr>
+<tr>
+<td><code>gitlab-pipeline</code></td>
+<td>adds <code>agent:&lt;role&gt;</code> and runs the agent pipeline</td>
+<td>GitLab</td>
+</tr>
+<tr>
+<td><code>command</code></td>
+<td>marks the task, runs <code>start_command</code> with <code>{number} {id} {ref} {role} {title} {url} {tracker} {harness}</code></td>
+<td>any tracker, when <code>start_command</code> is set</td>
+</tr>
+<tr>
+<td><code>print</code></td>
+<td>marks the task and prints how to start it in a session</td>
+<td>the other trackers</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="c09-labels">Labels</h2>
+<div class="table"><table>
+<thead>
+<tr>
+<th>Label</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>agent:&lt;role&gt;</code></td>
+<td>the task runs on that role; on GitHub adding it starts the agent</td>
+</tr>
+<tr>
+<td><code>agent:team</code></td>
+<td>GitHub: one coordinator runs the roles of the <code>Roles:</code> line (GitLab: <code>AI_FLOW_ROLES</code>)</td>
+</tr>
+<tr>
+<td><code>agent:split</code></td>
+<td>GitHub: Claude proposes a split in a comment (GitLab: <code>SPLIT_ISSUE</code>)</td>
+</tr>
+<tr>
+<td><code>hold</code></td>
+<td>dispatch never starts this task</td>
+</tr>
+<tr>
+<td><code>alignment-needed</code></td>
+<td>the merge request changes something other roles rely on</td>
+</tr>
+<tr>
+<td><code>ai-review</code></td>
+<td>two reviews of the pull request, rules and spec</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="c09-ci-secrets-and-variables">CI secrets and variables</h2>
+<div class="table"><table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Where</th>
+<th>Used by</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ANTHROPIC_API_KEY</code> or <code>CLAUDE_CODE_OAUTH_TOKEN</code></td>
+<td>GitHub secret, GitLab variable</td>
+<td>Claude Code jobs</td>
+</tr>
+<tr>
+<td><code>OPENAI_API_KEY</code></td>
+<td>secret / variable</td>
+<td>Codex jobs</td>
+</tr>
+<tr>
+<td><code>CODEX_MODEL</code></td>
+<td>GitHub variable</td>
+<td>Codex model (empty: Codex's default)</td>
+</tr>
+<tr>
+<td><code>AGENT_PR_TOKEN</code></td>
+<td>GitHub secret</td>
+<td>Codex pull requests that start the CI</td>
+</tr>
+<tr>
+<td><code>OPENCODE_MODEL</code>, provider keys</td>
+<td>variable, secrets</td>
+<td>OpenCode jobs</td>
+</tr>
+<tr>
+<td><code>AGENT_RUNNERS</code>, <code>AGENT_DEFAULT_RUNNER</code></td>
+<td>GitHub variables</td>
+<td>which tool runs which role</td>
+</tr>
+<tr>
+<td><code>AGENT_AUTODISPATCH</code>, <code>AGENT_DISPATCH_TOKEN</code></td>
+<td>GitHub variable, secret</td>
+<td>dispatch at every merge</td>
+</tr>
+<tr>
+<td><code>AGENT_DISPATCH_PER_ROLE</code>, <code>AGENT_DISPATCH_MAX</code></td>
+<td>GitHub variables</td>
+<td>its limits (1 and 3)</td>
+</tr>
+<tr>
+<td><code>GITLAB_ACCESS_TOKEN</code></td>
+<td>GitLab variable</td>
+<td>splits; Codex and OpenCode merge requests</td>
+</tr>
+<tr>
+<td><code>AI_FLOW_*</code>, <code>TASK_ID</code>, <code>SPLIT_*</code></td>
+<td>GitLab pipeline variables</td>
+<td>starting a job (<a href="#c06-gitlab">6. Scenario: remote</a>)</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="c09-where-the-tools-find-things">Where the tools find things</h2>
+<div class="table"><table>
+<thead>
+<tr>
+<th></th>
+<th>Claude Code</th>
+<th>Codex</th>
+<th>OpenCode</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Project rules</td>
+<td><code>CLAUDE.md</code> → <code>AGENTS.md</code></td>
+<td><code>AGENTS.md</code></td>
+<td><code>AGENTS.md</code></td>
+</tr>
+<tr>
+<td>Roles</td>
+<td><code>.claude/agents/*.md</code></td>
+<td><code>.codex/agents/*.toml</code></td>
+<td><code>.opencode/agents/*.md</code></td>
+</tr>
+<tr>
+<td>Skills</td>
+<td><code>.claude/skills/</code></td>
+<td><code>.agents/skills/</code></td>
+<td><code>.claude/skills/</code> or <code>.agents/skills/</code></td>
+</tr>
+<tr>
+<td>Forbidden commands</td>
+<td><code>.claude/settings.json</code></td>
+<td><code>.codex/rules/agent-team.rules</code></td>
+<td><code>permission</code> in <code>opencode.json</code> and agents</td>
+</tr>
+<tr>
+<td>Hooks</td>
+<td><code>.claude/settings.json</code> → <code>scripts/hooks/</code></td>
+<td><code>.codex/hooks.json</code> → <code>scripts/hooks/</code></td>
+<td>none</td>
+</tr>
+<tr>
+<td>Settings</td>
+<td><code>.claude/settings.json</code></td>
+<td><code>.codex/config.toml</code></td>
+<td><code>opencode.json</code></td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="c09-token-costs">Token costs</h2>
+<p>What every agent reads on every turn costs on every request: <code>AGENTS.md</code>
+(about 1,200 tokens after setup), <code>CLAUDE.md</code>, the descriptions of the agents
+and skills of the tool in use, and the tools of active MCP servers. Role
+prompts, specs and <code>docs/agents/</code> cost only when an agent opens them. Files
+of other tools, trackers and workflows cost nothing unless an agent searches
+or opens them: the profile removes them anyway, so no agent stumbles on
+instructions for tools you do not have.</p>
+<p>To keep costs down: one task per session, handoff notes instead of long
+sessions, MCP servers only on the agents that need them, and few skills per
+role.</p>
+<h2 id="c09-this-manual">This manual</h2>
+<p>The manual is written in Markdown, one file per chapter in <code>docs/manual/</code>.
+<code>docs/manual.html</code> is generated from those files and never edited by hand:</p>
+<pre><code class="language-bash">pip install markdown==3.11.2
+python3 scripts/build_manual.py           # regenerate docs/manual.html
+python3 scripts/build_manual.py --check   # fails if the HTML is not built from the current Markdown
+</code></pre>
+<p>The HTML records a hash of the Markdown it was built from; <code>--check</code> compares
+it with the files, and the repository's CI runs it on every pull request. To
+check before every commit: <code>git config core.hooksPath .githooks</code>.</p>
+</section>
+<p class="meta">Generated from the Markdown sources in <code>docs/manual/</code>.</p>
+</main>
+</div>
+</body>
+</html>

@@ -1,0 +1,14 @@
+{
+  "name": "agent-team",
+  "description": "Agent team: a project template and skills for a development team of AI agents on Claude Code, OpenCode or Codex.",
+  "owner": {
+    "name": "Alberto Riorda"
+  },
+  "plugins": [
+    {
+      "name": "agent-team",
+      "source": "./",
+      "description": "Project template and skills for a development team of AI agents on Claude Code, OpenCode or Codex."
+    }
+  ]
+}

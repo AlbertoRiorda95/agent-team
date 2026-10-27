@@ -1,0 +1,58 @@
+# .codex/rules/agent-team.rules: commands Codex never runs in this project, the
+# same list as .claude/settings.json and scripts/hooks/block-infra-commands.sh.
+# Check a command: codex execpolicy check --pretty --rules .codex/rules/agent-team.rules -- git push --force
+
+prefix_rule(
+    pattern = ["git", "push", ["--force", "-f", "--force-with-lease"]],
+    decision = "forbidden",
+    justification = "Never rewrite pushed history.",
+    match = ["git push --force origin feat/login", "git push -f"],
+    not_match = ["git push origin feat/login"],
+)
+
+prefix_rule(
+    pattern = ["git", "push", "origin", ["main", "HEAD:main"]],
+    decision = "forbidden",
+    justification = "Nobody pushes to main: open a pull request.",
+    match = ["git push origin main"],
+    not_match = ["git push origin feat/login"],
+)
+
+prefix_rule(
+    pattern = [["gh", "glab"], ["pr", "mr"], "merge"],
+    decision = "forbidden",
+    justification = "Nobody merges: the user does.",
+    match = ["gh pr merge 12", "glab mr merge 3"],
+)
+
+prefix_rule(
+    pattern = ["terraform", ["apply", "destroy"]],
+    decision = "forbidden",
+    justification = "Changes to real environments go through a merge request and the pipeline.",
+    match = ["terraform apply -auto-approve"],
+    not_match = ["terraform plan"],
+)
+
+prefix_rule(
+    pattern = ["kubectl", ["apply", "delete", "patch", "rollout"]],
+    decision = "forbidden",
+    justification = "Changes to real environments go through a merge request and the pipeline.",
+    match = ["kubectl apply -f deploy.yaml"],
+    not_match = ["kubectl get pods"],
+)
+
+prefix_rule(
+    pattern = ["helm", ["install", "upgrade", "uninstall", "rollback"]],
+    decision = "forbidden",
+    justification = "Changes to real environments go through a merge request and the pipeline.",
+    match = ["helm upgrade app ./chart"],
+    not_match = ["helm template ./chart"],
+)
+
+prefix_rule(
+    pattern = [["docker", "podman"], "push"],
+    decision = "forbidden",
+    justification = "Images are published by the pipeline.",
+    match = ["docker push registry/app:1"],
+    not_match = ["docker build ."],
+)

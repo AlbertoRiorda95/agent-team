@@ -1,0 +1,4 @@
+# CUSTOMIZE: your domain
+llm.your-domain.com {
+    reverse_proxy litellm:4000
+}

@@ -1,0 +1,42 @@
+# .github/workflows/validate.yml: checks the plugin and the template on every PR.
+# (The template's own workflows live in template/.github/ and do not run here.)
+name: Validate
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803  # v6.1.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1  # v7.1.0
+        with:
+          node-version: 24
+      - name: Plugin manifest, marketplace and skills
+        run: |
+          npm install -g @anthropic-ai/claude-code
+          claude plugin validate . --strict
+      - name: Workflows (template and this repository)
+        run: |
+          ./template/ci/install-scanners.sh actionlint
+          actionlint template/.github/workflows/*.yml .github/workflows/*.yml
+      - name: Manual (docs/manual.html built from docs/manual/*.md)
+        run: python3 scripts/build_manual.py --check
+      - name: Scripts
+        run: |
+          for f in $(git ls-files '*.sh'); do bash -n "$f"; done
+          python3 -m py_compile $(git ls-files '*.py')
+      - name: Profiles (every sample profile renders, loads and lints; switching profiles)
+        run: |
+          export PATH="$HOME/.local/bin:$PATH"
+          python3 tests/test_profiles.py
+      - name: Issue trackers (GitHub, GitLab, local, Jira, Linear, Redmine against fakes)
+        run: python3 tests/test_trackers.py
+      - name: Template install and upgrade
+        run: bash tests/test_template_sync.sh

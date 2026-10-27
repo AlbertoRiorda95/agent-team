@@ -1,0 +1,23 @@
+# CUSTOMIZE: the models you actually use; the names on the left are what the agents see.
+# litellm-config.yaml
+model_list:
+  - model_name: claude-sonnet
+    litellm_params:
+      model: anthropic/claude-sonnet-5-5
+      api_key: os.environ/ANTHROPIC_API_KEY
+  - model_name: gpt
+    litellm_params:
+      model: openai/<model>
+      api_key: os.environ/OPENAI_API_KEY
+  - model_name: deepseek
+    litellm_params:
+      model: deepseek/<model>
+      api_key: os.environ/DEEPSEEK_API_KEY
+  - model_name: mistral
+    litellm_params:
+      model: mistral/<model>
+      api_key: os.environ/MISTRAL_API_KEY
+  - model_name: local
+    litellm_params:
+      model: ollama/<model>
+      api_base: http://ollama:11434

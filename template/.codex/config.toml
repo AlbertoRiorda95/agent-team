@@ -1,0 +1,26 @@
+# .codex/config.toml: project settings for Codex. Codex reads .codex/ only after
+# you trust the project. Instructions: AGENTS.md. Roles: .codex/agents/.
+# Skills: .agents/skills/. Hooks: .codex/hooks.json. Forbidden commands:
+# .codex/rules/agent-team.rules.
+
+# CUSTOMIZE: pin the model with its ID from the Codex documentation, or leave it
+# unset to use Codex's default. Each role sets its own reasoning effort.
+# model = "<model>"
+model_reasoning_effort = "medium"
+approval_policy = "on-request"
+sandbox_mode = "workspace-write"
+
+# Compact at 200K tokens instead of near the model's window: every turn re-reads
+# the context.
+model_auto_compact_token_limit = 200000
+
+[agents]
+# At most three role agents at once: two agents never edit the same file.
+max_concurrent_threads_per_session = 3
+
+# The designer's browser for UI reviews. Every session sees the tools of every
+# enabled MCP server, so it stays off until you review the UI with Codex.
+[mcp_servers.playwright]
+command = "npx"
+args = ["-y", "@playwright/mcp@latest"]
+enabled = false

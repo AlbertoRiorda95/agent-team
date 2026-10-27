@@ -1,0 +1,50 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "permission": {
+    "bash": {
+      "*": "ask",
+      "git push --force*": "deny",
+      "git push origin main*": "deny",
+      "gh pr merge*": "deny",
+      "glab mr merge*": "deny",
+      "terraform apply*": "deny",
+      "terraform destroy*": "deny",
+      "kubectl apply*": "deny",
+      "kubectl delete*": "deny",
+      "helm install*": "deny",
+      "helm upgrade*": "deny",
+      "docker push*": "deny",
+      "podman push*": "deny"
+    },
+    "read": {
+      "*": "allow",
+      ".env": "deny",
+      ".env.*": "deny",
+      "secrets/*": "deny",
+      "infra/litellm/.env": "deny"
+    }
+  },
+  "provider": {
+    "litellm": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "LiteLLM",
+      "options": {
+        "baseURL": "https://llm.your-domain.com/v1"
+      },
+      "models": {
+        "gpt": {
+          "name": "GPT via LiteLLM"
+        },
+        "deepseek": {
+          "name": "DeepSeek via LiteLLM"
+        },
+        "mistral": {
+          "name": "Mistral via LiteLLM"
+        },
+        "local": {
+          "name": "Local model"
+        }
+      }
+    }
+  }
+}

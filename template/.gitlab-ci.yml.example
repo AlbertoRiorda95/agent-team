@@ -1,0 +1,24 @@
+# GitLab only: rename to .gitlab-ci.yml.
+# The pipeline has two parts:
+#   .gitlab/ci/ci.yml      the project's CI: build, test, licenses, vulnerabilities
+#   .gitlab/ci/agents.yml  the agent jobs, started only explicitly (AI_FLOW_INPUT)
+include:
+  - local: .gitlab/ci/ci.yml
+# agent-team:if ci_agents
+  - local: .gitlab/ci/agents.yml
+# agent-team:end
+
+# One pipeline per change: MR pipelines, the default branch, explicit triggers.
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
+      when: never
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_PIPELINE_SOURCE == "web" || $CI_PIPELINE_SOURCE == "api" || $CI_PIPELINE_SOURCE == "trigger"
+
+stages:
+  - build
+  - test
+  - scan
+  - ai

@@ -1,0 +1,9 @@
+#!/bin/bash
+# .githooks/pre-commit: refuse a commit whose docs/manual.html is not built from
+# the committed docs/manual/*.md. Turn it on with: git config core.hooksPath .githooks
+if git diff --cached --name-only | grep -q '^docs/manual'; then
+  python3 scripts/build_manual.py --check || {
+    echo "Run python3 scripts/build_manual.py and add docs/manual.html." >&2
+    exit 1
+  }
+fi
