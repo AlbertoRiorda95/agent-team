@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="light dark">
-<meta name="manual-source" content="sha256:324603243c37d8bdb4ef47f57be7d33e8e60b18f7e70081300879f98565c6387">
+<meta name="manual-source" content="sha256:03d399e5746d0a199267ebbe4abe2ba0f5f28234f2a4e655ef2b86f5e6b37bdb">
 <meta name="manual-builder" content="python-markdown 3.11.2">
 <title>Agent team: user manual</title>
 <style>
@@ -302,10 +302,10 @@ CI, tracker, roles and features you use (<a href="#c03-the-profile">3. Set up a 
 </section>
 <section class="chapter" id="c02">
 <h1 id="c02-2-install">2. Install</h1>
-<p>Agent team ships as one repository, <code>claude-agent-team</code>. It is a Claude Code
+<p>Agent team ships as one repository, <code>agent-team</code>. It is a Claude Code
 plugin, and its skills also work in Codex and OpenCode.</p>
 <h2 id="c02-in-claude-code">In Claude Code</h2>
-<pre><code class="language-bash">claude plugin marketplace add &lt;owner&gt;/claude-agent-team
+<pre><code class="language-bash">claude plugin marketplace add AlbertoRiorda95/agent-team
 claude plugin install agent-team@agent-team
 </code></pre>
 <p>Inside a session the same steps are under <code>/plugin</code>. The commands then appear
@@ -344,14 +344,14 @@ as <code>/agent-team:&lt;skill&gt;</code>:</p>
 </tr>
 </tbody>
 </table></div>
-<p>To try a local checkout without installing: <code>claude --plugin-dir ./claude-agent-team</code>.</p>
+<p>To try a local checkout without installing: <code>claude --plugin-dir ./agent-team</code>.</p>
 <h2 id="c02-in-codex-or-opencode">In Codex or OpenCode</h2>
 <p>Both read skills from <code>~/.agents/skills/</code>. Clone the repository once and link
 its skills there:</p>
-<pre><code class="language-bash">git clone https://github.com/&lt;owner&gt;/claude-agent-team ~/claude-agent-team
+<pre><code class="language-bash">git clone https://github.com/AlbertoRiorda95/agent-team ~/agent-team
 mkdir -p ~/.agents/skills
-ln -s ~/claude-agent-team/skills/* ~/.agents/skills/
-echo 'export AGENT_TEAM_HOME=~/claude-agent-team' &gt;&gt; ~/.bashrc   # or your shell's file
+ln -s ~/agent-team/skills/* ~/.agents/skills/
+echo 'export AGENT_TEAM_HOME=~/agent-team' &gt;&gt; ~/.bashrc   # or your shell's file
 </code></pre>
 <p>The skills use <code>AGENT_TEAM_HOME</code> where Claude Code would use the plugin
 folder. Ask for them by name ("use the setup skill", "run the design-studio
@@ -359,7 +359,7 @@ skill for login") or, in Codex, with <code>$setup</code>, <code>$design-studio</
 <h2 id="c02-without-the-plugin">Without the plugin</h2>
 <p>Copy <code>template/</code> into a new repository and ask your tool to follow
 <code>SETUP.md</code>:</p>
-<pre><code class="language-bash">cp -r claude-agent-team/template my-project &amp;&amp; cd my-project &amp;&amp; git init
+<pre><code class="language-bash">cp -r agent-team/template my-project &amp;&amp; cd my-project &amp;&amp; git init
 claude        # or codex, or opencode
 # then: &quot;Read SETUP.md and set up this project&quot;
 </code></pre>
@@ -1347,8 +1347,8 @@ plugin existed, has no <code>.agent-team/base/</code>. The first upgrade propose
 profile from what the project has, then compares each file that differs with
 you and records the result; later upgrades are automatic. Without Claude
 Code, run it from a clone:</p>
-<pre><code class="language-bash">python3 ~/claude-agent-team/scripts/template_sync.py status --template ~/claude-agent-team/template --project .
-python3 ~/claude-agent-team/scripts/template_sync.py apply  --template ~/claude-agent-team/template --project .
+<pre><code class="language-bash">python3 ~/agent-team/scripts/template_sync.py status --template ~/agent-team/template --project .
+python3 ~/agent-team/scripts/template_sync.py apply  --template ~/agent-team/template --project .
 </code></pre>
 </section>
 <section class="chapter" id="c09">

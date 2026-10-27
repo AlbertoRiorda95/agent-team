@@ -77,6 +77,6 @@ you and records the result; later upgrades are automatic. Without Claude
 Code, run it from a clone:
 
 ```bash
-python3 ~/claude-agent-team/scripts/template_sync.py status --template ~/claude-agent-team/template --project .
-python3 ~/claude-agent-team/scripts/template_sync.py apply  --template ~/claude-agent-team/template --project .
+python3 ~/agent-team/scripts/template_sync.py status --template ~/agent-team/template --project .
+python3 ~/agent-team/scripts/template_sync.py apply  --template ~/agent-team/template --project .
 ```

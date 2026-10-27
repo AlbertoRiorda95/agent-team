@@ -15,7 +15,7 @@ Paths used below:
 
 `${CLAUDE_PLUGIN_ROOT}` is the plugin folder in Claude Code. In Codex or
 OpenCode, which load these skills from `~/.agents/skills/`, use the folder where
-the claude-agent-team repository is cloned (`$AGENT_TEAM_HOME`) instead.
+the agent-team repository is cloned (`$AGENT_TEAM_HOME`) instead.
 
 ## 1. Prepare
 

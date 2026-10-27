@@ -1,12 +1,12 @@
 # 2. Install
 
-Agent team ships as one repository, `claude-agent-team`. It is a Claude Code
+Agent team ships as one repository, `agent-team`. It is a Claude Code
 plugin, and its skills also work in Codex and OpenCode.
 
 ## In Claude Code
 
 ```bash
-claude plugin marketplace add <owner>/claude-agent-team
+claude plugin marketplace add AlbertoRiorda95/agent-team
 claude plugin install agent-team@agent-team
 ```
 
@@ -22,7 +22,7 @@ as `/agent-team:<skill>`:
 | `/agent-team:dispatch` | start the tasks that are ready |
 | `/agent-team:upgrade` | bring the project to a new plugin version or a new profile |
 
-To try a local checkout without installing: `claude --plugin-dir ./claude-agent-team`.
+To try a local checkout without installing: `claude --plugin-dir ./agent-team`.
 
 ## In Codex or OpenCode
 
@@ -30,10 +30,10 @@ Both read skills from `~/.agents/skills/`. Clone the repository once and link
 its skills there:
 
 ```bash
-git clone https://github.com/<owner>/claude-agent-team ~/claude-agent-team
+git clone https://github.com/AlbertoRiorda95/agent-team ~/agent-team
 mkdir -p ~/.agents/skills
-ln -s ~/claude-agent-team/skills/* ~/.agents/skills/
-echo 'export AGENT_TEAM_HOME=~/claude-agent-team' >> ~/.bashrc   # or your shell's file
+ln -s ~/agent-team/skills/* ~/.agents/skills/
+echo 'export AGENT_TEAM_HOME=~/agent-team' >> ~/.bashrc   # or your shell's file
 ```
 
 The skills use `AGENT_TEAM_HOME` where Claude Code would use the plugin
@@ -46,7 +46,7 @@ Copy `template/` into a new repository and ask your tool to follow
 `SETUP.md`:
 
 ```bash
-cp -r claude-agent-team/template my-project && cd my-project && git init
+cp -r agent-team/template my-project && cd my-project && git init
 claude        # or codex, or opencode
 # then: "Read SETUP.md and set up this project"
 ```

@@ -20,7 +20,7 @@ Design, issues, splits, dispatch and upgrades work the same in all three.
 ## Get started
 
 ```bash
-claude plugin marketplace add <owner>/claude-agent-team
+claude plugin marketplace add AlbertoRiorda95/agent-team
 claude plugin install agent-team@agent-team
 ```
 
