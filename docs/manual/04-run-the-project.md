@@ -81,6 +81,37 @@ Only after your yes, the plan is posted on the issue and a script creates
 exactly those issues: the model does not create anything itself. Running it
 again creates nothing new.
 
+### Several issues at once
+
+Give several numbers, or a milestone (its open issues that have no sub-issues,
+are not "Design:" issues and were not made by `create-issues`):
+
+```text
+/agent-team:split-issue 12 15 18
+/agent-team:split-issue --milestone M1
+```
+
+The agent reads all of them first, with the specs and the existing sub-issues,
+so the plans fit: no work twice, and the API contract is planned once. It
+shows one overview: a table per issue (role, task, depends on), the
+dependencies between issues, then numbered questions with a recommended
+answer. You approve per issue, in one line:
+
+```text
+ok 12, 15; 18: merge the two frontend tasks
+skip 21
+```
+
+Only what you asked is revised, and the overview is shown again until each
+issue is approved or skipped. Then the issues are created in dependency order,
+each one with its own proposal comment and its own `create`.
+
+A task can wait for a task of another issue: `"depends_on": ["12:api"]` in the
+plan means the task with key `api` of the plan of issue 12. It is written in
+"Depends on" and as the tracker's native "blocked by" relation. If that task
+does not exist yet, `create` refuses and creates nothing: split issue 12 first.
+In CI (`agent:split`) each issue is still proposed and approved on its own.
+
 In the remote scenario you can also split from the issue itself
 ([6. Scenario: remote](06-scenario-remote.md#split-from-the-issue)).
 
@@ -94,10 +125,16 @@ one, or let dispatch pick the ready ones:
                                      python3 scripts/dispatch.py --apply   (start it)
 ```
 
-Dispatch takes the first open milestone, counts what is running, and starts
-the tasks whose dependencies are all closed as completed: by default one per
-role and three in total (`--per-role`, `--max`). It never starts optimizer or
-security, "Design:" issues, or issues marked `hold`.
+Dispatch takes the first milestone that has open task issues, counts what is
+running, and starts the tasks whose dependencies are all closed as completed:
+by default one per role and three in total (`--per-role`, `--max`). It never
+starts optimizer or security, "Design:" issues, or issues marked `hold`.
+
+"Design:" issues and issues without a role are not tasks yet. Under "Not tasks
+yet" the plan lists how many are open in that milestone and the earlier ones,
+with the command that turns them into tasks (`design-studio` then
+`create-issues`, or `split-issue`). So if dispatch works on M2 while M0 still
+has "Design:" issues, the plan says so.
 
 What "start" means depends on the scenario: a label that starts a CI job, a
 GitLab pipeline, a command of your orchestrator, or a printed instruction for

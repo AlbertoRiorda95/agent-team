@@ -3,6 +3,41 @@
 Every release has **Upgrade notes**: the steps `/agent-team:upgrade` cannot do
 by changing files, because they need your hands on the platform or a decision.
 
+## 1.4.0 - 2026-10-28
+
+### Fixes
+- `create-issues`: a roadmap feature with commas inside parentheses or
+  backticks (`` `foundations` (Makefile, compose) ``) was split into several
+  broken "Design:" issues. The feature name is now the name in backticks, or
+  the text before the parenthesis; the rest goes in the issue body.
+- Issue keys with spaces (milestone codes like `M0 Foundations`) were not read
+  back, so `create-issues` did not recognize its own issues by key.
+- `dispatch`: with no task issues it said "issues without a milestone"; it now
+  says "no task issues" and, under "Not tasks yet", counts the open "Design:"
+  issues and issues without a role up to the milestone in scope, with the
+  command that turns them into tasks. A milestone without tasks is no longer
+  skipped silently.
+
+### Skills
+- `split-issue` takes several issues (`12 15 18`) or `--milestone M1`: one
+  overview, one approval per issue, creation in dependency order.
+
+### Template
+- Split plans: `depends_on` accepts `"<issue>:<key>"`, a task of another
+  issue's plan. `split-issue.py create` writes it in "Depends on" and as the
+  native "blocked by" relation, and refuses while that task does not exist.
+  `split.yml` is unchanged.
+
+### Documentation
+- Every skill by example in the local and remote scenarios; several-issue
+  split and cross-issue dependencies in "Run the project".
+
+### Upgrade notes
+- If your roadmap has commas inside parentheses, `create-issues` made broken
+  "Design:" issues. After the upgrade, `create-issues` lists them under
+  "Created by this script but no longer in the plan": close them, then let it
+  create the right ones.
+
 ## 1.3.0 - 2026-10-27
 
 ### Skills

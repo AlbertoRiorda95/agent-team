@@ -178,7 +178,7 @@ def deps_of(issue):
 
 
 def key_of(issue):
-    m = re.search(r"key: (\S+?)(?: -->|\s*$)", issue.body, re.M)
+    m = re.search(r"key: ([^\n]+?)(?: -->|\s*$)", issue.body, re.M)     # milestone codes may hold spaces
     return m.group(1) if m else None
 
 

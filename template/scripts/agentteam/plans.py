@@ -11,10 +11,14 @@ Plan (JSON):
        "task": "What to do, in a few sentences.",
        "acceptance": ["Checkable without reading the code"],
        "files": ["docs/api/openapi.yaml"],
-       "depends_on": []}                   # keys of earlier tasks
+       "depends_on": []}                   # keys of earlier tasks, or "<issue>:<key>" (see below)
     ],
     "team": {"roles": ["backend", "frontend"], "reason": "Small and tightly coupled."}   # optional
   }
+
+A task may also wait for a task of another issue's plan: "depends_on": ["12:api"]
+is the task with key "api" of the plan of issue 12 (a number, "#12" or "PROJ-12").
+That issue must be split first: create refuses otherwise.
 """
 import json
 import re
@@ -25,6 +29,14 @@ ROLES = ["designer", "frontend", "backend", "devops", "optimizer", "security"]
 MAX_TASKS = 6
 START, END = "split-plan v1", "split-plan-end"
 LABEL = "agent:split"
+KEY = r"[a-z0-9][a-z0-9-]{0,29}"
+CROSS = re.compile(rf"#?([A-Za-z0-9][A-Za-z0-9_-]*):({KEY})")
+
+
+def cross_ref(dep):
+    """(issue, key) of a "<issue>:<key>" dependency, None for a key of the same plan."""
+    m = CROSS.fullmatch(dep) if isinstance(dep, str) else None
+    return (m.group(1), m.group(2)) if m else None
 
 
 def same_issue(value, issue_number):
@@ -61,7 +73,7 @@ def validate(plan, issue_number=None):
             err.append(f"{w}: not an object")
             continue
         k = t.get("key")
-        if not isinstance(k, str) or not re.fullmatch(r"[a-z0-9][a-z0-9-]{0,29}", k):
+        if not isinstance(k, str) or not re.fullmatch(KEY, k):
             err.append(f'{w}: "key" must be 1-30 lowercase letters, digits or hyphens')
         elif k in keys:
             err.append(f'{w}: duplicate key "{k}"')
@@ -82,8 +94,17 @@ def validate(plan, issue_number=None):
             for j, f in enumerate(files, 1):
                 text(f"{w} file {j}", f, 200)
         deps = t.get("depends_on", [])
-        if not isinstance(deps, list) or any(d not in keys for d in deps):
-            err.append(f'{w}: "depends_on" may only list keys of earlier tasks')
+        if not isinstance(deps, list):
+            err.append(f'{w}: "depends_on" must be a list')
+        else:
+            for d in deps:
+                x = cross_ref(d)
+                if x is None and d not in keys:
+                    err.append(f'{w}: "depends_on" may only list keys of earlier tasks or "<issue>:<key>", not {d!r}')
+                elif x is not None and issue_number is not None and same_issue(x[0], issue_number):
+                    err.append(f'{w}: "{d}" is this issue: use the key "{x[1]}" alone')
+                elif x is not None and issue_number is None and same_issue(x[0], plan.get("parent")):
+                    err.append(f'{w}: "{d}" is this issue: use the key "{x[1]}" alone')
         keys.append(k)
     team = plan.get("team")
     if team is not None:
@@ -120,7 +141,7 @@ def render(plan, trk, issue_id):
     tasks = plan["tasks"]
     idx = {t["key"]: i for i, t in enumerate(tasks, 1)}
     rows = "\n".join(
-        f"| {i} | {t['role']} | {t['title']} | {', '.join(str(idx[d]) for d in t.get('depends_on', [])) or '-'} |"
+        f"| {i} | {t['role']} | {t['title']} | {', '.join(str(idx.get(d, d)) for d in t.get('depends_on', [])) or '-'} |"
         for i, t in enumerate(tasks, 1))
     details = []
     for i, t in enumerate(tasks, 1):

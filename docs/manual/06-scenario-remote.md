@@ -139,6 +139,75 @@ push and open the merge request after the agent has finished. Protect `main`
 and require the pipeline to pass before merging. GitLab reads the code owners
 from `.gitlab/CODEOWNERS`.
 
+## The skills by example
+
+A short example of each skill on GitHub (profile above). The skills run in your
+session, the agents run in GitHub Actions. Replies are in one line.
+
+**setup** - once; it ends with the list of secrets, labels and branch
+protection that are left to you (see [Set up once](#set-up-once)):
+
+```text
+> /agent-team:setup
+  (it asks harnesses, tracker "github", features ci-agents, split, dispatch)
+```
+
+**next** - where the project stands, including pull requests to review:
+
+```text
+> /agent-team:next
+  Issues: 6 created. Running: #4 backend. Waiting: #5 (needs #4). PRs to review: 1.
+  Next: review the pull request, then /agent-team:dispatch
+```
+
+**design-studio** - the spec is committed to the repository like any file:
+
+```text
+> /agent-team:design-studio orders
+> 1 yes, 2 by date and status, 3: option B
+```
+
+**create-issues** - milestones and issues in GitHub, no labels, so nothing
+starts:
+
+```text
+> /agent-team:create-issues
+  milestone create   M0 · Walking skeleton ... (dry run shown)
+> yes
+```
+
+**split-issue** - in the session, or from the issue itself with `agent:split`
+and a reply (see [Split from the issue](#split-from-the-issue)):
+
+```text
+> /agent-team:split-issue 12 15
+  (one overview, then)
+> ok 12; 15: merge the two frontend tasks
+```
+
+On the issue: add the label `agent:split`, read Claude's comment, reply
+`@claude ok`.
+
+**dispatch** - adds `agent:<role>` to the ready tasks, so `agents.yml` starts
+them:
+
+```text
+> /agent-team:dispatch --per-role 1
+  Would start (2): #4 backend, #6 devops. Waits: #5 (needs #4)
+> yes
+```
+
+To start one task by hand, add the label `agent:backend` to its issue.
+
+**upgrade** - brings in new workflows and scripts as pull-request-sized
+changes on a branch:
+
+```text
+> /agent-team:upgrade
+  update 4 files, add 1 workflow. Work on a branch, one commit.
+> yes
+```
+
 ## Costs and safety
 
 - Each task is one agent run; a team task is several. The CI minutes are

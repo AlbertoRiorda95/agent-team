@@ -104,6 +104,69 @@ The default starter for trackers other than GitHub and GitLab prints the
 command to start each task; with `"starter": "command"` it can open a new
 terminal session for you instead ([9. Reference](09-reference.md#starters)).
 
+## The skills by example
+
+A short example of each skill in a local project (profile with `"tracker":
+"local"`, issues as files in `docs/tasks/`). Replies are in one line: the
+agent asks numbered questions and you answer by number.
+
+**setup** - once, in an empty or existing repository:
+
+```text
+> /agent-team:setup
+  (it asks harnesses, tracker, roles, stack; "1 claude, 2 local, 3 all roles")
+```
+
+**next** - when you do not know what to do:
+
+```text
+> /agent-team:next
+  Design: project ready, "login" ready, "orders" not. Issues: none yet.
+  Next: /agent-team:create-issues
+```
+
+**design-studio** - before building a feature:
+
+```text
+> /agent-team:design-studio orders
+  Round 1 - 1. Who filters the list? (recommended: the customer) ...
+> 1 yes, 2 by date and status, 3: option B
+```
+
+**create-issues** - after a design session; it shows the plan first:
+
+```text
+> /agent-team:create-issues
+  milestone create   M0 · Walking skeleton
+  issue create       Login · 1/3 · backend: Auth endpoint ...
+> yes
+```
+
+**split-issue** - for an issue written by hand, in `docs/tasks/`:
+
+```text
+> /agent-team:split-issue 7
+  1 backend: date filter in the API   2 frontend: date picker (after 1)
+> ok 7
+```
+
+**dispatch** - to see what is ready; in a local project the starter prints the
+command to run in a new session:
+
+```text
+> /agent-team:dispatch
+  Would start (2): #1 backend, #3 devops. Waits: #2 (needs #1)
+> yes
+```
+
+**upgrade** - after a new plugin version, or to add a tool:
+
+```text
+> /agent-team:upgrade
+  update 3 files, merge 1, add 2. Work on a branch, one commit.
+> yes
+```
+
 ## From your phone
 
 To drive the session from the Claude app, start it with Remote Control:

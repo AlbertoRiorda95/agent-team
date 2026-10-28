@@ -15,6 +15,10 @@ printed instruction.
      text, and the tracker's native "blocked by") are all closed as completed,
      at most --per-role per role and --max in total, running ones included.
 
+Open "Design:" issues and issues without a role are not tasks: the plan lists
+how many are open up to the scope's milestone, with the command that turns them
+into tasks, so a milestone without tasks yet is never skipped silently.
+
 It never starts optimizer or security (on-demand roles), issues marked `hold`,
 "Design:" issues, or issues without a role. Without --apply it only prints the
 plan.
@@ -46,7 +50,7 @@ def plan(issues, trk, per_role, max_total, milestone=None, all_ms=False):
         with_ms = sorted({i.milestone for i in tasks if i.milestone}, key=core.ms_key)
         first = with_ms[0] if with_ms else None
         scope = [i for i in tasks if i.milestone == first]
-        label = f"milestone {first}" if first else "issues without a milestone"
+        label = f"milestone {first}" if first else "issues without a milestone" if scope else "no task issues"
     running = [i for i in issues if i.open and core.started(i)]
     busy = {}
     for i in running:
@@ -84,6 +88,28 @@ def plan(issues, trk, per_role, max_total, milestone=None, all_ms=False):
     return label, running, start, waiting, skipped
 
 
+def not_tasks(issues, label):
+    """Hints for the open issues that are not tasks yet, up to the milestone in scope."""
+    limit = core.ms_key(label[len("milestone "):]) if label.startswith("milestone ") else None
+    design, plain = {}, {}
+    for i in issues:
+        if not i.open or core.started(i) or (limit and i.milestone and core.ms_key(i.milestone) > limit):
+            continue
+        ms = core.code(i.milestone) or "no milestone"
+        if i.title.startswith("Design:"):
+            design[ms] = design.get(ms, 0) + 1
+        elif not core.role_of(i):
+            plain[ms] = plain.get(ms, 0) + 1
+    order = lambda d: ", ".join(f"{m} ({n})" for m, n in sorted(d.items(), key=lambda x: core.ms_key(x[0])))  # noqa: E731
+    out = []
+    if design:
+        out.append(f"  Design: issues to design first: {order(design)}. "
+                   f"Run /agent-team:design-studio <feature>, then /agent-team:create-issues.")
+    if plain:
+        out.append(f"  Issues without a role: {order(plain)}. Split them with /agent-team:split-issue <n>.")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--apply", action="store_true")
@@ -112,6 +138,10 @@ def main():
     if skipped:
         lines.append(f"\nNot started automatically ({len(skipped)}):")
         lines += [f"  {i.id}  {i.title}  - {why}" for i, why in skipped]
+    hints = [] if a.milestone or a.all else not_tasks(issues, label)
+    if hints:
+        lines.append("\nNot tasks yet:")
+        lines += hints
     text = "\n".join(lines)
     print(text)
     if os.environ.get("GITHUB_STEP_SUMMARY"):

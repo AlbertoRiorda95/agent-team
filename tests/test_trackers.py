@@ -219,6 +219,56 @@ class TrackerFlow(unittest.TestCase):
         with self.assertRaises(SystemExit):
             call("split-issue.py", "create", parent.number, "--team")
 
+    def run_cross_issue(self, sc):
+        """Two hand-written issues: the frontend task of the second waits for the backend task of the first."""
+        json.dump(sc.cfg, open(".agent-team/config.json", "w"))
+        sc.install()
+        trk = lambda: config.tracker(config.load())  # noqa: E731
+        first = trk().create_issue("Orders: filter by date", "Hand written request.")
+        second = trk().create_issue("Orders page: date picker", "Hand written request.")
+        backend = {"parent": first.number, "summary": "The API.", "tasks": [dict(PLAN["tasks"][0])]}
+        frontend = {"parent": second.number, "summary": "The UI.", "tasks": [
+            dict(PLAN["tasks"][1], depends_on=[f"{first.number}:api"])]}
+        for name, plan in (("backend.json", backend), ("frontend.json", frontend)):
+            json.dump(plan, open(name, "w"))
+            rc, out = call("split-issue.py", "check", name)
+            self.assertEqual(rc, 0, out)
+        for issue, name in ((first, "backend.json"), (second, "frontend.json")):
+            rc, out = call("split-issue.py", "propose", issue.number, name)
+            self.assertEqual(rc, 0, out)
+        kids = lambda i: trk().children(trk().get(i.ref))  # noqa: E731
+
+        # the second before the first: refused, nothing created
+        with self.assertRaises(SystemExit) as refused:
+            call("split-issue.py", "create", second.number)
+        self.assertIn(f"{first.number}:api", str(refused.exception))
+        self.assertEqual(kids(second), [])
+
+        # in order: the dependency is in the text and a native relation
+        rc, out = call("split-issue.py", "create", first.number)
+        self.assertIn("1 issue(s) created", out)
+        rc, out = call("split-issue.py", "create", second.number)
+        self.assertIn("1 issue(s) created", out)
+        api, ui = kids(first)[0], kids(second)[0]
+        self.assertEqual(core.role_of(ui), "frontend")
+        self.assertIn(api.ref, [r.lstrip("#") for r in core.deps_of(ui)[0]])
+        self.assertIn(api.ref, [str(b) for b in trk().blockers(ui)])
+        self.assertIn(api.id, core.section(ui.body, "Depends on"))
+
+        # again: nothing new
+        rc, out = call("split-issue.py", "create", second.number)
+        self.assertIn("0 issue(s) created", out)
+        self.assertEqual(len(kids(second)), 1)
+
+    def test_cross_issue_local(self):
+        self.run_cross_issue(scenarios()[0])
+
+    def test_cross_issue_github(self):
+        self.run_cross_issue(scenarios()[1])
+
+    def test_cross_issue_jira(self):
+        self.run_cross_issue(scenarios()[2])
+
     def test_local(self):
         self.run_flow(scenarios()[0])
         self.assertTrue(os.path.exists("docs/tasks/_milestones.json"))
@@ -243,6 +293,44 @@ class TrackerFlow(unittest.TestCase):
 
 
 class Units(unittest.TestCase):
+    def test_dispatch_explains_milestones_without_tasks(self):
+        d = script("dispatch.py")
+        task = "## Task\nx\n\nTo start it: add `agent:backend`."
+        design = [core.Issue(n, f"#{n}", f"Design: f{n} ({m})", milestone=f"{m} · x") for n, m in ((1, "M0"), (2, "M6"))]
+        label, _, start, _, _ = d.plan(design, core.Tracker({}), 1, 3)
+        self.assertEqual((label, start), ("no task issues", []))
+        self.assertIn("M0 (1), M6 (1)", d.not_tasks(design, label)[0])
+        # M6 has a task, M0 only a design issue: the plan says M0 is not designed yet
+        issues = design + [core.Issue(3, "#3", "Task", task, milestone="M6 · x")]
+        label, _, start, _, _ = d.plan(issues, core.Tracker({}), 1, 3)
+        self.assertEqual(label, "milestone M6 · x")
+        self.assertIn("M0 (1)", d.not_tasks(issues, label)[0])
+
+    def test_key_with_spaces(self):
+        for marker in ("<!-- key: design:M0 Foundations:foundations -->", "[agent-team] key: design:M0 Foundations:foundations"):
+            self.assertEqual(core.key_of(core.Issue(1, "#1", "t", f"x\n\n{marker}\n")), "design:M0 Foundations:foundations")
+
+    def test_roadmap_features_with_commas_in_parentheses(self):
+        from agentteam import specs
+        row = ("`foundations` (Makefile, compose, FastAPI skeleton with `/health`), "
+               "`app-shell` (navigation, theme); `alignment-control` (`ask`, then `auto`), Login screen (web, mobile)")
+        self.assertEqual([specs.feature_name(f) for f in specs.items(row)],
+                         ["foundations", "app-shell", "alignment-control", "Login screen"])
+        self.assertEqual(specs.items("[a, b; c]"), ["a", "b", "c"])
+
+    def test_cross_issue_dependency_format(self):
+        from agentteam import plans
+
+        def check(dep, number="13"):
+            task = dict(PLAN["tasks"][1], depends_on=[dep])
+            return plans.validate({"parent": number, "summary": "s", "tasks": [task]}, number)
+
+        for ok in ("12:api", "#12:api", "PROJ-12:api-2"):
+            self.assertEqual(check(ok), [], ok)
+        for bad in ("12:", ":api", "12:API", "12 api", "12:api:x", "nokey"):
+            self.assertTrue(check(bad), bad)
+        self.assertTrue(check("13:api"))                       # its own issue: use the key alone
+
     def test_jira_markup(self):
         from agentteam.trackers.jira import md_to_jira
         out = md_to_jira("## Task\n- one\n`agent:backend`\n```json\n{}\n```\n| a | b |\n|---|---|\n| 1 | 2 |")

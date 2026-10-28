@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="light dark">
-<meta name="manual-source" content="sha256:483b60e0943e6b40b7e9793485f3007fb118300afd0b37e508220260bbc375ac">
+<meta name="manual-source" content="sha256:945647a64618647f17ac0d2ce3301aa10a82605ace1f691e994caaf5e7acb9f3">
 <meta name="manual-builder" content="python-markdown 3.11.2">
 <title>Agent team: user manual</title>
 <style>
@@ -64,7 +64,7 @@ h1{font-size:26px}
 <nav aria-label="Contents">
 <p class="brand">Agent team</p>
 <p class="sub">User manual</p>
-<ol><li><a href="#c00">Agent team: user manual</a></li><li><a href="#c01">1. What Agent team is</a><ol><li><a href="#c01-you-are-the-lead">You are the lead</a></li><li><a href="#c01-the-team">The team</a></li><li><a href="#c01-how-work-flows">How work flows</a></li><li><a href="#c01-three-scenarios">Three scenarios</a></li><li><a href="#c01-what-you-get-in-the-repository">What you get in the repository</a></li></ol></li><li><a href="#c02">2. Install</a><ol><li><a href="#c02-in-claude-code">In Claude Code</a></li><li><a href="#c02-in-codex-or-opencode">In Codex or OpenCode</a></li><li><a href="#c02-without-the-plugin">Without the plugin</a></li><li><a href="#c02-updating-the-plugin">Updating the plugin</a></li><li><a href="#c02-what-each-tool-needs">What each tool needs</a></li></ol></li><li><a href="#c03">3. Set up a project</a><ol><li><a href="#c03-the-steps">The steps</a></li><li><a href="#c03-the-profile">The profile</a></li><li><a href="#c03-what-you-get">What you get</a></li><li><a href="#c03-after-the-setup">After the setup</a></li></ol></li><li><a href="#c04">4. Run the project</a><ol><li><a href="#c04-design">Design</a></li><li><a href="#c04-issues">Issues</a></li><li><a href="#c04-split">Split</a></li><li><a href="#c04-start">Start</a></li><li><a href="#c04-review-and-merge">Review and merge</a></li><li><a href="#c04-alignment">Alignment</a></li><li><a href="#c04-team-tasks">Team tasks</a></li><li><a href="#c04-on-demand-roles">On-demand roles</a></li><li><a href="#c04-long-sessions">Long sessions</a></li></ol></li><li><a href="#c05">5. Scenario: local</a><ol><li><a href="#c05-why-use-it">Why use it</a></li><li><a href="#c05-profile">Profile</a></li><li><a href="#c05-with-claude-code">With Claude Code</a></li><li><a href="#c05-with-codex">With Codex</a></li><li><a href="#c05-with-opencode">With OpenCode</a></li><li><a href="#c05-several-tools-in-one-project">Several tools in one project</a></li><li><a href="#c05-issues-in-the-local-scenario">Issues in the local scenario</a></li><li><a href="#c05-from-your-phone">From your phone</a></li></ol></li><li><a href="#c06">6. Scenario: remote repository</a><ol><li><a href="#c06-why-use-it">Why use it</a></li><li><a href="#c06-profile">Profile</a></li><li><a href="#c06-github">GitHub</a></li><li><a href="#c06-gitlab">GitLab</a></li><li><a href="#c06-costs-and-safety">Costs and safety</a></li></ol></li><li><a href="#c07">7. Scenario: custom orchestrator</a><ol><li><a href="#c07-why-use-it">Why use it</a></li><li><a href="#c07-the-connection-points">The connection points</a></li><li><a href="#c07-option-a-multica-a-board-with-agents-as-team-members">Option A: Multica, a board with agents as team members</a></li><li><a href="#c07-option-b-your-own-orchestrator">Option B: your own orchestrator</a></li><li><a href="#c07-litellm-one-gateway-for-many-providers">LiteLLM: one gateway for many providers</a></li></ol></li><li><a href="#c08">8. Change and upgrade</a><ol><li><a href="#c08-change-the-profile">Change the profile</a></li><li><a href="#c08-upgrade-to-a-new-plugin-version">Upgrade to a new plugin version</a></li><li><a href="#c08-how-your-changes-are-kept">How your changes are kept</a></li><li><a href="#c08-a-project-set-up-by-hand">A project set up by hand</a></li></ol></li><li><a href="#c09">9. Reference</a><ol><li><a href="#c09-skills">Skills</a></li><li><a href="#c09-scripts">Scripts</a></li><li><a href="#c09-configuration">Configuration</a></li><li><a href="#c09-starters">Starters</a></li><li><a href="#c09-labels">Labels</a></li><li><a href="#c09-ci-secrets-and-variables">CI secrets and variables</a></li><li><a href="#c09-where-the-tools-find-things">Where the tools find things</a></li><li><a href="#c09-token-costs">Token costs</a></li><li><a href="#c09-this-manual">This manual</a></li></ol></li></ol>
+<ol><li><a href="#c00">Agent team: user manual</a></li><li><a href="#c01">1. What Agent team is</a><ol><li><a href="#c01-you-are-the-lead">You are the lead</a></li><li><a href="#c01-the-team">The team</a></li><li><a href="#c01-how-work-flows">How work flows</a></li><li><a href="#c01-three-scenarios">Three scenarios</a></li><li><a href="#c01-what-you-get-in-the-repository">What you get in the repository</a></li></ol></li><li><a href="#c02">2. Install</a><ol><li><a href="#c02-in-claude-code">In Claude Code</a></li><li><a href="#c02-in-codex-or-opencode">In Codex or OpenCode</a></li><li><a href="#c02-without-the-plugin">Without the plugin</a></li><li><a href="#c02-updating-the-plugin">Updating the plugin</a></li><li><a href="#c02-what-each-tool-needs">What each tool needs</a></li></ol></li><li><a href="#c03">3. Set up a project</a><ol><li><a href="#c03-the-steps">The steps</a></li><li><a href="#c03-the-profile">The profile</a></li><li><a href="#c03-what-you-get">What you get</a></li><li><a href="#c03-after-the-setup">After the setup</a></li></ol></li><li><a href="#c04">4. Run the project</a><ol><li><a href="#c04-design">Design</a></li><li><a href="#c04-issues">Issues</a></li><li><a href="#c04-split">Split</a></li><li><a href="#c04-start">Start</a></li><li><a href="#c04-review-and-merge">Review and merge</a></li><li><a href="#c04-alignment">Alignment</a></li><li><a href="#c04-team-tasks">Team tasks</a></li><li><a href="#c04-on-demand-roles">On-demand roles</a></li><li><a href="#c04-long-sessions">Long sessions</a></li></ol></li><li><a href="#c05">5. Scenario: local</a><ol><li><a href="#c05-why-use-it">Why use it</a></li><li><a href="#c05-profile">Profile</a></li><li><a href="#c05-with-claude-code">With Claude Code</a></li><li><a href="#c05-with-codex">With Codex</a></li><li><a href="#c05-with-opencode">With OpenCode</a></li><li><a href="#c05-several-tools-in-one-project">Several tools in one project</a></li><li><a href="#c05-issues-in-the-local-scenario">Issues in the local scenario</a></li><li><a href="#c05-the-skills-by-example">The skills by example</a></li><li><a href="#c05-from-your-phone">From your phone</a></li></ol></li><li><a href="#c06">6. Scenario: remote repository</a><ol><li><a href="#c06-why-use-it">Why use it</a></li><li><a href="#c06-profile">Profile</a></li><li><a href="#c06-github">GitHub</a></li><li><a href="#c06-gitlab">GitLab</a></li><li><a href="#c06-the-skills-by-example">The skills by example</a></li><li><a href="#c06-costs-and-safety">Costs and safety</a></li></ol></li><li><a href="#c07">7. Scenario: custom orchestrator</a><ol><li><a href="#c07-why-use-it">Why use it</a></li><li><a href="#c07-the-connection-points">The connection points</a></li><li><a href="#c07-option-a-multica-a-board-with-agents-as-team-members">Option A: Multica, a board with agents as team members</a></li><li><a href="#c07-option-b-your-own-orchestrator">Option B: your own orchestrator</a></li><li><a href="#c07-litellm-one-gateway-for-many-providers">LiteLLM: one gateway for many providers</a></li></ol></li><li><a href="#c08">8. Change and upgrade</a><ol><li><a href="#c08-change-the-profile">Change the profile</a></li><li><a href="#c08-upgrade-to-a-new-plugin-version">Upgrade to a new plugin version</a></li><li><a href="#c08-how-your-changes-are-kept">How your changes are kept</a></li><li><a href="#c08-a-project-set-up-by-hand">A project set up by hand</a></li></ol></li><li><a href="#c09">9. Reference</a><ol><li><a href="#c09-skills">Skills</a></li><li><a href="#c09-scripts">Scripts</a></li><li><a href="#c09-configuration">Configuration</a></li><li><a href="#c09-starters">Starters</a></li><li><a href="#c09-labels">Labels</a></li><li><a href="#c09-ci-secrets-and-variables">CI secrets and variables</a></li><li><a href="#c09-where-the-tools-find-things">Where the tools find things</a></li><li><a href="#c09-token-costs">Token costs</a></li><li><a href="#c09-this-manual">This manual</a></li></ol></li></ol>
 </nav>
 <main>
 <section class="chapter" id="c00">
@@ -665,6 +665,28 @@ folders each one touches. You change it in the conversation until it is right.
 Only after your yes, the plan is posted on the issue and a script creates
 exactly those issues: the model does not create anything itself. Running it
 again creates nothing new.</p>
+<h3 id="c04-several-issues-at-once">Several issues at once</h3>
+<p>Give several numbers, or a milestone (its open issues that have no sub-issues,
+are not "Design:" issues and were not made by <code>create-issues</code>):</p>
+<pre><code class="language-text">/agent-team:split-issue 12 15 18
+/agent-team:split-issue --milestone M1
+</code></pre>
+<p>The agent reads all of them first, with the specs and the existing sub-issues,
+so the plans fit: no work twice, and the API contract is planned once. It
+shows one overview: a table per issue (role, task, depends on), the
+dependencies between issues, then numbered questions with a recommended
+answer. You approve per issue, in one line:</p>
+<pre><code class="language-text">ok 12, 15; 18: merge the two frontend tasks
+skip 21
+</code></pre>
+<p>Only what you asked is revised, and the overview is shown again until each
+issue is approved or skipped. Then the issues are created in dependency order,
+each one with its own proposal comment and its own <code>create</code>.</p>
+<p>A task can wait for a task of another issue: <code>"depends_on": ["12:api"]</code> in the
+plan means the task with key <code>api</code> of the plan of issue 12. It is written in
+"Depends on" and as the tracker's native "blocked by" relation. If that task
+does not exist yet, <code>create</code> refuses and creates nothing: split issue 12 first.
+In CI (<code>agent:split</code>) each issue is still proposed and approved on its own.</p>
 <p>In the remote scenario you can also split from the issue itself
 (<a href="#c06-split-from-the-issue">6. Scenario: remote</a>).</p>
 <h2 id="c04-start">Start</h2>
@@ -673,10 +695,15 @@ one, or let dispatch pick the ready ones:</p>
 <pre><code class="language-text">/agent-team:dispatch        or      python3 scripts/dispatch.py           (the plan)
                                      python3 scripts/dispatch.py --apply   (start it)
 </code></pre>
-<p>Dispatch takes the first open milestone, counts what is running, and starts
-the tasks whose dependencies are all closed as completed: by default one per
-role and three in total (<code>--per-role</code>, <code>--max</code>). It never starts optimizer or
-security, "Design:" issues, or issues marked <code>hold</code>.</p>
+<p>Dispatch takes the first milestone that has open task issues, counts what is
+running, and starts the tasks whose dependencies are all closed as completed:
+by default one per role and three in total (<code>--per-role</code>, <code>--max</code>). It never
+starts optimizer or security, "Design:" issues, or issues marked <code>hold</code>.</p>
+<p>"Design:" issues and issues without a role are not tasks yet. Under "Not tasks
+yet" the plan lists how many are open in that milestone and the earlier ones,
+with the command that turns them into tasks (<code>design-studio</code> then
+<code>create-issues</code>, or <code>split-issue</code>). So if dispatch works on M2 while M0 still
+has "Design:" issues, the plan says so.</p>
 <p>What "start" means depends on the scenario: a label that starts a CI job, a
 GitLab pipeline, a command of your orchestrator, or a printed instruction for
 a local session. That is the <em>starter</em> (<a href="#c09-starters">9. Reference</a>).</p>
@@ -845,6 +872,46 @@ With a tracker, the lead can pick work from it:</p>
 <p>The default starter for trackers other than GitHub and GitLab prints the
 command to start each task; with <code>"starter": "command"</code> it can open a new
 terminal session for you instead (<a href="#c09-starters">9. Reference</a>).</p>
+<h2 id="c05-the-skills-by-example">The skills by example</h2>
+<p>A short example of each skill in a local project (profile with <code>"tracker":
+"local"</code>, issues as files in <code>docs/tasks/</code>). Replies are in one line: the
+agent asks numbered questions and you answer by number.</p>
+<p><strong>setup</strong> - once, in an empty or existing repository:</p>
+<pre><code class="language-text">&gt; /agent-team:setup
+  (it asks harnesses, tracker, roles, stack; &quot;1 claude, 2 local, 3 all roles&quot;)
+</code></pre>
+<p><strong>next</strong> - when you do not know what to do:</p>
+<pre><code class="language-text">&gt; /agent-team:next
+  Design: project ready, &quot;login&quot; ready, &quot;orders&quot; not. Issues: none yet.
+  Next: /agent-team:create-issues
+</code></pre>
+<p><strong>design-studio</strong> - before building a feature:</p>
+<pre><code class="language-text">&gt; /agent-team:design-studio orders
+  Round 1 - 1. Who filters the list? (recommended: the customer) ...
+&gt; 1 yes, 2 by date and status, 3: option B
+</code></pre>
+<p><strong>create-issues</strong> - after a design session; it shows the plan first:</p>
+<pre><code class="language-text">&gt; /agent-team:create-issues
+  milestone create   M0 · Walking skeleton
+  issue create       Login · 1/3 · backend: Auth endpoint ...
+&gt; yes
+</code></pre>
+<p><strong>split-issue</strong> - for an issue written by hand, in <code>docs/tasks/</code>:</p>
+<pre><code class="language-text">&gt; /agent-team:split-issue 7
+  1 backend: date filter in the API   2 frontend: date picker (after 1)
+&gt; ok 7
+</code></pre>
+<p><strong>dispatch</strong> - to see what is ready; in a local project the starter prints the
+command to run in a new session:</p>
+<pre><code class="language-text">&gt; /agent-team:dispatch
+  Would start (2): #1 backend, #3 devops. Waits: #2 (needs #1)
+&gt; yes
+</code></pre>
+<p><strong>upgrade</strong> - after a new plugin version, or to add a tool:</p>
+<pre><code class="language-text">&gt; /agent-team:upgrade
+  update 3 files, merge 1, add 2. Work on a branch, one commit.
+&gt; yes
+</code></pre>
 <h2 id="c05-from-your-phone">From your phone</h2>
 <p>To drive the session from the Claude app, start it with Remote Control:</p>
 <pre><code class="language-bash">claude --remote-control &quot;my-project&quot;     # or type /remote-control in a session
@@ -1057,6 +1124,50 @@ OpenCode, and <code>GITLAB_ACCESS_TOKEN</code> (a project access token with <cod
 push and open the merge request after the agent has finished. Protect <code>main</code>
 and require the pipeline to pass before merging. GitLab reads the code owners
 from <code>.gitlab/CODEOWNERS</code>.</p>
+<h2 id="c06-the-skills-by-example">The skills by example</h2>
+<p>A short example of each skill on GitHub (profile above). The skills run in your
+session, the agents run in GitHub Actions. Replies are in one line.</p>
+<p><strong>setup</strong> - once; it ends with the list of secrets, labels and branch
+protection that are left to you (see <a href="#c06-set-up-once">Set up once</a>):</p>
+<pre><code class="language-text">&gt; /agent-team:setup
+  (it asks harnesses, tracker &quot;github&quot;, features ci-agents, split, dispatch)
+</code></pre>
+<p><strong>next</strong> - where the project stands, including pull requests to review:</p>
+<pre><code class="language-text">&gt; /agent-team:next
+  Issues: 6 created. Running: #4 backend. Waiting: #5 (needs #4). PRs to review: 1.
+  Next: review the pull request, then /agent-team:dispatch
+</code></pre>
+<p><strong>design-studio</strong> - the spec is committed to the repository like any file:</p>
+<pre><code class="language-text">&gt; /agent-team:design-studio orders
+&gt; 1 yes, 2 by date and status, 3: option B
+</code></pre>
+<p><strong>create-issues</strong> - milestones and issues in GitHub, no labels, so nothing
+starts:</p>
+<pre><code class="language-text">&gt; /agent-team:create-issues
+  milestone create   M0 · Walking skeleton ... (dry run shown)
+&gt; yes
+</code></pre>
+<p><strong>split-issue</strong> - in the session, or from the issue itself with <code>agent:split</code>
+and a reply (see <a href="#c06-split-from-the-issue">Split from the issue</a>):</p>
+<pre><code class="language-text">&gt; /agent-team:split-issue 12 15
+  (one overview, then)
+&gt; ok 12; 15: merge the two frontend tasks
+</code></pre>
+<p>On the issue: add the label <code>agent:split</code>, read Claude's comment, reply
+<code>@claude ok</code>.</p>
+<p><strong>dispatch</strong> - adds <code>agent:&lt;role&gt;</code> to the ready tasks, so <code>agents.yml</code> starts
+them:</p>
+<pre><code class="language-text">&gt; /agent-team:dispatch --per-role 1
+  Would start (2): #4 backend, #6 devops. Waits: #5 (needs #4)
+&gt; yes
+</code></pre>
+<p>To start one task by hand, add the label <code>agent:backend</code> to its issue.</p>
+<p><strong>upgrade</strong> - brings in new workflows and scripts as pull-request-sized
+changes on a branch:</p>
+<pre><code class="language-text">&gt; /agent-team:upgrade
+  update 4 files, add 1 workflow. Work on a branch, one commit.
+&gt; yes
+</code></pre>
 <h2 id="c06-costs-and-safety">Costs and safety</h2>
 <ul>
 <li>Each task is one agent run; a team task is several. The CI minutes are
@@ -1396,7 +1507,7 @@ python3 ~/agent-team/scripts/template_sync.py apply  --template ~/agent-team/tem
 <tr>
 <td><code>split-issue</code></td>
 <td></td>
-<td>one issue into one task per role, after your approval</td>
+<td>one or several issues (or a milestone) into one task per role, after your approval of each</td>
 </tr>
 <tr>
 <td><code>dispatch</code></td>
@@ -1458,7 +1569,7 @@ OpenCode ask for them by name. Template skills live in the project
 </tr>
 <tr>
 <td><code>python3 scripts/split-issue.py check \| propose \| create</code></td>
-<td>the split: validate a plan, post it, create it</td>
+<td>the split of one issue: validate a plan, post it, create it; <code>"depends_on": ["12:api"]</code> waits for a task of issue 12's plan, which must be created first</td>
 </tr>
 <tr>
 <td><code>python3 scripts/dispatch.py [--apply] [--per-role N] [--max N] [--milestone M1 \| --all]</code></td>

@@ -7,7 +7,7 @@
 | `setup` | | installs and configures the template; first time only |
 | `design-studio` | `/design-studio` | design session for the project or a feature, writes the spec |
 | `create-issues` | | milestones and issues from the roadmap and the ready specs |
-| `split-issue` | | one issue into one task per role, after your approval |
+| `split-issue` | | one or several issues (or a milestone) into one task per role, after your approval of each |
 | `dispatch` | | starts the ready tasks with the project's starter |
 | `upgrade` | | new plugin version or new profile, keeping your changes |
 | `next` | | where the project stands and the command to run next; reads only |
@@ -30,7 +30,7 @@ OpenCode ask for them by name. Template skills live in the project
 | `python3 scripts/agent-team.py prune [--dry-run]` | removes files and sections outside the profile |
 | `python3 scripts/tracker.py check \| config \| list \| show N` | the tracker: connection, settings, open issues, one issue |
 | `python3 scripts/create-issues.py [--dry-run] [--team] [--migrate]` | milestones and issues; `--migrate` moves old "M0 · ..." parent issues to milestones |
-| `python3 scripts/split-issue.py check \| propose \| create` | the split: validate a plan, post it, create it |
+| `python3 scripts/split-issue.py check \| propose \| create` | the split of one issue: validate a plan, post it, create it; `"depends_on": ["12:api"]` waits for a task of issue 12's plan, which must be created first |
 | `python3 scripts/dispatch.py [--apply] [--per-role N] [--max N] [--milestone M1 \| --all]` | the ready tasks; starts them with `--apply` |
 | `./scripts/create-labels.sh` | GitHub labels |
 | `./scripts/install-skills.sh`, `./scripts/check-skills.sh` | recommended skills for your stack, and a check that the agents find them |

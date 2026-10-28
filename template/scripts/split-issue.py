@@ -12,6 +12,9 @@ Two steps, with your approval in between:
      plan of the latest proposal comment, as sub-issues of the issue in its
      milestone. The model is not involved in this step.
 
+A task can depend on a task of another issue's plan: "depends_on": ["12:api"].
+Split issue 12 first; create on this issue refuses while that task does not exist.
+
 Usage:
   python3 scripts/split-issue.py check   <plan.json>
   python3 scripts/split-issue.py propose <issue> <plan.json>
@@ -52,6 +55,40 @@ def latest_plan(trk, issue):
     return found
 
 
+def keyed_children(trk, issue):
+    """{key: child} of the task issues already created for an issue."""
+    found = {}
+    for child in trk.children(issue):
+        m = re.search(r"split-of: (\S+) key: ([a-z0-9-]+)", child.body)
+        if m:
+            found[m.group(2)] = child
+    return found
+
+
+def resolve_external(trk, issue, tasks, done):
+    """{"12:api": issue} for the cross-issue dependencies of the tasks still to create."""
+    found, missing = {}, []
+    for t in tasks:
+        if t["key"] in done:
+            continue
+        for d in t.get("depends_on", []):
+            x = plans.cross_ref(d)
+            if not x or d in found:
+                continue
+            try:
+                child = keyed_children(trk, trk.get(x[0].lstrip("#"))).get(x[1])
+            except core.TrackerError:
+                child = None
+            if child:
+                found[d] = child
+            elif d not in missing:
+                missing.append(d)
+    if missing:
+        sys.exit(f'{issue.id} depends on {", ".join(missing)}, which do not exist yet: '
+                 f"split and create the issue each one belongs to first. Nothing was created.")
+    return found
+
+
 def create(trk, issue, team):
     body = latest_plan(trk, issue)
     plan = plans.parse(body) if body else None
@@ -63,10 +100,7 @@ def create(trk, issue, team):
     by = f" (approved by @{approver})" if approver else ""
     done = {}
     try:
-        for child in trk.children(issue):
-            m = re.search(r"split-of: (\S+) key: ([a-z0-9-]+)", child.body)
-            if m:
-                done[m.group(2)] = child
+        done = keyed_children(trk, issue)
     except core.Unsupported:
         pass
     if team and set(done) - {"team"}:
@@ -82,6 +116,7 @@ def create(trk, issue, team):
     short = issue.title if len(issue.title) <= 60 else issue.title[:57].rstrip() + "..."
     spec = f"\n\nSpec: `{plan['spec']}`" if plan.get("spec") else ""
     tasks, made, notes = plan["tasks"], [], []
+    external = {} if team else resolve_external(trk, issue, tasks, done)
 
     def new(title, body, key):
         child = trk.create_issue(title, body + "\n\n" + trk.marker(f"split-of: {issue.id} key: {key}"), ms_ref, parent=issue)
@@ -105,7 +140,8 @@ def create(trk, issue, team):
             if t["key"] in done:
                 print(f"exists  {done[t['key']].id}  {t['title']}")
                 continue
-            deps = [done[d] for d in t.get("depends_on", []) if d in done]
+            deps = [external[d] if d in external else done[d] for d in t.get("depends_on", [])
+                    if d in external or d in done]
             acc = "\n".join(f"- [ ] {a}" for a in t["acceptance"])
             files = "\n".join(f"- `{f}`" for f in t.get("files", [])) or "-"
             child = new(f"{short} · {i}/{len(tasks)} · {t['role']}: {t['title']}"[:250],

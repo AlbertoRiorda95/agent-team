@@ -28,7 +28,28 @@ def front(text):
 
 
 def items(value):
-    return [x.strip(" '\"") for x in re.split(r"[,;]", (value or "").strip("[] ")) if x.strip(" '\"")]
+    """Comma or semicolon separated values; separators inside (), [] or `` do not split."""
+    out, cur, depth, code = [], "", 0, False
+    for ch in (value or "").strip().removeprefix("[").removesuffix("]"):
+        if ch == "`":
+            code = not code
+        elif not code and ch in "([":
+            depth += 1
+        elif not code and ch in ")]":
+            depth = max(depth - 1, 0)
+        elif not code and not depth and ch in ",;":
+            out.append(cur)
+            cur = ""
+            continue
+        cur += ch
+    out.append(cur)
+    return [x.strip(" '\"") for x in out if x.strip(" '\"")]
+
+
+def feature_name(item):
+    """The name of a roadmap feature: "`audit-log` (who did what)" -> "audit-log"."""
+    m = re.match(r"\s*`([^`]+)`", item)
+    return m.group(1).strip() if m else re.sub(r"\s*\(.*$", "", item).strip() or item.strip()
 
 
 def md_section(text, name):
@@ -69,7 +90,7 @@ def load_roadmap():
     out = []
     for r in table(md_section(open(path, encoding="utf-8").read(), "Roadmap")):
         if len(r) >= 2 and r[0] not in ("", "..."):
-            out.append((r[0], [f for f in items(r[1]) if f != "..."]))
+            out.append((r[0], [(feature_name(f), f) for f in items(r[1]) if f != "..."]))
     return out
 
 
@@ -136,9 +157,9 @@ def build_plan(team, trk):
                          and os.path.basename(p) not in ("project.md", "README.md")) if s]
     used, groups = set(), []
     mark = trk.marker(core.MARK_CREATED)
-    for milestone, feats in load_roadmap():
-        children = []
-        for feat in feats:
+    for milestone, entries in load_roadmap():
+        children, feats = [], [name for name, _ in entries]
+        for feat, described in entries:
             spec = next((s for s in specs if s["slug"] == slug(feat)
                          or (slug(feat) in map(slug, s["features"])
                              and (not s["milestone"] or s["milestone"] == milestone))), None)
@@ -149,7 +170,8 @@ def build_plan(team, trk):
                 continue
             key = f"design:{milestone}:{slug(feat)}"
             children.append(_task(key, f"Design: {feat} ({milestone})",
-                                  f"## Roadmap\nMilestone {milestone}, feature \"{feat}\" (docs/design/project.md).\n\n"
+                                  f"## Roadmap\nMilestone {milestone}, feature \"{feat}\" (docs/design/project.md)"
+                                  f"{': ' + described if described != feat else ''}.\n\n"
                                   f"## Task\nDesign this feature in a studio session with you: `/design-studio {slug(feat)}`. "
                                   f"It produces docs/design/{slug(feat)}.md; once it is ready and merged, create its "
                                   f"task issues again with scripts/create-issues.py.\n\n"
