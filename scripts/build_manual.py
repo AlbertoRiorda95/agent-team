@@ -56,6 +56,9 @@ def build(names):
     chapters, ids = [], set()
     for n in names:
         text = open(os.path.join(SRC, n), encoding="utf-8").read()
+        # previous/next links are for the Markdown on GitHub; the page has its sidebar
+        text = re.sub(r"<!-- nav -->.*?<!-- /nav -->\n*", "", text, flags=re.S)
+        text = re.sub(r"\n---\n+$", "\n", text)
         md = markdown.Markdown(extensions=["tables", "fenced_code", "toc", "sane_lists"])
         body = md.convert(text)
         k = key(n)

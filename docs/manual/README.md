@@ -24,3 +24,7 @@ it uses are defined at the end of chapter 1
 
 The HTML version of this manual, `docs/manual.html`, is generated from these
 files (see [9. Reference](09-reference.md#this-manual)).
+
+<!-- nav -->
+[1. What Agent team is →](01-what-it-is.md)
+<!-- /nav -->

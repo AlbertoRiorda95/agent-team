@@ -1,5 +1,9 @@
 # 7. Scenario: custom orchestrator
 
+<!-- nav -->
+[← 6. Scenario: remote repository](06-scenario-remote.md) · [Manual index](README.md) · [8. Change and upgrade →](08-change-and-upgrade.md)
+<!-- /nav -->
+
 Here the issues live in the tracker you already use, and the agents run where
 you decide, started by something you control. Agent team gives you the
 planning side (design, issues, split, dispatch) on any supported tracker, and
@@ -168,3 +172,9 @@ To use it:
 3. Give OpenCode the key: locally with `/connect`, choosing the LiteLLM provider; in CI as a secret
    in the env of the OpenCode job, with `OPENCODE_MODEL` set to
    `litellm/<model>`.
+
+---
+
+<!-- nav -->
+[← 6. Scenario: remote repository](06-scenario-remote.md) · [Manual index](README.md) · [8. Change and upgrade →](08-change-and-upgrade.md)
+<!-- /nav -->

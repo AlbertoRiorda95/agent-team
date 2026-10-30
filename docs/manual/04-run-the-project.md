@@ -1,5 +1,9 @@
 # 4. Run the project
 
+<!-- nav -->
+[← 3. Set up a project](03-set-up-a-project.md) · [Manual index](README.md) · [5. Scenario: local →](05-scenario-local.md)
+<!-- /nav -->
+
 This chapter is the same in every scenario: how you design, plan, start,
 review and keep the team aligned. The scenario chapters only add how agents
 run and how a task starts.
@@ -532,3 +536,9 @@ you run it yourself, since only you can start a new session:
 `/handoff` in Claude Code and OpenCode, the handoff skill in Codex. It writes
 a short note in `.handoff/`; start a new session and it continues from the
 note with a small context.
+
+---
+
+<!-- nav -->
+[← 3. Set up a project](03-set-up-a-project.md) · [Manual index](README.md) · [5. Scenario: local →](05-scenario-local.md)
+<!-- /nav -->

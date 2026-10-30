@@ -1,5 +1,9 @@
 # 2. Install
 
+<!-- nav -->
+[← 1. What Agent team is](01-what-it-is.md) · [Manual index](README.md) · [3. Set up a project →](03-set-up-a-project.md)
+<!-- /nav -->
+
 Agent team ships as one repository, `agent-team`. It is a Claude Code
 plugin, and its skills also work in Codex and OpenCode.
 
@@ -94,3 +98,9 @@ new template ([8. Change and upgrade](08-change-and-upgrade.md)).
 | Claude Code | `curl -fsSL https://claude.ai/install.sh \| bash` | API key or Claude subscription |
 | Codex | `npm install -g @openai/codex` | trust the project once, so it reads `.codex/`; approve its hooks with `/hooks` |
 | OpenCode | `curl -fsSL https://opencode.ai/install \| bash` or `npm install -g opencode-ai` | connect the providers you use with `/connect` |
+
+---
+
+<!-- nav -->
+[← 1. What Agent team is](01-what-it-is.md) · [Manual index](README.md) · [3. Set up a project →](03-set-up-a-project.md)
+<!-- /nav -->

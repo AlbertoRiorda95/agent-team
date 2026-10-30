@@ -1,5 +1,9 @@
 # 5. Scenario: local
 
+<!-- nav -->
+[← 4. Run the project](04-run-the-project.md) · [Manual index](README.md) · [6. Scenario: remote repository →](06-scenario-remote.md)
+<!-- /nav -->
+
 The team runs on your computer, inside your session. You talk to the main
 session (the agent you started), which hands each task to the role agent and
 reports back. Everything in
@@ -301,3 +305,9 @@ claude --remote-control "my-project"     # or type /remote-control in a session
 Then open the session in the app and ask "what's next?" (Claude runs `next`) or
 type `/agent-team:dispatch`. The terminal must stay running: the work happens
 on your computer, the app is only a window on it.
+
+---
+
+<!-- nav -->
+[← 4. Run the project](04-run-the-project.md) · [Manual index](README.md) · [6. Scenario: remote repository →](06-scenario-remote.md)
+<!-- /nav -->

@@ -1,5 +1,9 @@
 # 9. Reference
 
+<!-- nav -->
+[← 8. Change and upgrade](08-change-and-upgrade.md) · [Manual index](README.md)
+<!-- /nav -->
+
 ## Skills
 
 | Plugin skill | Template skill | What it does |
@@ -160,3 +164,9 @@ python3 scripts/build_manual.py --check   # fails if the HTML is not built from 
 The HTML records a hash of the Markdown it was built from; `--check` compares
 it with the files, and the repository's CI runs it on every pull request. To
 check before every commit: `git config core.hooksPath .githooks`.
+
+---
+
+<!-- nav -->
+[← 8. Change and upgrade](08-change-and-upgrade.md) · [Manual index](README.md)
+<!-- /nav -->

@@ -1,5 +1,9 @@
 # 3. Set up a project
 
+<!-- nav -->
+[← 2. Install](02-install.md) · [Manual index](README.md) · [4. Run the project →](04-run-the-project.md)
+<!-- /nav -->
+
 Run the setup once per repository, new or existing, in a session started in
 the repository's folder:
 
@@ -147,3 +151,9 @@ back ([8. Change and upgrade](08-change-and-upgrade.md)).
   session). It stops there: merge the setup merge request, then start the
   foundations with `/agent-team:dispatch`, which waits for that merge anyway
   ([4. The workflow](04-run-the-project.md#the-workflow)).
+
+---
+
+<!-- nav -->
+[← 2. Install](02-install.md) · [Manual index](README.md) · [4. Run the project →](04-run-the-project.md)
+<!-- /nav -->

@@ -1,5 +1,9 @@
 # 8. Change and upgrade
 
+<!-- nav -->
+[← 7. Scenario: custom orchestrator](07-scenario-custom.md) · [Manual index](README.md) · [9. Reference →](09-reference.md)
+<!-- /nav -->
+
 Two things change over a project's life: the plugin gets new versions, and
 your setup changes (another tracker, Codex next to Claude Code, a role back,
 the move from local to remote). Both go through the same command:
@@ -81,3 +85,9 @@ Code, run it from a clone:
 python3 ~/agent-team/scripts/template_sync.py status --template ~/agent-team/template --project .
 python3 ~/agent-team/scripts/template_sync.py apply  --template ~/agent-team/template --project .
 ```
+
+---
+
+<!-- nav -->
+[← 7. Scenario: custom orchestrator](07-scenario-custom.md) · [Manual index](README.md) · [9. Reference →](09-reference.md)
+<!-- /nav -->

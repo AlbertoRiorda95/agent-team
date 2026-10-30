@@ -1,5 +1,9 @@
 # 1. What Agent team is
 
+<!-- nav -->
+[← Manual index](README.md) · [2. Install →](02-install.md)
+<!-- /nav -->
+
 Agent team is a way to run a software project as if you led a development
 team, where the developers are AI agents. It is a plugin for Claude Code and a
 set of skills for Codex and OpenCode, plus a project template that the plugin
@@ -153,3 +157,9 @@ The full list is in [3. What you get](03-set-up-a-project.md#what-you-get).
 | **handoff** | a short note an agent writes so a fresh session can continue without the whole history |
 | **profile** | `.agent-team/config.json`: which tools, CI, tracker, roles and **profile features** (optional parts such as `ci-agents` or `dispatch`) the project uses |
 | **scenario** | local, remote repository or custom orchestrator: where agents run and how tasks start |
+
+---
+
+<!-- nav -->
+[← Manual index](README.md) · [2. Install →](02-install.md)
+<!-- /nav -->

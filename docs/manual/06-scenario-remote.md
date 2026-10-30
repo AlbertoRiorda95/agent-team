@@ -1,5 +1,9 @@
 # 6. Scenario: remote repository
 
+<!-- nav -->
+[← 5. Scenario: local](05-scenario-local.md) · [Manual index](README.md) · [7. Scenario: custom orchestrator →](07-scenario-custom.md)
+<!-- /nav -->
+
 The team works in your GitHub or GitLab CI. A task is an issue; you start it
 with a label (GitHub) or a pipeline (GitLab); the agent runs in a job, pushes
 a branch and opens a merge request. You come back to review and merge.
@@ -291,3 +295,9 @@ changes on a branch:
 - Agents never merge, never push to `main`, never apply infrastructure. The
   CI checks their merge requests like anyone else's, and the actions in the
   workflows are pinned to commits, with Dependabot proposing updates.
+
+---
+
+<!-- nav -->
+[← 5. Scenario: local](05-scenario-local.md) · [Manual index](README.md) · [7. Scenario: custom orchestrator →](07-scenario-custom.md)
+<!-- /nav -->
