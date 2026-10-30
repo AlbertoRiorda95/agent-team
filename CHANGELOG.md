@@ -21,6 +21,32 @@ features, the major for changes that break existing projects.
 - The CI builds the reference documentation from the code (`reference-docs`
   job, `ci/reference.sh`: OpenAPI with Redocly, typedoc, pdoc; other stacks
   are added in the script) and keeps it as an artifact.
+- Software reuse: specs have a `## Reuse` section (and a readiness item);
+  `docs/agents/dependencies.md` gives the order (the project's code, the
+  team's libraries, a trusted library, own code) and the checklist for a
+  third-party library, starting with checking that the package really exists;
+  merge requests list **Dependencies**. The team's libraries are listed in
+  `docs/general/libraries.md` (setup asks for them, with their registry); an
+  agent never changes one from the project and proposes an issue for it.
+- `ci/registry.sh` (settings in `ci/registry.env`): the connection to the
+  team's package registry, the same in every CI job, in the agent jobs and
+  on a laptop. Package managers: npm, PyPI, Maven, Gradle, Conan 2, and
+  `custom` with your own commands for any other. Tokens come from the environment, never
+  from a committed file: the job token on GitHub Packages and GitLab,
+  otherwise a read-only `REGISTRY_TOKEN`.
+- Publishing: `publish.yml` (GitHub) and the `publish` job (GitLab) publish
+  the project's package on a `v*` tag, in the `release` environment, with
+  `REGISTRY_PUBLISH_TOKEN` stored only there. Agents cannot publish or push
+  tags (hooks and permission rules of every tool). `ci/registry.sh local`
+  installs the package in the machine's local repository (`mvn install`,
+  `gradle publishToMavenLocal`, `conan create`, `npm pack`, a wheel): the
+  release of the local scenario. Setup step D4 sets up publishing for any
+  stack.
+- optimizer proposes an issue for code that can be shared; it never merges
+  it by itself.
+- Monorepo: setup lists the services in `AGENTS.md` and makes role
+  boundaries, CODEOWNERS and CI per service; a task names its service
+  (`[orders] ...`), and dispatch runs one task per role and per service.
 - `local-ci` skill: runs the CI's checks on your computer and fixes the
   failures, for convenience before a push or instead of the CI when the
   project has none.
@@ -38,6 +64,11 @@ features, the major for changes that break existing projects.
 ### Upgrade notes
 - A project whose profile has no `roles` key gets the `writer` role on upgrade
   (it only acts when asked); list `roles` without it to opt out.
+- With a private registry: fill in `ci/registry.env`, add `REGISTRY_TOKEN`
+  if the job token is not enough, and to publish create the `release`
+  environment with `REGISTRY_PUBLISH_TOKEN`, a required reviewer and protected
+  `v*` tags. Set the toolchain of `publish.yml` (or the GitLab `publish` job)
+  to your stack's.
 - Set the toolchain of the `reference-docs` job in your CI file and check
   `ci/reference.sh` keeps the generators of your stack. The tool versions
   were checked against the registries but not run on a real project.

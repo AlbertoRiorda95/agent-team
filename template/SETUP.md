@@ -78,7 +78,11 @@ repository (an existing CI is a source too: keep its steps):
 - toolchain: the setup action on GitHub (`actions/setup-node`,
   `setup-python`, `setup-java`, `setup-go`...) and the image on GitLab;
 - install, lint, type check, build and test commands; the lockfile used as
-  cache key; without a type check command, propose one (`tsc --noEmit`,
+  cache key; every job that installs dependencies keeps
+  `./ci/registry.sh login` (with its `env:`) right before the install
+  command, whatever the stack (`npm ci`, `pip install`, `mvn`, `gradle`,
+  `conan install`...), and so do `agents.yml` and the publish job (D4);
+  without a type check command, propose one (`tsc --noEmit`,
   `mypy`, `pyright`...) or remove the step;
 - the semgrep rulesets of the stack's languages in `ci/scanners.env`
   (`SEMGREP_CONFIG`, for example `p/ci p/typescript` or `p/ci p/python`);
@@ -128,6 +132,27 @@ Also ask:
   designer in a backend service). A removed role must disappear from every
   file in the table below.
 
+### D1. One application or several services
+Ask whether the repository holds one application or several services or
+subsystems (a monorepo: `services/orders/`, `services/billing/`, a shared
+`libs/`...). With several:
+- list each service with its folder, its language and its contract, and
+  fill the `## Services` table in `AGENTS.md` (remove the comment around it);
+- the role boundaries become per service: `docs/roles/<role>.md` →
+  `## Boundaries` (for example backend: `services/*/src/`, `services/*/migrations/`),
+  the routing lines of `AGENTS.md`, `.github/CODEOWNERS` per service folder;
+- the issues: every task row and split task starts with its service
+  (`[orders] Add the endpoint`); dispatch then runs one task per role and per
+  service (`--per-role` counts per service) and a task without a service
+  waits for all of them;
+- the CI builds and tests only what changed: a job per service with path
+  filters (GitHub: `paths` or a matrix built from the changed folders;
+  GitLab: `rules: changes:`), or the monorepo tool the project uses (Nx,
+  Turborepo, Gradle, Bazel, Go workspaces). The security scans stay on the
+  whole repository.
+Services in separate repositories are not supported yet: set up each as its
+own project.
+
 ### D2. API contract
 - Where does the contract between frontend and backend live? OpenAPI file
   (default `docs/api/openapi.yaml`), shared TypeScript types or schemas, a
@@ -138,6 +163,80 @@ Also ask:
   yet, propose one and add the command to `## Commands`.
 - Which changes count as breaking for this project (the default list is in
   `AGENTS.md` → API contract).
+
+### D3. Reuse: the team's libraries
+Ask whether the team has libraries of its own that this project should use
+(give a GitHub/GitLab link for each). For each: what it is for, how to get it
+(a package registry and the package name; a Git dependency at a tag when
+there is no registry; a submodule only to build it from source), the
+version range, where its documentation is. Write them in
+`docs/general/libraries.md`.
+
+The registry connection is `ci/registry.sh`, the same in every CI job, in
+the release job and on a laptop; set it up in `ci/registry.env`:
+`REGISTRY_KIND` (the package manager, see D4), `REGISTRY_URL` (empty: no
+team registry), the npm scope or the id of the Maven server, Gradle
+repository or Conan remote. No token goes in a committed file: the script
+reads it from the environment and writes it into the package manager's
+user-level configuration.
+- **Read** (every job that installs dependencies runs `ci/registry.sh login`,
+  C2): on GitHub Packages or GitLab's package registry of the same
+  organization the job token is enough (`GITHUB_TOKEN` with
+  `packages: read`, which `ci.yml` grants; `CI_JOB_TOKEN`, after adding this
+  project to the library project's job token allowlist). Otherwise create a
+  **read-only** token and store it as `REGISTRY_TOKEN`: a repository secret on
+  GitHub, a masked variable on GitLab.
+- **Locally**: each person exports their own `REGISTRY_TOKEN` and runs
+  `./ci/registry.sh login` once; agents in a local session use it through
+  the package manager and cannot read the files it writes (denied in
+  `.claude/settings.json`).
+- **Dependabot**: a `registries:` entry in `.github/dependabot.yml` with
+  `token: ${{secrets.DEPENDABOT_REGISTRY_TOKEN}}`, a Dependabot secret
+  (Settings > Secrets > Dependabot: Actions secrets are not visible to it).
+  Dependabot has no Conan support.
+
+No libraries: leave the file with its example removed, saying "none yet".
+
+### D4. Publishing: this project as a package
+Ask whether this project is itself a package other projects use (a library,
+an SDK, a shared component). If yes, set `PUBLISH_PACKAGE=yes` and make sure,
+whatever the stack, that there is a step that uploads it, and one that
+installs it on this machine when there is no registry:
+
+| Stack | `REGISTRY_KIND` | `publish` (to `REGISTRY_URL`) | `local` (this machine) |
+|---|---|---|---|
+| Node | `npm` | `npm publish` | `npm pack` into `LOCAL_REPOSITORY` |
+| Python | `pypi` | `python -m build`, `twine upload` | wheel into `LOCAL_REPOSITORY` (`pip install --find-links`) |
+| Java, Maven | `maven` | `mvn deploy` (`distributionManagement` with the server id) | `mvn install` (`~/.m2`) |
+| Java/Kotlin, Gradle | `gradle` | `gradle publish` (`maven-publish`, the repository named `REGISTRY_ID` with `credentials(PasswordCredentials)`) | `gradle publishToMavenLocal` |
+| C/C++, Conan 2 | `conan` | `conan create`, `conan upload` to the remote `REGISTRY_ID` (Artifactory, Nexus, GitLab; not GitHub Packages) | `conan create` (Conan's cache) |
+| anything else (cargo, Go, NuGet, Helm...) | `custom` | `PUBLISH_COMMAND` | `LOCAL_COMMAND` |
+
+For `custom`, write the commands in `ci/registry.env` (`LOGIN_COMMAND`,
+`PUBLISH_COMMAND`, `LOCAL_COMMAND`): they read the token from
+`$REGISTRY_AUTH_TOKEN`, never print it, and write it only in the user-level
+configuration. Add the tool's publish command to the blocked list of
+`scripts/hooks/block-infra-commands.sh`, `.codex/rules/agent-team.rules` and
+the `deny` of OpenCode, and its credential file to the `Read(...)` denials
+of `.claude/settings.json`.
+
+Then, from the scenario (F):
+- **With a remote CI**: `publish.yml` (GitHub) and the `publish` job
+  (GitLab) run on a `v*` tag in the `release` environment; set their
+  toolchain, install and test commands as in C2. A token with write access
+  goes there only, as `REGISTRY_PUBLISH_TOKEN`: an environment secret of
+  `release` on GitHub, with a required reviewer and the deployment limited to
+  `v*` tags; a protected, masked variable scoped to `release` on GitLab, with
+  `v*` as protected tags. On the platform's own registry the job token
+  publishes and no secret is needed.
+- **Local, or no registry**: the release is `git tag vX.Y.Z` and
+  `./ci/registry.sh local`, run by the user; the projects that use the
+  package take it from the local repository (`~/.m2`, Conan's cache,
+  `LOCAL_REPOSITORY`). With a registry, the user can also publish from their computer:
+  `REGISTRY_PUBLISH_TOKEN=... ./ci/registry.sh publish`.
+
+Agents never publish and never push tags (hooks and permission rules of
+every tool): the user pushes the tag, or runs the command.
 
 ### E. Design system
 - Brand colors, fonts, spacing scale, base components, breakpoints.
@@ -267,6 +366,9 @@ skill adds its description to every session.
 | Commands allowed in CI | `--allowedTools` in `.github/workflows/agents.yml` and `claude.yml` (replace `Bash(npm:*)`, `Bash(npx:*)` with the stack's tools), `.gitlab-ci.yml.example` |
 | Reference generators | `ci/reference.sh` (keep the generators of the stack, add the missing one) and `ci/scanners.env` (versions, `PYTHON_PACKAGE`); the `reference-docs` job of `.github/workflows/ci.yml` and `.gitlab/ci/ci.yml` (toolchain, dependency install); the dev dependency the generator needs (typedoc, for example) |
 | Wanted documents | `docs/software/README.md` (the list the writer writes) |
+| Services (monorepo) | `AGENTS.md` → `## Services` and the routing lines; `docs/roles/*.md` → `## Boundaries`; `.github/CODEOWNERS`; the CI jobs (path filters per service) |
+| Team libraries | `docs/general/libraries.md`; `ci/registry.env`; the committed registry file of the stack, without tokens (`.npmrc` with the scope, `pom.xml` repository ids, the Gradle repository, the Conan remote's name); `REGISTRY_TOKEN` on the platform; `.github/dependabot.yml` |
+| Publishing | `ci/registry.env` (`REGISTRY_KIND`, `PUBLISH_PACKAGE`, the `custom` commands); the toolchain and commands of `.github/workflows/publish.yml` and of the `publish` job in `.gitlab/ci/ci.yml`; `REGISTRY_PUBLISH_TOKEN` in the `release` environment and the protected `v*` tags; for `custom`, the publish command in the blocked lists and its credential file in the `Read(...)` denials |
 | Security scope and tools | `docs/roles/security-scope.txt` (one host per line, never production); the dependency-audit command in `docs/roles/security.md` → `## What you check` item 6 |
 | Scenario | see "Profiles by scenario" below |
 | Team tasks in CI | keep the `team` job in `.github/workflows/agents.yml` and `agent:team` in `scripts/create-labels.sh`, or the `claude-team` job in `.gitlab-ci.yml.example`; if not wanted, remove them and the `## Team tasks` section of `AGENTS.md` and `docs/agents/team-tasks.md` |
@@ -312,6 +414,7 @@ chmod +x scripts/hooks/*.sh scripts/*.sh infra/litellm/*.sh 2>/dev/null
 python3 -c "import json; [json.load(open(f)) for f in ['.claude/settings.json','.mcp.json']]"
 echo '{"tool_input":{"command":"terraform apply"}}' | ./scripts/hooks/block-infra-commands.sh; echo "exit $? (must be 2)"
 ./scripts/hooks/alignment-check.sh; echo "exit $? (must be 0: no open entries yet)"
+./ci/registry.sh local   # with PUBLISH_PACKAGE=yes: the package builds and installs on this machine
 grep -q '^ready: yes' docs/design/project.md && echo "project design ready" || echo "project design NOT ready"
 # with the security role:
 echo '{"tool_input":{"command":"curl https://example.com"}}' | ./scripts/hooks/security-scope.sh; echo "exit $? (must be 2)"

@@ -24,4 +24,5 @@ stages:
   - build
   - test
   - scan
+  - publish
   - ai

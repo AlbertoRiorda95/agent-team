@@ -34,6 +34,17 @@ Route by file boundary, not by topic:
 - `docs/software/`, the project `README.md` → writer (the software documentation; `docs/design/` stays the designer's)
 <!-- agent-team:end -->
 
+<!-- CUSTOMIZE: in a monorepo, setup lists the services here and drops this comment.
+## Services
+Each service has its folder and its contract; a task touches one service, and
+its text starts with the service's name in brackets (`[orders] ...`).
+| Service | Folder | Contract |
+|---|---|---|
+| orders | `services/orders/` | `services/orders/openapi.yaml` |
+A change of one service's contract that another service uses is an alignment
+change ("Alignment changes"): the services that call it are the affected roles.
+-->
+
 Two agents never edit the same file in the same round. If a task crosses
 a boundary, split it into two tasks with an explicit dependency.
 
@@ -130,6 +141,12 @@ Implementation tasks start from a spec in `docs/design/` marked `ready: yes`
 - Large design work happens in a studio session with the user
   (`docs/roles/design-studio.md`), not in MR comments. MR comments are code
   review.
+
+## Reuse before writing
+Before writing something generic or adding a dependency: what the project
+already has, then the team's libraries (`docs/general/libraries.md`), then a
+trusted library; read `docs/agents/dependencies.md`. Never install a package
+name from memory, and never change a team library from this repository.
 
 ## Branches and merge requests
 One branch per task. Before opening or updating an MR: read

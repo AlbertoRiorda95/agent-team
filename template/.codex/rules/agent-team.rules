@@ -56,3 +56,43 @@ prefix_rule(
     match = ["docker push registry/app:1"],
     not_match = ["docker build ."],
 )
+
+prefix_rule(
+    pattern = [["npm", "pnpm", "yarn", "cargo"], "publish"],
+    decision = "forbidden",
+    justification = "Packages are published by the release job on a v* tag.",
+    match = ["npm publish", "cargo publish"],
+    not_match = ["npm pack"],
+)
+
+prefix_rule(
+    pattern = ["twine", "upload"],
+    decision = "forbidden",
+    justification = "Packages are published by the release job on a v* tag.",
+    match = ["twine upload dist/*"],
+    not_match = ["twine check dist/*"],
+)
+
+prefix_rule(
+    pattern = ["conan", "upload"],
+    decision = "forbidden",
+    justification = "Packages are published by the release job on a v* tag.",
+    match = ["conan upload hello/1.0 -r team"],
+    not_match = ["conan create ."],
+)
+
+prefix_rule(
+    pattern = ["dotnet", "nuget", "push"],
+    decision = "forbidden",
+    justification = "Packages are published by the release job on a v* tag.",
+    match = ["dotnet nuget push app.nupkg"],
+    not_match = ["dotnet nuget list source"],
+)
+
+prefix_rule(
+    pattern = ["git", "push", "--tags"],
+    decision = "forbidden",
+    justification = "Tags start a release: the user pushes them.",
+    match = ["git push --tags"],
+    not_match = ["git push origin feat/x"],
+)

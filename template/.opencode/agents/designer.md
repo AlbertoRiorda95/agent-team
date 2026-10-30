@@ -26,6 +26,10 @@ permission:
     "helm upgrade*": deny
     "docker push*": deny
     "podman push*": deny
+    "npm publish*": deny
+    "twine upload*": deny
+    "conan upload*": deny
+    "git push --tags*": deny
 ---
 
 Follow the role instructions in docs/roles/designer.md and the project rules in AGENTS.md.

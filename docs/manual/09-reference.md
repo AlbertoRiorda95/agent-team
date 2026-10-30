@@ -48,6 +48,15 @@ it has `--to-issues`.
 | `./scripts/create-labels.sh` | GitHub labels |
 | `./scripts/install-skills.sh`, `./scripts/check-skills.sh` | recommended skills for your stack, and a check that the agents find them |
 
+## Files the agents read by situation
+
+| File | When |
+|---|---|
+| `docs/agents/dependencies.md` | before adding a dependency or writing something generic |
+| `docs/general/libraries.md` | the team's libraries: what they do, how to get them |
+| `docs/agents/merge-requests.md` | opening or updating a merge request |
+| `docs/agents/ci.md` | a check fails, or tests, UI, workflows or CI change |
+
 ## Configuration
 
 `.agent-team/config.json`, every key optional:
@@ -100,6 +109,9 @@ Environment variables `AGENT_TEAM_TRACKER`, `AGENT_TEAM_STARTER` and
 | `AGENT_DISPATCH_PER_ROLE`, `AGENT_DISPATCH_MAX` | GitHub variables | its limits (1 and 3) |
 | `GITLAB_ACCESS_TOKEN` | GitLab variable | splits; `spec-sync`; Codex and OpenCode merge requests |
 | `JIRA_EMAIL` + `JIRA_API_TOKEN` or `JIRA_PAT`, `LINEAR_API_KEY`, `REDMINE_API_KEY` | GitHub secrets, GitLab variables | `spec-sync` and dispatch in CI with those trackers |
+| `REGISTRY_TOKEN` | GitHub secret, GitLab masked variable | read access to the team's registry, when the job token is not enough (`ci/registry.sh`) |
+| `REGISTRY_PUBLISH_TOKEN` | secret of the `release` environment (GitHub), protected variable of `release` (GitLab); on your computer, exported only for the command | publishing this project's package on a `v*` tag (`ci/registry.sh publish`) |
+| `DEPENDABOT_REGISTRY_TOKEN` | Dependabot secret | Dependabot updates of the team's packages |
 | `AI_FLOW_*`, `TASK_ID`, `SPLIT_*` | GitLab pipeline variables | starting a job ([6. Scenario: remote](06-scenario-remote.md#gitlab)) |
 
 ## Where the tools find things

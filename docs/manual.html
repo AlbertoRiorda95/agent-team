@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="light dark">
-<meta name="manual-source" content="sha256:450bfd50ddac8dc981055a5a3f6a87065a8156b36617b1d2c7502bdde3f5150f">
+<meta name="manual-source" content="sha256:b773b9fedf0026f6f60495c7929e16927c15b58553d1b76137a0713c08f88a3f">
 <meta name="manual-builder" content="python-markdown 3.11.2">
 <title>Agent team: user manual</title>
 <style>
@@ -66,7 +66,7 @@ h1{font-size:26px}
 <nav aria-label="Contents">
 <p class="brand">Agent team</p>
 <p class="sub">User manual</p>
-<ol><li><a href="#c00">Agent team: user manual</a></li><li><a href="#c01">1. What Agent team is</a><ol><li><a href="#c01-you-are-the-lead">You are the lead</a></li><li><a href="#c01-the-team">The team</a></li><li><a href="#c01-how-work-flows">How work flows</a></li><li><a href="#c01-how-the-team-develops">How the team develops</a></li><li><a href="#c01-three-scenarios">Three scenarios</a></li><li><a href="#c01-what-you-get-in-the-repository">What you get in the repository</a></li><li><a href="#c01-words-used-in-this-manual">Words used in this manual</a></li></ol></li><li><a href="#c02">2. Install</a><ol><li><a href="#c02-before-you-start">Before you start</a></li><li><a href="#c02-in-claude-code">In Claude Code</a></li><li><a href="#c02-in-codex-or-opencode">In Codex or OpenCode</a></li><li><a href="#c02-without-the-plugin">Without the plugin</a></li><li><a href="#c02-updating-the-plugin">Updating the plugin</a></li><li><a href="#c02-what-each-tool-needs">What each tool needs</a></li></ol></li><li><a href="#c03">3. Set up a project</a><ol><li><a href="#c03-the-steps">The steps</a></li><li><a href="#c03-the-profile">The profile</a></li><li><a href="#c03-what-you-get">What you get</a></li><li><a href="#c03-after-the-setup">After the setup</a></li></ol></li><li><a href="#c04">4. Run the project</a><ol><li><a href="#c04-the-workflow">The workflow</a></li><li><a href="#c04-design">Design</a></li><li><a href="#c04-issues">Issues</a></li><li><a href="#c04-split">Split</a></li><li><a href="#c04-start">Start</a></li><li><a href="#c04-while-a-task-runs">While a task runs</a></li><li><a href="#c04-change-the-plan">Change the plan</a></li><li><a href="#c04-review-and-merge">Review and merge</a></li><li><a href="#c04-alignment">Alignment</a></li><li><a href="#c04-team-tasks">Team tasks</a></li><li><a href="#c04-on-demand-roles">On-demand roles</a></li><li><a href="#c04-long-sessions">Long sessions</a></li></ol></li><li><a href="#c05">5. Scenario: local</a><ol><li><a href="#c05-why-use-it">Why use it</a></li><li><a href="#c05-profile">Profile</a></li><li><a href="#c05-what-a-task-produces">What a task produces</a></li><li><a href="#c05-where-the-ci-runs">Where the CI runs</a></li><li><a href="#c05-with-claude-code">With Claude Code</a></li><li><a href="#c05-with-codex">With Codex</a></li><li><a href="#c05-with-opencode">With OpenCode</a></li><li><a href="#c05-several-tools-in-one-project">Several tools in one project</a></li><li><a href="#c05-issues-in-the-local-scenario">Issues in the local scenario</a></li><li><a href="#c05-keep-the-issues-in-line-with-the-specs">Keep the issues in line with the specs</a></li><li><a href="#c05-the-skills-by-example">The skills by example</a></li><li><a href="#c05-from-your-phone">From your phone</a></li></ol></li><li><a href="#c06">6. Scenario: remote repository</a><ol><li><a href="#c06-why-use-it">Why use it</a></li><li><a href="#c06-profile">Profile</a></li><li><a href="#c06-github">GitHub</a></li><li><a href="#c06-gitlab">GitLab</a></li><li><a href="#c06-the-skills-by-example">The skills by example</a></li><li><a href="#c06-costs-and-safety">Costs and safety</a></li></ol></li><li><a href="#c07">7. Scenario: custom orchestrator</a><ol><li><a href="#c07-why-use-it">Why use it</a></li><li><a href="#c07-the-connection-points">The connection points</a></li><li><a href="#c07-option-a-multica-a-board-with-agents-as-team-members">Option A: Multica, a board with agents as team members</a></li><li><a href="#c07-option-b-your-own-orchestrator">Option B: your own orchestrator</a></li><li><a href="#c07-litellm-one-gateway-for-many-providers">LiteLLM: one gateway for many providers</a></li></ol></li><li><a href="#c08">8. Change and upgrade</a><ol><li><a href="#c08-change-the-profile">Change the profile</a></li><li><a href="#c08-upgrade-to-a-new-plugin-version">Upgrade to a new plugin version</a></li><li><a href="#c08-how-your-changes-are-kept">How your changes are kept</a></li><li><a href="#c08-a-project-set-up-by-hand">A project set up by hand</a></li></ol></li><li><a href="#c09">9. Reference</a><ol><li><a href="#c09-skills">Skills</a></li><li><a href="#c09-scripts">Scripts</a></li><li><a href="#c09-configuration">Configuration</a></li><li><a href="#c09-starters">Starters</a></li><li><a href="#c09-labels">Labels</a></li><li><a href="#c09-ci-secrets-and-variables">CI secrets and variables</a></li><li><a href="#c09-where-the-tools-find-things">Where the tools find things</a></li><li><a href="#c09-what-a-run-costs">What a run costs</a></li><li><a href="#c09-token-costs">Token costs</a></li><li><a href="#c09-this-manual">This manual</a></li></ol></li></ol>
+<ol><li><a href="#c00">Agent team: user manual</a></li><li><a href="#c01">1. What Agent team is</a><ol><li><a href="#c01-you-are-the-lead">You are the lead</a></li><li><a href="#c01-the-team">The team</a></li><li><a href="#c01-how-work-flows">How work flows</a></li><li><a href="#c01-how-the-team-develops">How the team develops</a></li><li><a href="#c01-three-scenarios">Three scenarios</a></li><li><a href="#c01-what-you-get-in-the-repository">What you get in the repository</a></li><li><a href="#c01-words-used-in-this-manual">Words used in this manual</a></li></ol></li><li><a href="#c02">2. Install</a><ol><li><a href="#c02-before-you-start">Before you start</a></li><li><a href="#c02-in-claude-code">In Claude Code</a></li><li><a href="#c02-in-codex-or-opencode">In Codex or OpenCode</a></li><li><a href="#c02-without-the-plugin">Without the plugin</a></li><li><a href="#c02-updating-the-plugin">Updating the plugin</a></li><li><a href="#c02-what-each-tool-needs">What each tool needs</a></li></ol></li><li><a href="#c03">3. Set up a project</a><ol><li><a href="#c03-the-steps">The steps</a></li><li><a href="#c03-the-profile">The profile</a></li><li><a href="#c03-what-you-get">What you get</a></li><li><a href="#c03-after-the-setup">After the setup</a></li></ol></li><li><a href="#c04">4. Run the project</a><ol><li><a href="#c04-the-workflow">The workflow</a></li><li><a href="#c04-design">Design</a></li><li><a href="#c04-issues">Issues</a></li><li><a href="#c04-split">Split</a></li><li><a href="#c04-start">Start</a></li><li><a href="#c04-while-a-task-runs">While a task runs</a></li><li><a href="#c04-change-the-plan">Change the plan</a></li><li><a href="#c04-review-and-merge">Review and merge</a></li><li><a href="#c04-alignment">Alignment</a></li><li><a href="#c04-team-tasks">Team tasks</a></li><li><a href="#c04-on-demand-roles">On-demand roles</a></li><li><a href="#c04-long-sessions">Long sessions</a></li></ol></li><li><a href="#c05">5. Scenario: local</a><ol><li><a href="#c05-why-use-it">Why use it</a></li><li><a href="#c05-profile">Profile</a></li><li><a href="#c05-what-a-task-produces">What a task produces</a></li><li><a href="#c05-where-the-ci-runs">Where the CI runs</a></li><li><a href="#c05-with-claude-code">With Claude Code</a></li><li><a href="#c05-with-codex">With Codex</a></li><li><a href="#c05-with-opencode">With OpenCode</a></li><li><a href="#c05-several-tools-in-one-project">Several tools in one project</a></li><li><a href="#c05-issues-in-the-local-scenario">Issues in the local scenario</a></li><li><a href="#c05-keep-the-issues-in-line-with-the-specs">Keep the issues in line with the specs</a></li><li><a href="#c05-the-skills-by-example">The skills by example</a></li><li><a href="#c05-from-your-phone">From your phone</a></li></ol></li><li><a href="#c06">6. Scenario: remote repository</a><ol><li><a href="#c06-why-use-it">Why use it</a></li><li><a href="#c06-profile">Profile</a></li><li><a href="#c06-github">GitHub</a></li><li><a href="#c06-gitlab">GitLab</a></li><li><a href="#c06-the-skills-by-example">The skills by example</a></li><li><a href="#c06-costs-and-safety">Costs and safety</a></li></ol></li><li><a href="#c07">7. Scenario: custom orchestrator</a><ol><li><a href="#c07-why-use-it">Why use it</a></li><li><a href="#c07-the-connection-points">The connection points</a></li><li><a href="#c07-option-a-multica-a-board-with-agents-as-team-members">Option A: Multica, a board with agents as team members</a></li><li><a href="#c07-option-b-your-own-orchestrator">Option B: your own orchestrator</a></li><li><a href="#c07-litellm-one-gateway-for-many-providers">LiteLLM: one gateway for many providers</a></li></ol></li><li><a href="#c08">8. Change and upgrade</a><ol><li><a href="#c08-change-the-profile">Change the profile</a></li><li><a href="#c08-upgrade-to-a-new-plugin-version">Upgrade to a new plugin version</a></li><li><a href="#c08-how-your-changes-are-kept">How your changes are kept</a></li><li><a href="#c08-a-project-set-up-by-hand">A project set up by hand</a></li></ol></li><li><a href="#c09">9. Reference</a><ol><li><a href="#c09-skills">Skills</a></li><li><a href="#c09-scripts">Scripts</a></li><li><a href="#c09-files-the-agents-read-by-situation">Files the agents read by situation</a></li><li><a href="#c09-configuration">Configuration</a></li><li><a href="#c09-starters">Starters</a></li><li><a href="#c09-labels">Labels</a></li><li><a href="#c09-ci-secrets-and-variables">CI secrets and variables</a></li><li><a href="#c09-where-the-tools-find-things">Where the tools find things</a></li><li><a href="#c09-what-a-run-costs">What a run costs</a></li><li><a href="#c09-token-costs">Token costs</a></li><li><a href="#c09-this-manual">This manual</a></li></ol></li></ol>
 </nav>
 <main>
 <section class="chapter" id="c00">
@@ -265,6 +265,10 @@ agents' work as for yours.</p>
 <tr>
 <td><strong>Clean architecture, when it fits</strong></td>
 <td>if the backend's language and framework allow it and the service has real business rules, the backend preloads the <code>clean-architecture</code> skill: business rules in the domain and use cases, dependencies pointing inward, tests that need no database. <code>setup</code> asks and removes it for a script or a thin CRUD, where layers only add weight. The frontend has its own rules: a design system, tokens, UI tests per viewport</td>
+</tr>
+<tr>
+<td><strong>Software reuse</strong></td>
+<td>before writing, the agents look for what already exists: the project's own code, then the team's libraries (listed in <code>docs/general/libraries.md</code>, consumed from a package registry), then a trusted third-party library that passes a checklist (it really exists under that name, license, maintenance, known vulnerabilities, weight). The spec records what is reused; a new dependency needs your yes and is justified in the merge request. The optimizer proposes an issue when it finds code worth sharing</td>
 </tr>
 <tr>
 <td><strong>Small, reviewable changes</strong></td>
@@ -635,8 +639,12 @@ branch and you merge it yourself (<code>git merge chore/agent-team-setup</code>)
    never overwritten: the ones that differ are shown to you and merged with
    your approval.</li>
 <li><strong>Interview.</strong> Project name, stack and its commands (test, lint, build),
-   the folders each role owns (for example <code>src/server/</code> for backend), the
-   design system, and the model and reasoning effort of each role (stronger
+   the folders each role owns (for example <code>src/server/</code> for backend), whether
+   the repository holds several services (a monorepo,
+   <a href="#c04-several-services-in-one-repository">4. Monorepo</a>),
+   the team's own libraries to reuse and how to get them, whether this
+   project is itself a package and how it is published or installed locally
+   (<a href="#c04-reuse">4. Reuse</a>), the design system, and the model and reasoning effort of each role (stronger
    models cost more per task; the setup proposes defaults). If the repository
    already has code, the agent reads it first and turns what it finds into
    proposals you only confirm.</li>
@@ -986,6 +994,146 @@ and the features in each.</p>
 <p>When the spec is ready, the designer commits it on a branch <code>design/&lt;feature&gt;</code>
 and, if the repository has a remote, opens a merge request <code>design: &lt;feature&gt;</code>
 for you to review and merge. Without a remote, merge the branch yourself.</p>
+<h3 id="c04-reuse">Reuse</h3>
+<p>Before planning a part, the designer checks what already exists: the
+project's own code, the team's libraries in <code>docs/general/libraries.md</code>
+(filled by the setup from the links you give: what each does, the registry
+or Git tag it comes from, the version, where its documentation is) and, for
+generic parts, trusted third-party libraries. It proposes the choice as a
+question; your answer goes in the spec's <code>## Reuse</code> section, and the
+readiness checklist does not pass without it.</p>
+<p>The agents follow the same order during a task (<code>docs/agents/dependencies.md</code>):</p>
+<ol>
+<li>what the project already has;</li>
+<li>a team library, never changed from this repository: if it lacks
+   something, the agent proposes an issue for the library's repository and
+   the task waits for its release;</li>
+<li>a third-party library that passes the checklist: the package exists under
+   that exact name (agents can invent plausible names, and some are
+   registered to catch that mistake), allowed license, maintained, no known
+   high vulnerability, few transitive dependencies, pinned in the lockfile;</li>
+<li>code written here, when nothing fits or the need is a few lines.</li>
+</ol>
+<p><strong>Registry and secrets.</strong> The team's libraries come from a package registry,
+reached through one script, <code>ci/registry.sh</code> (settings in <code>ci/registry.env</code>:
+the package manager, the registry's URL). No token is ever committed: the
+script takes it from the environment and writes it into the package manager's
+user-level configuration, which on a CI runner disappears with the job.</p>
+<div class="table"><table>
+<thead>
+<tr>
+<th></th>
+<th>Read (install)</th>
+<th>Publish (this project is a package)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>When</td>
+<td>every CI job that installs dependencies, and the agent jobs</td>
+<td>on a <code>v*</code> tag you push, in the <code>release</code> environment</td>
+</tr>
+<tr>
+<td>GitHub Packages, GitLab registry</td>
+<td>the job token (<code>GITHUB_TOKEN</code>, <code>CI_JOB_TOKEN</code>): no secret</td>
+<td>the job token: no secret</td>
+</tr>
+<tr>
+<td>Another registry</td>
+<td><code>REGISTRY_TOKEN</code>, read-only, repository secret or masked variable</td>
+<td><code>REGISTRY_PUBLISH_TOKEN</code>, only in the <code>release</code> environment, with a required reviewer and only for <code>v*</code> tags</td>
+</tr>
+<tr>
+<td>On your computer</td>
+<td>your own token: <code>export REGISTRY_TOKEN=...</code>, then <code>./ci/registry.sh login</code></td>
+<td>push the tag; without a registry, <code>./ci/registry.sh local</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>Agents never publish and never push tags: the commands are blocked by the
+hooks and permission rules of every tool, and the publish token exists only in
+the <code>release</code> environment, which no agent job uses.</p>
+<p><strong>Publishing a package.</strong> When the project is itself a package, setup sets
+<code>PUBLISH_PACKAGE=yes</code> and makes sure there is a step that uploads it, whatever
+the stack. <code>ci/registry.sh</code> has three actions: <code>login</code>, <code>publish</code> (the release
+job installs, tests and uploads) and <code>local</code> (it installs the package in this
+machine's local repository, for the local scenario or when there is no
+registry).</p>
+<div class="table"><table>
+<thead>
+<tr>
+<th>Stack</th>
+<th><code>REGISTRY_KIND</code></th>
+<th><code>publish</code></th>
+<th><code>local</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Node</td>
+<td><code>npm</code></td>
+<td><code>npm publish</code></td>
+<td><code>npm pack</code> into <code>LOCAL_REPOSITORY</code> (<code>~/.local/share/packages</code>)</td>
+</tr>
+<tr>
+<td>Python</td>
+<td><code>pypi</code></td>
+<td><code>python -m build</code>, <code>twine upload</code></td>
+<td>the wheel into <code>LOCAL_REPOSITORY</code> (<code>pip install --find-links</code>)</td>
+</tr>
+<tr>
+<td>Java, Maven</td>
+<td><code>maven</code></td>
+<td><code>mvn deploy</code></td>
+<td><code>mvn install</code> (<code>~/.m2</code>)</td>
+</tr>
+<tr>
+<td>Java/Kotlin, Gradle</td>
+<td><code>gradle</code></td>
+<td><code>gradle publish</code></td>
+<td><code>gradle publishToMavenLocal</code></td>
+</tr>
+<tr>
+<td>C/C++, Conan 2</td>
+<td><code>conan</code></td>
+<td><code>conan create</code>, <code>conan upload</code></td>
+<td><code>conan create</code> (Conan's cache)</td>
+</tr>
+<tr>
+<td>anything else</td>
+<td><code>custom</code></td>
+<td><code>PUBLISH_COMMAND</code></td>
+<td><code>LOCAL_COMMAND</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>Conan needs a registry that serves it (Artifactory, Nexus, GitLab's package
+registry): GitHub Packages does not. With <code>custom</code>, setup writes the commands
+of your tool (cargo, Go, NuGet, Helm...) in <code>ci/registry.env</code>, adds its
+publish command to the blocked ones and its credential file to the files the
+agents cannot read. Without a registry, <code>./ci/registry.sh publish</code> stops and
+points you to <code>local</code>.</p>
+<p>A new runtime dependency the spec did not plan needs your yes; every merge
+request lists its dependency changes under <strong>Dependencies</strong>, and the CI checks
+licenses and vulnerabilities anyway. When the optimizer finds the same logic
+in several places, it does not merge it: it proposes an issue (where, what
+the shared version would be, the risk), created only on your yes.</p>
+<h3 id="c04-several-services-in-one-repository">Several services in one repository</h3>
+<p>In a monorepo (<code>services/orders/</code>, <code>services/billing/</code>...) the setup lists
+the services in <code>AGENTS.md</code> (folder and contract of each) and makes the role
+boundaries per service. Each row of a breakdown touches one service, named
+at the start of its task:</p>
+<pre><code class="language-text">| 1 | backend  | [orders] Add the refund endpoint      | —  | - |
+| 2 | backend  | [billing] Issue the credit note       | 1  | - |
+| 3 | frontend | [web] Refund button on the order page | 1  | - |
+</code></pre>
+<p>Dispatch then runs one task per role <strong>and per service</strong>: rows 1 and 2 can
+run at the same time, since they touch different folders; a backend task
+without a service waits until no other backend task runs. A change to the
+contract of a service that another service calls is an alignment change: the
+callers are the affected roles. The CI builds and tests only the services a
+merge request changes (path filters or the monorepo tool), and scans the
+whole repository.</p>
 <h3 id="c04-a-whole-milestone-at-once">A whole milestone at once</h3>
 <p>The project session writes only <code>project.md</code>: the goal, the decisions and a
 roadmap of features. Every feature still needs its own spec, and until it has
@@ -1516,6 +1664,17 @@ fixes stay in the working tree, uncommitted. It is not the real CI: a green run
 on your computer proves nothing to anyone else, and the platform's CI stays
 the one that gates the merge. The security steps need the network, to install
 their tools and fetch the vulnerability data.</p>
+<h3 id="c05-release-a-package-locally">Release a package locally</h3>
+<p>When the project is a package (<code>PUBLISH_PACKAGE=yes</code> in <code>ci/registry.env</code>)
+and there is no remote CI, the release is yours: tag the version and install
+it in your machine's local repository, where the other projects find it.</p>
+<pre><code class="language-bash">git tag v1.2.0
+./ci/registry.sh local     # mvn install, gradle publishToMavenLocal, conan create, npm pack...
+</code></pre>
+<p>With a team registry you can upload from your computer too, with your own
+token: <code>REGISTRY_PUBLISH_TOKEN=... ./ci/registry.sh publish</code>. The agents
+cannot do either: tags and publishing are blocked for them
+(<a href="#c04-reuse">4. Run the project</a>).</p>
 <h2 id="c05-with-claude-code">With Claude Code</h2>
 <p>Start <code>claude</code> in the repository. The roles are subagents in <code>.claude/agents/</code>:</p>
 <pre><code class="language-text">&gt; @backend implement task 2 of docs/design/login.md
@@ -2463,6 +2622,33 @@ it has <code>--to-issues</code>.</p>
 </tr>
 </tbody>
 </table></div>
+<h2 id="c09-files-the-agents-read-by-situation">Files the agents read by situation</h2>
+<div class="table"><table>
+<thead>
+<tr>
+<th>File</th>
+<th>When</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>docs/agents/dependencies.md</code></td>
+<td>before adding a dependency or writing something generic</td>
+</tr>
+<tr>
+<td><code>docs/general/libraries.md</code></td>
+<td>the team's libraries: what they do, how to get them</td>
+</tr>
+<tr>
+<td><code>docs/agents/merge-requests.md</code></td>
+<td>opening or updating a merge request</td>
+</tr>
+<tr>
+<td><code>docs/agents/ci.md</code></td>
+<td>a check fails, or tests, UI, workflows or CI change</td>
+</tr>
+</tbody>
+</table></div>
 <h2 id="c09-configuration">Configuration</h2>
 <p><code>.agent-team/config.json</code>, every key optional:</p>
 <div class="table"><table>
@@ -2632,6 +2818,21 @@ it has <code>--to-issues</code>.</p>
 <td><code>JIRA_EMAIL</code> + <code>JIRA_API_TOKEN</code> or <code>JIRA_PAT</code>, <code>LINEAR_API_KEY</code>, <code>REDMINE_API_KEY</code></td>
 <td>GitHub secrets, GitLab variables</td>
 <td><code>spec-sync</code> and dispatch in CI with those trackers</td>
+</tr>
+<tr>
+<td><code>REGISTRY_TOKEN</code></td>
+<td>GitHub secret, GitLab masked variable</td>
+<td>read access to the team's registry, when the job token is not enough (<code>ci/registry.sh</code>)</td>
+</tr>
+<tr>
+<td><code>REGISTRY_PUBLISH_TOKEN</code></td>
+<td>secret of the <code>release</code> environment (GitHub), protected variable of <code>release</code> (GitLab); on your computer, exported only for the command</td>
+<td>publishing this project's package on a <code>v*</code> tag (<code>ci/registry.sh publish</code>)</td>
+</tr>
+<tr>
+<td><code>DEPENDABOT_REGISTRY_TOKEN</code></td>
+<td>Dependabot secret</td>
+<td>Dependabot updates of the team's packages</td>
 </tr>
 <tr>
 <td><code>AI_FLOW_*</code>, <code>TASK_ID</code>, <code>SPLIT_*</code></td>

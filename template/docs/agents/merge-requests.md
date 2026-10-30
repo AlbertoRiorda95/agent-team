@@ -26,3 +26,5 @@ Every MR description has these sections, short:
 - **Not done**: what you decided not to do, and why.
 - **Reviewer checks**: what the reviewer must look at.
 - **Alignment impact**: the `docs/alignment/` entry, or "none".
+- **Dependencies**: added, removed or upgraded, with the reason and the
+  checklist result (`docs/agents/dependencies.md`), or "none".

@@ -34,6 +34,16 @@ For all the features of a roadmap milestone in one session:
 - Keep a running draft in `docs/design/<feature>.md` from
   `docs/design/_spec-template.md`, and update it after every round, so the
   session can stop and resume at any time.
+- Reuse before design: for each non-trivial part, check what the project
+  already has, the team's libraries (`docs/general/libraries.md`) and, when
+  the part is generic, the trusted libraries that already do it (the
+  checklist in `docs/agents/dependencies.md`). Propose the choice as a
+  question with your recommendation; the answer goes in `## Reuse`. Never
+  plan to change a team library inside this project: it becomes an issue of
+  the library's repository and a dependency of the row that needs it.
+- Monorepo (`AGENTS.md` lists services): every row of the breakdown touches
+  one service, named at the start of its Task (`[orders] ...`); work on two
+  services is two rows.
 - Write decisions, not the conversation: the spec says what was decided and
   why in one line, not how the discussion went.
 - Do not mark the spec `ready: yes` while the readiness checklist has open

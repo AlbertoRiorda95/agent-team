@@ -12,6 +12,7 @@ on:
 
 permissions:
   contents: read
+  packages: read     # the team's packages on GitHub Packages (ci/registry.sh)
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -29,6 +30,11 @@ jobs:
           node-version: 24
           cache: npm
       # CUSTOMIZE: the commands in AGENTS.md > Commands
+      # the team's registry (ci/registry.env): read token from the secret, else the job token
+      - run: ./ci/registry.sh login
+        env:
+          REGISTRY_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
+          GITHUB_TOKEN: ${{ github.token }}
       - run: npm ci
       - run: npm run lint
       - run: npm run typecheck    # CUSTOMIZE: tsc --noEmit, mypy, pyright, go vet...
@@ -65,6 +71,11 @@ jobs:
           node-version: 24
           cache: npm
       # dependencies installed without running their scripts: license data come from them
+      # the team's registry (ci/registry.env): read token from the secret, else the job token
+      - run: ./ci/registry.sh login
+        env:
+          REGISTRY_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
+          GITHUB_TOKEN: ${{ github.token }}
       - run: npm ci --ignore-scripts     # CUSTOMIZE
       - run: ./ci/install-scanners.sh
       - run: ./ci/scan.sh sbom-licenses
@@ -92,6 +103,11 @@ jobs:
         with:
           node-version: 24
           cache: npm
+      - if: steps.enabled.outputs.on == 'true'
+        run: ./ci/registry.sh login
+        env:
+          REGISTRY_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
+          GITHUB_TOKEN: ${{ github.token }}
       - if: steps.enabled.outputs.on == 'true'
         run: npm ci                                       # CUSTOMIZE
       - if: steps.enabled.outputs.on == 'true'
@@ -152,6 +168,11 @@ jobs:
         with:
           node-version: 24
           cache: npm
+      # the team's registry (ci/registry.env): read token from the secret, else the job token
+      - run: ./ci/registry.sh login
+        env:
+          REGISTRY_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
+          GITHUB_TOKEN: ${{ github.token }}
       - run: npm ci --ignore-scripts     # CUSTOMIZE
       - run: ./ci/reference.sh
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2

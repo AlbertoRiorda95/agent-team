@@ -16,6 +16,8 @@ the plan:
 - A breaking contract change is planned as expand-contract (see "API
   contract"): the expand task, the tasks that move the callers (depending on
   it), a last contract task (depending on all of them).
+- In a monorepo (services listed in `AGENTS.md`), one task per role and per
+  service, its text starting with the service: `[orders] Add the endpoint`.
 - optimizer, security and writer only when the issue asks for them explicitly.
 - At most 6 tasks. If more are needed, say so and propose splitting the issue
   into features first.

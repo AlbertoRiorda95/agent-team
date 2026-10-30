@@ -465,6 +465,19 @@ class Units(unittest.TestCase):
         self.assertEqual(label, "milestone M6 · x")
         self.assertIn("M0 (1)", d.not_tasks(issues, label)[0])
 
+    def test_dispatch_slots_per_service(self):
+        d = script("dispatch.py")
+        mk = lambda n, svc, labels=(): core.Issue(  # noqa: E731
+            n, f"#{n}", f"F · {n}/9 · backend: {'[' + svc + '] ' if svc else ''}task {n}",
+            "## Task\nx\n\nTo start it: add `agent:backend`.", labels=list(labels), milestone="M1 · x")
+        self.assertEqual(core.service_of(mk(1, "orders")), "orders")
+        self.assertIsNone(core.service_of(mk(1, None)))
+        # one backend task per service; the task without a service waits for both
+        issues = [mk(1, "orders", ["agent:backend"]), mk(2, "orders"), mk(3, "billing"), mk(4, None)]
+        _, _, start, waiting, _ = d.plan(issues, core.Tracker({}), 1, 5)
+        self.assertEqual([i.number for i, _ in start], ["3"])
+        self.assertEqual(sorted(i.number for i, _ in waiting), ["2", "4"])
+
     def test_key_with_spaces(self):
         for marker in ("<!-- key: design:M0 Foundations:foundations -->", "[agent-team] key: design:M0 Foundations:foundations"):
             self.assertEqual(core.key_of(core.Issue(1, "#1", "t", f"x\n\n{marker}\n")), "design:M0 Foundations:foundations")

@@ -22,6 +22,15 @@ already failing, say so and do not fix it yourself.
 4. **Report** in a single message: number before, number after, list of
    changes, and what you decided NOT to do, with the reason.
 
+## Code that can be shared
+When you find the same logic in several places (here, or in code this
+project copied from another of the team's projects), do not merge it
+yourself: it changes structure beyond your task. Propose it: in your report,
+an issue draft with a title, the places (paths and lines), what the shared
+version would be (a module here, or a new team library), and the risk. Create
+the issue only if the user says yes. In CI, post the draft as a comment on
+your MR.
+
 ## What you never do
 You do not change public APIs, rewrite whole modules, add new dependencies,
 or touch tests to make them pass.

@@ -14,7 +14,11 @@
       "helm install*": "deny",
       "helm upgrade*": "deny",
       "docker push*": "deny",
-      "podman push*": "deny"
+      "podman push*": "deny",
+      "npm publish*": "deny",
+      "twine upload*": "deny",
+      "conan upload*": "deny",
+      "git push --tags*": "deny"
     },
     "read": {
       "*": "allow",

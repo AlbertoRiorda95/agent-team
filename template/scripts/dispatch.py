@@ -119,10 +119,17 @@ def plan(issues, trk, per_role, max_total, milestone=None, all_ms=False, specs_n
         scope = [i for i in tasks if i.milestone == first]
         label = f"milestone {first}" if first else "issues without a milestone" if scope else "no task issues"
     running = [i for i in issues if i.open and core.started(i)]
+    # slots per role, and per service in a monorepo ("[orders]" tasks): a task
+    # without a service may touch any, so it shares the slot with all of them
     busy = {}
     for i in running:
         r = core.role_of(i) or next(l[6:] for l in i.labels if l.startswith("agent:"))
-        busy[r] = busy.get(r, 0) + 1
+        busy[(r, core.service_of(i))] = busy.get((r, core.service_of(i)), 0) + 1
+
+    def taken(role, svc):
+        if svc is None:
+            return max([n for (r, _), n in busy.items() if r == role] or [0])
+        return busy.get((role, svc), 0) + busy.get((role, None), 0)
     total = len(running)
     start, waiting, skipped = [], [], []
     for i in scope:
@@ -147,14 +154,16 @@ def plan(issues, trk, per_role, max_total, milestone=None, all_ms=False, specs_n
             why = ", ".join(x for x in (why, ", ".join(loose)) if x)
             waiting.append((i, f"waits for {why}"))
             continue
-        if busy.get(role, 0) >= per_role:
-            waiting.append((i, f"ready, but a {role} task is already running"))
+        svc = core.service_of(i)
+        if taken(role, svc) >= per_role:
+            where = f" for {svc}" if svc else ""
+            waiting.append((i, f"ready, but a {role} task{where} is already running"))
             continue
         if total >= max_total:
             waiting.append((i, f"ready, but {max_total} tasks are already running or starting"))
             continue
         start.append((i, role))
-        busy[role] = busy.get(role, 0) + 1
+        busy[(role, svc)] = busy.get((role, svc), 0) + 1
         total += 1
     return label, running, start, waiting, skipped
 

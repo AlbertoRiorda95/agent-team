@@ -126,6 +126,95 @@ When the spec is ready, the designer commits it on a branch `design/<feature>`
 and, if the repository has a remote, opens a merge request `design: <feature>`
 for you to review and merge. Without a remote, merge the branch yourself.
 
+### Reuse
+
+Before planning a part, the designer checks what already exists: the
+project's own code, the team's libraries in `docs/general/libraries.md`
+(filled by the setup from the links you give: what each does, the registry
+or Git tag it comes from, the version, where its documentation is) and, for
+generic parts, trusted third-party libraries. It proposes the choice as a
+question; your answer goes in the spec's `## Reuse` section, and the
+readiness checklist does not pass without it.
+
+The agents follow the same order during a task (`docs/agents/dependencies.md`):
+
+1. what the project already has;
+2. a team library, never changed from this repository: if it lacks
+   something, the agent proposes an issue for the library's repository and
+   the task waits for its release;
+3. a third-party library that passes the checklist: the package exists under
+   that exact name (agents can invent plausible names, and some are
+   registered to catch that mistake), allowed license, maintained, no known
+   high vulnerability, few transitive dependencies, pinned in the lockfile;
+4. code written here, when nothing fits or the need is a few lines.
+
+**Registry and secrets.** The team's libraries come from a package registry,
+reached through one script, `ci/registry.sh` (settings in `ci/registry.env`:
+the package manager, the registry's URL). No token is ever committed: the
+script takes it from the environment and writes it into the package manager's
+user-level configuration, which on a CI runner disappears with the job.
+
+| | Read (install) | Publish (this project is a package) |
+|---|---|---|
+| When | every CI job that installs dependencies, and the agent jobs | on a `v*` tag you push, in the `release` environment |
+| GitHub Packages, GitLab registry | the job token (`GITHUB_TOKEN`, `CI_JOB_TOKEN`): no secret | the job token: no secret |
+| Another registry | `REGISTRY_TOKEN`, read-only, repository secret or masked variable | `REGISTRY_PUBLISH_TOKEN`, only in the `release` environment, with a required reviewer and only for `v*` tags |
+| On your computer | your own token: `export REGISTRY_TOKEN=...`, then `./ci/registry.sh login` | push the tag; without a registry, `./ci/registry.sh local` |
+
+Agents never publish and never push tags: the commands are blocked by the
+hooks and permission rules of every tool, and the publish token exists only in
+the `release` environment, which no agent job uses.
+
+**Publishing a package.** When the project is itself a package, setup sets
+`PUBLISH_PACKAGE=yes` and makes sure there is a step that uploads it, whatever
+the stack. `ci/registry.sh` has three actions: `login`, `publish` (the release
+job installs, tests and uploads) and `local` (it installs the package in this
+machine's local repository, for the local scenario or when there is no
+registry).
+
+| Stack | `REGISTRY_KIND` | `publish` | `local` |
+|---|---|---|---|
+| Node | `npm` | `npm publish` | `npm pack` into `LOCAL_REPOSITORY` (`~/.local/share/packages`) |
+| Python | `pypi` | `python -m build`, `twine upload` | the wheel into `LOCAL_REPOSITORY` (`pip install --find-links`) |
+| Java, Maven | `maven` | `mvn deploy` | `mvn install` (`~/.m2`) |
+| Java/Kotlin, Gradle | `gradle` | `gradle publish` | `gradle publishToMavenLocal` |
+| C/C++, Conan 2 | `conan` | `conan create`, `conan upload` | `conan create` (Conan's cache) |
+| anything else | `custom` | `PUBLISH_COMMAND` | `LOCAL_COMMAND` |
+
+Conan needs a registry that serves it (Artifactory, Nexus, GitLab's package
+registry): GitHub Packages does not. With `custom`, setup writes the commands
+of your tool (cargo, Go, NuGet, Helm...) in `ci/registry.env`, adds its
+publish command to the blocked ones and its credential file to the files the
+agents cannot read. Without a registry, `./ci/registry.sh publish` stops and
+points you to `local`.
+
+A new runtime dependency the spec did not plan needs your yes; every merge
+request lists its dependency changes under **Dependencies**, and the CI checks
+licenses and vulnerabilities anyway. When the optimizer finds the same logic
+in several places, it does not merge it: it proposes an issue (where, what
+the shared version would be, the risk), created only on your yes.
+
+### Several services in one repository
+
+In a monorepo (`services/orders/`, `services/billing/`...) the setup lists
+the services in `AGENTS.md` (folder and contract of each) and makes the role
+boundaries per service. Each row of a breakdown touches one service, named
+at the start of its task:
+
+```text
+| 1 | backend  | [orders] Add the refund endpoint      | —  | - |
+| 2 | backend  | [billing] Issue the credit note       | 1  | - |
+| 3 | frontend | [web] Refund button on the order page | 1  | - |
+```
+
+Dispatch then runs one task per role **and per service**: rows 1 and 2 can
+run at the same time, since they touch different folders; a backend task
+without a service waits until no other backend task runs. A change to the
+contract of a service that another service calls is an alignment change: the
+callers are the affected roles. The CI builds and tests only the services a
+merge request changes (path filters or the monorepo tool), and scans the
+whole repository.
+
 ### A whole milestone at once
 
 The project session writes only `project.md`: the goal, the decisions and a

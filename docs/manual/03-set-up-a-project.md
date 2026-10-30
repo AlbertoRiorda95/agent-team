@@ -27,8 +27,12 @@ branch and you merge it yourself (`git merge chore/agent-team-setup`).
    never overwritten: the ones that differ are shown to you and merged with
    your approval.
 3. **Interview.** Project name, stack and its commands (test, lint, build),
-   the folders each role owns (for example `src/server/` for backend), the
-   design system, and the model and reasoning effort of each role (stronger
+   the folders each role owns (for example `src/server/` for backend), whether
+   the repository holds several services (a monorepo,
+   [4. Monorepo](04-run-the-project.md#several-services-in-one-repository)),
+   the team's own libraries to reuse and how to get them, whether this
+   project is itself a package and how it is published or installed locally
+   ([4. Reuse](04-run-the-project.md#reuse)), the design system, and the model and reasoning effort of each role (stronger
    models cost more per task; the setup proposes defaults). If the repository
    already has code, the agent reads it first and turns what it finds into
    proposals you only confirm.

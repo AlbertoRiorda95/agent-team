@@ -172,6 +172,17 @@ def role_of(issue):
     return m.group(1) if m else None
 
 
+SERVICE = re.compile(r"^\s*\[([a-z0-9][a-z0-9-]*)\]")
+
+
+def service_of(issue):
+    """The service a task touches, in a monorepo: its task text starts with "[orders]"
+    (the Task cell of the spec row, or of a split). None: not tied to one service."""
+    m = re.search(r" · [a-z]+: (\[[^\]]+\])", issue.title) or re.search(r"^## Task\n(\[[^\]]+\])", issue.body, re.M)
+    m = m and SERVICE.match(m.group(1))
+    return m.group(1) if m else None
+
+
 def deps_of(issue):
     """(ids written in "Depends on", unresolved "task N" mentions)."""
     text = section(issue.body, "Depends on").strip().split("\n\n")[0]   # the paragraph, not the markers below

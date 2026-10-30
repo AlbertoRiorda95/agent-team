@@ -14,6 +14,7 @@ reads a file in this folder only when its situation applies.
 <!-- agent-team:end -->
 - `merge-requests.md`: you open or update an MR
 - `ci.md`: a check fails, or you touch tests, UI, workflows or CI
+- `dependencies.md`: you add a dependency, or write something generic a library could do
 
 When you add a rule, ask first whether a check can enforce it (lint, type check,
 CI job, hook, CODEOWNERS): a check never forgets, a sentence here can be missed.

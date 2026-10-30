@@ -95,6 +95,22 @@ on your computer proves nothing to anyone else, and the platform's CI stays
 the one that gates the merge. The security steps need the network, to install
 their tools and fetch the vulnerability data.
 
+### Release a package locally
+
+When the project is a package (`PUBLISH_PACKAGE=yes` in `ci/registry.env`)
+and there is no remote CI, the release is yours: tag the version and install
+it in your machine's local repository, where the other projects find it.
+
+```bash
+git tag v1.2.0
+./ci/registry.sh local     # mvn install, gradle publishToMavenLocal, conan create, npm pack...
+```
+
+With a team registry you can upload from your computer too, with your own
+token: `REGISTRY_PUBLISH_TOKEN=... ./ci/registry.sh publish`. The agents
+cannot do either: tags and publishing are blocked for them
+([4. Run the project](04-run-the-project.md#reuse)).
+
 ## With Claude Code
 
 Start `claude` in the repository. The roles are subagents in `.claude/agents/`:

@@ -7,10 +7,10 @@ INPUT=$(cat)
 CMD=$(echo "$INPUT" | jq -r '.tool_input.command // empty')
 [ -z "$CMD" ] && exit 0
 
-FORBIDDEN='terraform[[:space:]]+apply|terraform[[:space:]]+destroy|kubectl[[:space:]]+(apply|delete|patch|rollout)|helm[[:space:]]+(install|upgrade|uninstall|rollback)|docker[[:space:]]+push|podman[[:space:]]+push|aws[[:space:]]+.*[[:space:]](create|delete|update)-|gcloud[[:space:]]+.*deploy'
+FORBIDDEN='terraform[[:space:]]+apply|terraform[[:space:]]+destroy|kubectl[[:space:]]+(apply|delete|patch|rollout)|helm[[:space:]]+(install|upgrade|uninstall|rollback)|docker[[:space:]]+push|podman[[:space:]]+push|aws[[:space:]]+.*[[:space:]](create|delete|update)-|gcloud[[:space:]]+.*deploy|npm[[:space:]]+publish|twine[[:space:]]+upload|cargo[[:space:]]+publish|mvnw?[[:space:]]+.*deploy|gradlew?[[:space:]]+.*publish|conan[[:space:]]+upload|dotnet[[:space:]]+nuget[[:space:]]+push|registry\.sh[[:space:]]+publish|git[[:space:]]+push.*(--tags|refs/tags|[[:space:]]v[0-9])'
 
 if echo "$CMD" | grep -qE "$FORBIDDEN"; then
-  echo "Blocked: this command changes a real environment." >&2
+  echo "Blocked: this command changes a real environment or publishes a package or a tag." >&2
   echo "Write the configuration and propose it in an MR: the pipeline applies it after the merge." >&2
   exit 2
 fi

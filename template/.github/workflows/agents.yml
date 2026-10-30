@@ -227,6 +227,11 @@ jobs:
         with:
           persist-credentials: false
       # CUSTOMIZE: install the dependencies of your stack: Codex runs without network.
+      - name: Registry login (read only)
+        run: ./ci/registry.sh login
+        env:
+          REGISTRY_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
+          GITHUB_TOKEN: ${{ github.token }}
       - name: Install dependencies
         if: hashFiles('package-lock.json') != ''
         run: npm ci
