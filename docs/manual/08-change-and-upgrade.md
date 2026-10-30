@@ -65,8 +65,9 @@ copy, your file, and the new template file. If only the template changed,
 your file is replaced; if only you changed it, nothing happens; if both
 changed, `git merge-file` merges them and marks the lines it cannot decide.
 
-`README.md`, `docs/design-decisions.md`, `.mcp.json` and
-`docs/roles/security-scope.txt` are yours after setup: they are never upgraded.
+`README.md`, `docs/design-decisions.md` (the decision log), `.mcp.json` (the
+MCP servers the agents may use) and `docs/roles/security-scope.txt` are yours
+after setup: they are never upgraded ([3. What you get](03-set-up-a-project.md#what-you-get)).
 
 ## A project set up by hand
 

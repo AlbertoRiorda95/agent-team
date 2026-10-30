@@ -4,7 +4,7 @@
 # Requires an authenticated GitHub CLI (gh auth login).
 set -euo pipefail
 cd "$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
-for r in designer frontend backend optimizer devops security; do
+for r in designer frontend backend optimizer devops security writer; do
   [ -f "docs/roles/$r.md" ] || continue
   gh label create "agent:$r" --description "Task for the $r agent" --color 5319e7 --force
 done

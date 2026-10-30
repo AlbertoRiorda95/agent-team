@@ -25,7 +25,7 @@ import re
 
 from . import core
 
-ROLES = ["designer", "frontend", "backend", "devops", "optimizer", "security"]
+ROLES = ["designer", "frontend", "backend", "devops", "optimizer", "security", "writer"]
 MAX_TASKS = 6
 START, END = "split-plan v1", "split-plan-end"
 LABEL = "agent:split"

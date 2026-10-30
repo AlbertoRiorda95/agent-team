@@ -1,7 +1,7 @@
 ---
 name: setup
-description: Install the agent-team template into this repository for the harnesses, CI, tracker, roles and features the project uses (Claude Code, OpenCode, Codex), configure it (stack, commands, architecture), then run the first design studio. First time only; on a project that already has the template it stops and points to upgrade.
-argument-hint: "(no arguments)"
+description: Install the agent-team template into this repository for the harnesses, CI, tracker, roles and features the project uses (Claude Code, OpenCode, Codex), configure it (stack, commands, architecture), then run the first design studio (project, milestones and foundations); with --to-issues it also creates the issues, foundations tasks ready and the other features as "Design:" issues. First time only; on a project that already has the template it stops and points to upgrade.
+argument-hint: "[--to-issues]"
 disable-model-invocation: true
 ---
 
@@ -60,7 +60,8 @@ design and, in an empty repository, the foundations spec.
 - When `SETUP.md` asks for a design studio session, follow the procedure of
   the `design-studio` skill of this plugin.
 - When it gets to the issues (remote and custom scenarios), follow the
-  `create-issues` skill: dry run first, create only on the user's yes.
+  `create-issues` skill: dry run first, create only on the user's yes. With
+  `--to-issues`, skip them here: they come at the end (step 6).
 - Blocks F and F2 are already answered: do not ask them again. Its prune step
   should find nothing to remove; if the user changes the profile during the
   interview, update `.agent-team/config.json` and run
@@ -73,6 +74,27 @@ design and, in an empty repository, the foundations spec.
    installed.
 2. Commit everything on `chore/agent-team-setup`, including `.agent-team/`,
    with a message that lists what was configured.
+   With the `spec-sync` feature and no CI (local scenario), offer to link
+   `scripts/git-hooks/spec-sync.sh` as `.git/hooks/post-merge` and
+   `.git/hooks/post-commit`, after checking that `.git/hooks/` has no hooks of
+   the user's with those names.
 3. Offer to push and open a pull request. Then give the user the open items
    from `SETUP.md` (secrets, labels, branch protection, required checks) as a
    short checklist.
+
+## 6. With --to-issues
+
+`--to-issues` runs the first flow to the end: setup, design (project,
+milestones, foundations), issues. It stops before anything starts.
+
+1. **Issues**, right away, with any tracker, the local one included: follow the
+   `create-issues` skill (dry run, the user's yes, create). The foundations
+   tasks come out ready to start; every other roadmap feature gets a
+   "Design: <feature>" issue in its milestone. Without a tracker, say so and
+   list the foundations tasks instead. Do not wait for the merge of the setup
+   pull request: dispatch keeps the tasks waiting until their spec is on the
+   main branch.
+2. **Stop.** Report the milestones and issues, then what comes next, without
+   doing it: merge the setup pull request (if there is one),
+   `/agent-team:dispatch` to start the foundations tasks, and `/agent-team:design-studio --milestone <next> --to-issues`
+   (or `<feature> --to-issues`) for the next features.

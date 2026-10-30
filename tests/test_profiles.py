@@ -25,13 +25,14 @@ PROFILES = {
     "full": {},
     "claude-github": {"harnesses": ["claude"], "ci": "github", "tracker": "github",
                       "features": ["ci-agents", "team-tasks", "split", "dispatch"]},
-    "codex-jira": {"harnesses": ["codex"], "ci": "github", "tracker": "jira", "features": ["ci-agents"]},
+    "codex-jira": {"harnesses": ["codex"], "ci": "github", "tracker": "jira", "features": ["ci-agents", "spec-sync"]},
     "opencode-claude-gitlab": {"harnesses": ["opencode", "claude"], "ci": "gitlab", "tracker": "gitlab",
-                               "features": ["ci-agents", "litellm", "split"],
+                               "features": ["ci-agents", "litellm", "split", "spec-sync"],
                                "roles": ["frontend", "backend", "devops"]},
     "codex-claude-github": {"harnesses": ["codex", "claude"], "ci": "github", "tracker": "github",
                             "features": ["ci-agents", "dispatch"]},
-    "local-only": {"harnesses": ["claude", "codex", "opencode"], "ci": "none", "tracker": "local", "features": []},
+    "local-only": {"harnesses": ["claude", "codex", "opencode"], "ci": "none", "tracker": "local",
+                   "features": ["spec-sync"]},
     "no-tracker": {"harnesses": ["opencode"], "ci": "none", "tracker": "none", "features": []},
 }
 
@@ -141,6 +142,15 @@ class Rendered(unittest.TestCase):
         self.assertIn("  claude:\n", wf)
         self.assertNotIn("\n  team:\n", wf)
         self.assertNotIn("\n  opencode:\n", wf)
+        # spec-sync: the workflow with the tracker's secrets only, the GitLab job, the local hook
+        wf = open(os.path.join(d["codex-jira"], ".github/workflows/spec-sync.yml")).read()
+        self.assertIn("JIRA_API_TOKEN", wf)
+        self.assertNotIn("LINEAR_API_KEY", wf)
+        self.assertFalse(os.path.exists(os.path.join(d["claude-github"], ".github/workflows/spec-sync.yml")))
+        self.assertTrue(os.path.exists(os.path.join(d["opencode-claude-gitlab"], ".gitlab/ci/spec-sync.yml")))
+        self.assertIn(".gitlab/ci/spec-sync.yml", open(os.path.join(d["opencode-claude-gitlab"], ".gitlab-ci.yml.example")).read())
+        self.assertTrue(os.path.exists(os.path.join(d["local-only"], "scripts/git-hooks/spec-sync.sh")))
+        self.assertFalse(os.path.exists(os.path.join(d["no-tracker"], "scripts/git-hooks/spec-sync.sh")))
         full = sum(os.path.getsize(os.path.join(d["full"], "AGENTS.md")) for _ in [0])
         small = os.path.getsize(os.path.join(d["no-tracker"], "AGENTS.md"))
         self.assertLess(small, full)

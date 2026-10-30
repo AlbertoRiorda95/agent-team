@@ -11,6 +11,7 @@ import io
 import json
 import os
 import shutil
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -260,6 +261,164 @@ class TrackerFlow(unittest.TestCase):
         self.assertIn("0 issue(s) created", out)
         self.assertEqual(len(kids(second)), 1)
 
+    def run_design_to_tasks(self, sc):
+        """Design: issues first; then a two-row spec makes its issue the feature, a one-row spec makes it the task."""
+        open("docs/design/project.md", "w").write(
+            "# P\n\n## Roadmap\n| Milestone | Features |\n|---|---|\n| M1 Studio | `shell` (navigation, theme), `auth` |\n")
+        os.remove("docs/design/foundations.md")
+        json.dump(sc.cfg, open(".agent-team/config.json", "w"))
+        sc.install()
+        trk = lambda: config.tracker(config.load())  # noqa: E731
+        rc, out = call("create-issues.py")
+        self.assertEqual(rc, 0, out)
+        by = {i.title: i for i in trk().issues()}
+        shell, auth = by["Design: shell (M1 Studio)"], by["Design: auth (M1 Studio)"]
+
+        row = "---\nready: yes\n---\n# {t}\n\n## Task breakdown\n| # | Role | Task | Depends on | Issue |\n|---|---|---|---|---|\n{r}"
+        open("docs/design/shell.md", "w").write(row.format(
+            t="Shell", r="| 1 | backend | Menu endpoint | - | - |\n| 2 | frontend | Navigation bar | 1 | - |\n"))
+        open("docs/design/auth.md", "w").write(row.format(t="Auth", r="| 1 | backend | Login endpoint | - | - |\n"))
+        rc, out = call("create-issues.py", "--dry-run")
+        self.assertIn(f"rename  {shell.id}  Design: shell (M1 Studio)  ->  Shell (M1 Studio)", out)
+        self.assertIn(f"(sub-issue of {shell.id})", out)
+        rc, out = call("create-issues.py")
+        self.assertEqual(rc, 0, out)
+        self.assertIn("2 issue(s) and 0 milestone(s) created, 2 Design: issue(s) turned into features or tasks", out)
+        self.assertNotIn("no longer in the plan", out)
+
+        feature, task = trk().get(shell.ref), trk().get(auth.ref)
+        self.assertEqual(feature.title, "Shell (M1 Studio)")
+        self.assertTrue(core.key_of(feature).endswith("shell.md#feature"))
+        kids = trk().children(feature)
+        self.assertEqual(sorted(core.role_of(k) for k in kids), ["backend", "frontend"])
+        self.assertEqual(task.title, "Auth · 1/1 · backend: Login endpoint")
+        self.assertEqual(core.role_of(task), "backend")
+        self.assertEqual(core.code(task.milestone), "M1 Studio")
+
+        rc, out = call("create-issues.py")
+        self.assertIn("0 issue(s) and 0 milestone(s) created, 0 Design: issue(s)", out)
+        rc, out = call("dispatch.py")
+        self.assertNotIn("Issues without a role", out)
+        self.assertIn("Login endpoint", out)
+        if sc.name == "jira":                                  # one level of sub-tasks: the feature's tasks are Tasks
+            self.assertEqual({sc.fake.issues[k.ref]["fields"]["issuetype"]["name"] for k in kids}, {"Task"})
+
+        # a task of the feature can still be split
+        menu = next(k for k in kids if core.role_of(k) == "backend")
+        json.dump(dict(PLAN, parent=menu.number), open("plan.json", "w"))
+        call("split-issue.py", "propose", menu.number, "plan.json")
+        rc, out = call("split-issue.py", "create", menu.number)
+        self.assertIn("2 issue(s) created", out)
+        self.assertEqual(len(trk().children(trk().get(menu.ref))), 2)
+
+    def test_design_to_tasks_local(self):
+        self.run_design_to_tasks(scenarios()[0])
+
+    def test_design_to_tasks_github(self):
+        self.run_design_to_tasks(scenarios()[1])
+
+    def test_design_to_tasks_jira(self):
+        self.run_design_to_tasks(scenarios()[2])
+
+    def test_design_to_tasks_redmine(self):
+        self.run_design_to_tasks(scenarios()[3])
+
+    def test_design_to_tasks_gitlab(self):
+        self.run_design_to_tasks(scenarios()[4])
+
+    def test_design_to_tasks_linear(self):
+        self.run_design_to_tasks(scenarios()[5])
+
+    @unittest.skipUnless(shutil.which("git"), "git not installed")
+    def test_dispatch_follows_the_spec_on_main(self):
+        """Issues from a design branch wait for its merge; a row changed on main rewrites them; a removed one waits."""
+        env = {"GIT_AUTHOR_NAME": "t", "GIT_AUTHOR_EMAIL": "t@t", "GIT_COMMITTER_NAME": "t",
+               "GIT_COMMITTER_EMAIL": "t@t", "GIT_CONFIG_GLOBAL": os.devnull}
+        os.environ.update(env)                                   # tearDown restores the environment
+        git = lambda *a: subprocess.run(["git", *a], check=True, capture_output=True)  # noqa: E731
+        open("docs/design/project.md", "w").write(
+            "# P\n\n## Roadmap\n| Milestone | Features |\n|---|---|\n| M0 Base | `shell` |\n")
+        os.remove("docs/design/foundations.md")
+        json.dump({"tracker": "local", "starter": "label"}, open(".agent-team/config.json", "w"))
+        open(".gitignore", "w").write("docs/tasks/\norigin.git/\n")
+        git("init", "--bare", "-b", "main", "origin.git")
+        git("init", "-b", "main")
+        git("remote", "add", "origin", os.path.abspath("origin.git"))
+        git("add", ".")
+        git("commit", "-m", "project")
+        git("push", "origin", "main")
+        spec = ("---\nready: yes\n---\n# Shell\n\n## Task breakdown\n| # | Role | Task | Depends on | Issue |\n"
+                "|---|---|---|---|---|\n| 1 | backend | {t} | - | - |\n{more}")
+        git("checkout", "-b", "design/m0")
+        open("docs/design/shell.md", "w").write(spec.format(t="Menu endpoint", more="| 2 | frontend | Menu | 1 | - |\n"))
+        git("add", ".")
+        git("commit", "-m", "design: shell")
+
+        rc, out = call("create-issues.py")                        # from the design branch, before the merge
+        self.assertIn("2 issue(s) and 1 milestone(s) created", out)
+        rc, out = call("dispatch.py")
+        self.assertIn("spec docs/design/shell.md not merged into origin/main yet", out)
+        self.assertIn("Nothing to start", out)
+
+        git("checkout", "main")
+        git("merge", "--ff-only", "design/m0")
+        git("push", "origin", "main")
+        rc, out = call("dispatch.py")
+        self.assertIn("Would start (1)", out)
+        self.assertNotIn("Would update", out)
+
+        # the review changes row 1 on main: the issue is rewritten before it starts
+        open("docs/design/shell.md", "w").write(spec.format(t="Menu endpoint with paging", more="| 2 | frontend | Menu | 1 | - |\n"))
+        git("commit", "-am", "review: paging")
+        git("push", "origin", "main")
+        rc, out = call("dispatch.py", "--apply")
+        self.assertIn("Updating from the spec on origin/main (1)", out)
+        t = config.tracker(config.load())
+        api = next(i for i in t.issues() if core.key_of(i) == "docs/design/shell.md#1")
+        self.assertIn("Menu endpoint with paging", api.title)
+        self.assertTrue(core.started(api))
+        rc, out = call("create-issues.py")
+        self.assertIn("0 updated from their spec row", out)
+
+        # row 2 removed: its task waits, and create-issues lists it
+        open("docs/design/shell.md", "w").write(spec.format(t="Menu endpoint with paging", more=""))
+        git("commit", "-am", "review: no frontend")
+        git("push", "origin", "main")
+        rc, out = call("dispatch.py")
+        self.assertIn("its row is no longer in docs/design/shell.md on origin/main", out)
+        rc, out = call("create-issues.py")
+        self.assertIn("no longer in the plan", out)
+
+        # spec-sync hook: a commit on main that adds a row creates its issue by itself
+        os.symlink(SCRIPTS, "scripts")
+        os.symlink("../../scripts/git-hooks/spec-sync.sh", ".git/hooks/post-commit")
+        open("docs/design/shell.md", "w").write(spec.format(t="Menu endpoint with paging", more="| 3 | devops | Deploy | 1 | - |\n"))
+        r = subprocess.run(["git", "commit", "-am", "review: deploy"], capture_output=True, text=True)
+        self.assertIn("spec-sync: docs/design/ changed on main", r.stdout + r.stderr)
+        self.assertTrue(any(core.key_of(i) == "docs/design/shell.md#3" for i in t.issues()), r.stdout + r.stderr)
+
+    def test_dependency_on_another_spec(self):
+        """Roadmap order "shell, auth"; a row of shell waits for row 1 of auth: auth is created first."""
+        open("docs/design/project.md", "w").write(
+            "# P\n\n## Roadmap\n| Milestone | Features |\n|---|---|\n| M0 Foundations | `shell` (navigation), `auth` |\n")
+        os.remove("docs/design/foundations.md")
+        row = "---\nready: yes\n---\n# {t}\n\n## Task breakdown\n| # | Role | Task | Depends on | Issue |\n|---|---|---|---|---|\n{r}"
+        open("docs/design/shell.md", "w").write(row.format(t="Shell", r="| 1 | frontend | Login page | auth#1 | - |\n"))
+        open("docs/design/auth.md", "w").write(row.format(t="Auth", r="| 1 | backend | Login endpoint | - | - |\n"))
+        sc = scenarios()[0]
+        json.dump(sc.cfg, open(".agent-team/config.json", "w"))
+        rc, out = call("create-issues.py")
+        self.assertEqual(rc, 0, out)
+        self.assertLess(out.index("Login endpoint"), out.index("Login page"), out)
+        t = config.tracker(config.load())
+        by = {i.title: i for i in t.issues()}
+        api, page = by["Auth · 1/1 · backend: Login endpoint"], by["Shell · 1/1 · frontend: Login page"]
+        self.assertIn(api.id, core.section(page.body, "Depends on"))
+        self.assertIn(api.ref, [str(b) for b in t.blockers(page)])
+        self.assertEqual(core.code(page.milestone), "M0 Foundations")
+        rc, out = call("create-issues.py")
+        self.assertIn("0 issue(s) and 0 milestone(s) created", out)
+
     def test_cross_issue_local(self):
         self.run_cross_issue(scenarios()[0])
 
@@ -330,6 +489,15 @@ class Units(unittest.TestCase):
         for bad in ("12:", ":api", "12:API", "12 api", "12:api:x", "nokey"):
             self.assertTrue(check(bad), bad)
         self.assertTrue(check("13:api"))                       # its own issue: use the key alone
+
+    def test_auto_starter_needs_agents_in_ci(self):
+        from agentteam import starters
+        gh = core.Tracker({})
+        gh.name = "github"
+        self.assertEqual(starters.make({"features": ["ci-agents"]}, gh).name, "label")
+        self.assertEqual(starters.make({}, gh).name, "label")                       # full template
+        self.assertEqual(starters.make({"features": []}, gh).name, "print")         # local scenario, GitHub issues
+        self.assertEqual(starters.make({"features": [], "start_command": "x {id}"}, gh).name, "command")
 
     def test_jira_markup(self):
         from agentteam.trackers.jira import md_to_jira

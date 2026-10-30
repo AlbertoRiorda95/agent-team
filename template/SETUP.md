@@ -2,7 +2,8 @@
 
 You are setting up the **agent-team template** for a new project. The template
 defines a team of agents: designer, frontend, backend and devops for everyday
-work, optimizer and security that run only on explicit request,
+work, optimizer, security and writer (the documentation) that run only on
+explicit request,
 plus the rules, hooks, workflows and gateway they need. It ships with
 placeholder values written for a React + Node + Postgres app on GitHub; your
 job is to replace them with the user's real project data.
@@ -111,6 +112,7 @@ what you found in the repository, and ask the user to confirm or correct:
 | devops | `.github/workflows/` or `.gitlab-ci.yml`, `Dockerfile*`, `compose*.yml`, `deploy/`, `charts/`, `infra/`, `Makefile` |
 | optimizer | no folder of its own: works on tested code anywhere, on request |
 | security | writes only `docs/security/`; reads everything, on request |
+| writer | writes only `docs/software/` and the project `README.md`; reads everything, on request |
 
 Also ask:
 - Where the design tokens live (default `src/styles/tokens.css`), or whether
@@ -183,12 +185,13 @@ lost: a later profile change plus the template upgrade brings it back.
 - **CI platform**: `github`, `gitlab`, `both` (rare) or `none`.
 - **Tracker**: from block F (`github`, `gitlab`, `local`, `jira`, `linear`,
   `redmine`, or `none` for no issues at all).
-- **Roles**: the six by default; drop those the project does not need
+- **Roles**: the seven by default; drop those the project does not need
   (designer without a UI, security with nothing to attack yet).
 - **Features**: `ci-agents` (agents started from issues in CI: the remote
   scenario), `team-tasks`, `split` (split proposals in CI, with Claude Code),
-  `dispatch` (start ready tasks at every merge), `litellm` (the gateway in
-  `infra/litellm/`).
+  `dispatch` (start ready tasks at every merge), `spec-sync` (update the
+  issues when a spec change reaches the main branch: a CI job on GitHub or
+  GitLab, a Git hook locally), `litellm` (the gateway in `infra/litellm/`).
 
 The profile goes into `.agent-team/config.json`, together with the tracker
 settings of block F, for example:
@@ -199,7 +202,7 @@ settings of block F, for example:
   "runners": {"optimizer": "codex"},
   "ci": "github",
   "tracker": "github",
-  "roles": ["designer", "frontend", "backend", "devops", "optimizer", "security"],
+  "roles": ["designer", "frontend", "backend", "devops", "optimizer", "security", "writer"],
   "features": ["ci-agents", "split", "dispatch"]
 }
 ```
@@ -215,6 +218,7 @@ Propose the defaults and ask only whether to change them:
 | optimizer | opus | high |
 | devops | opus | high |
 | security | opus | high |
+| writer | sonnet | medium |
 
 ### H. Skills
 `scripts/install-skills.sh` installs skills written for React, Postgres and
@@ -228,9 +232,17 @@ GitHub Actions. Show the list and ask which ones fit the stack:
 | tdd, diagnosing-bugs | always | frontend, backend |
 | supabase-postgres-best-practices | Postgres | backend, optimizer |
 | api-design-principles | there is an HTTP API | backend |
+| clean-architecture (shipped in the template, nothing to install) | the backend is in a language and framework that let you layer the code (TypeScript, Java, Kotlin, C#, Python, Go, PHP...) and has real business rules, not only CRUD over a database | backend (preloaded) |
 | security-review | always | security (preloaded), backend (on demand) |
 | code-simplifier | always | optimizer |
 | gha-security-review, github-actions-templates | GitHub Actions | devops |
+
+If the clean-architecture row does not fit (no backend, a script, a framework
+that imposes its own structure, a thin CRUD), delete
+`.claude/skills/clean-architecture/` and `.agents/skills/clean-architecture/`,
+and its line in `skills:` of `.claude/agents/backend.md`, and the clean
+architecture rule in `docs/roles/backend.md`. If it fits, set the folder names
+in the skill to the stack's.
 
 For a stack the list doesn't cover, offer to search with `npx skills find
 "<topic>"` and propose at most one or two skills per role: every installed
@@ -246,12 +258,15 @@ skill adds its description to every session.
 | Commands | `AGENTS.md` → `## Commands`; `docs/roles/frontend.md` (lint/test line); `scripts/hooks/gate-test.sh` (test command); `scripts/hooks/lint-frontend.sh` (file extensions and single-file linter); `.gitlab-ci.yml.example` (image, install steps) |
 | Folder layout | `AGENTS.md` → `## How work is delegated`; `docs/roles/*.md` → `## Boundaries` of each role; `.github/CODEOWNERS`; `.claude/settings.json` → `Read(...)` deny rules for secret paths |
 | Token location | `docs/roles/designer.md`, `docs/roles/frontend.md`, `.claude/skills/design-system/SKILL.md` |
+| Clean architecture | `.claude/skills/clean-architecture/SKILL.md` and its copy in `.agents/skills/` (folder names), or remove it as in step H |
 | Design system | `.claude/skills/design-system/SKILL.md` (rewrite; keep it under ~60 lines) |
-| Removed role | delete `docs/roles/<role>.md`, `.claude/agents/<role>.md`, `.opencode/agents/<role>.md`; remove it from `AGENTS.md` (on-demand roles) and `docs/agents/workflow.md` (sequence), `CLAUDE.md`, `scripts/create-labels.sh`, the model expression in `.github/workflows/agents.yml`. For security also delete `scripts/hooks/security-*.sh`, `docs/roles/security-scope.txt`, `docs/security/` and the matching `.gitignore` lines |
+| Removed role | delete `docs/roles/<role>.md`, `.claude/agents/<role>.md`, `.opencode/agents/<role>.md`; remove it from `AGENTS.md` (on-demand roles) and `docs/agents/workflow.md` (sequence), `CLAUDE.md`, `scripts/create-labels.sh`, the model expression in `.github/workflows/agents.yml`. For writer also delete `scripts/hooks/writer-writes.sh`, `docs/software/` and the `document` skill (`.claude/skills/document/`, `.agents/skills/document/`). For security also delete `scripts/hooks/security-*.sh`, `docs/roles/security-scope.txt`, `docs/security/` and the matching `.gitignore` lines |
 | Username | `.github/CODEOWNERS` |
 | CI | `.github/workflows/ci.yml` and `.gitlab/ci/ci.yml` (toolchain, commands, cache key, build output); `ci/scanners.env` (policies); `trivy.yaml` only if license categories change |
 | API contract | `AGENTS.md` → `## API contract` (path and generator); `docs/api/README.md`; `docs/roles/frontend.md` and `docs/roles/backend.md` if the wording differs; `.github/CODEOWNERS` (add the contract path) |
 | Commands allowed in CI | `--allowedTools` in `.github/workflows/agents.yml` and `claude.yml` (replace `Bash(npm:*)`, `Bash(npx:*)` with the stack's tools), `.gitlab-ci.yml.example` |
+| Reference generators | `ci/reference.sh` (keep the generators of the stack, add the missing one) and `ci/scanners.env` (versions, `PYTHON_PACKAGE`); the `reference-docs` job of `.github/workflows/ci.yml` and `.gitlab/ci/ci.yml` (toolchain, dependency install); the dev dependency the generator needs (typedoc, for example) |
+| Wanted documents | `docs/software/README.md` (the list the writer writes) |
 | Security scope and tools | `docs/roles/security-scope.txt` (one host per line, never production); the dependency-audit command in `docs/roles/security.md` → `## What you check` item 6 |
 | Scenario | see "Profiles by scenario" below |
 | Team tasks in CI | keep the `team` job in `.github/workflows/agents.yml` and `agent:team` in `scripts/create-labels.sh`, or the `claude-team` job in `.gitlab-ci.yml.example`; if not wanted, remove them and the `## Team tasks` section of `AGENTS.md` and `docs/agents/team-tasks.md` |
@@ -277,9 +292,9 @@ then removes the files, so there is nothing to delete by hand.
 
 | Scenario | Profile |
 |---|---|
-| Local | the tool(s) used locally; `ci` of the project CI; `tracker` `none` or `local`; no features. For Claude Code agent teams, set `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` to `"1"` in `.claude/settings.json` |
-| Remote repository | one or more tools (the first leads, `runners` for the others); `ci` and `tracker` the same platform; `ci-agents` plus `split`, `team-tasks`, `dispatch` as wanted; `litellm` for OpenCode through a gateway |
-| Custom orchestrator | the tools the orchestrator runs; the tracker of its intake; `starter: command` with `start_command` (`docs/general/trackers.md`); `litellm` if it routes models through the gateway |
+| Local | the tool(s) used locally; `ci` of the project CI; `tracker` `none` or `local`; `spec-sync` with a tracker if wanted (then link `scripts/git-hooks/spec-sync.sh` as the `post-merge` and `post-commit` hooks, after checking `.git/hooks/` has none of the user's). For Claude Code agent teams, set `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` to `"1"` in `.claude/settings.json` |
+| Remote repository | one or more tools (the first leads, `runners` for the others); `ci` and `tracker` the same platform; `ci-agents` plus `split`, `team-tasks`, `dispatch`, `spec-sync` as wanted; `litellm` for OpenCode through a gateway |
+| Custom orchestrator | the tools the orchestrator runs; the tracker of its intake; `starter: command` with `start_command` (`docs/general/trackers.md`); the orchestrator runs `scripts/create-issues.py` after merging a change to `docs/design/`; `litellm` if it routes models through the gateway |
 
 After pruning, by hand: on GitLab rename `.gitlab-ci.yml.example` to
 `.gitlab-ci.yml` and move `.github/CODEOWNERS` to `.gitlab/CODEOWNERS` if it is
@@ -453,7 +468,9 @@ starts until the user adds `agent:<role>` to a task.
 
 The script skips titles that already exist and never closes anything, so it is
 safe to run again after every design studio session; it lists the issues it
-created earlier that are no longer in the plan.
+created earlier that are no longer in the plan. When a feature's spec becomes
+ready, its "Design:" issue is renamed into the task (one row) or into the
+feature issue with the tasks as sub-issues (several rows).
 
 ## Report to the user
 
@@ -462,8 +479,10 @@ End with:
 2. the files changed, created and deleted;
 3. what is still open (versions to pin, secrets to create, labels to run,
    branch protection to enable, the CI as a required check on `main`), as a checklist;
-4. a reminder that optimizer and security run only on request, and that a
-   security assessment is best run once the application is complete;
+4. a reminder that optimizer, security and writer run only on request, that a
+   security assessment is best run once the application is complete, and that
+   `/document` writes the software documentation (`docs/software/`) while the
+   CI builds the reference from the code;
    on GitHub, a reminder to enable branch protection on `main` with "Require
    branches to be up to date before merging" and to run
    `./scripts/create-labels.sh` (it also creates `alignment-needed`); on

@@ -12,6 +12,9 @@ caught even where the Markdown library differs:
 Needs Python-Markdown, pinned so that every build gives the same bytes:
   pip install markdown==3.11.2
 
+Diagrams are ```mermaid blocks: GitHub draws them in the Markdown, and the HTML
+loads Mermaid (pinned, from a CDN) to draw them; offline they stay readable as text.
+
 Links between chapters are written for GitHub ("05-scenario-local.md#profile")
 and rewritten to anchors of the single page; a link to a missing chapter or
 heading fails the build.
@@ -27,6 +30,7 @@ SRC = os.path.join(ROOT, "docs", "manual")
 OUT = os.path.join(ROOT, "docs", "manual.html")
 PINNED = "3.11.2"
 TITLE = "Agent team: user manual"
+MERMAID = "https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.esm.min.mjs"
 
 
 def sources():
@@ -83,6 +87,8 @@ def build(names):
     for c in chapters:
         c["body"] = re.sub(r'href="([^"]+)"', lambda m: link(m, c["key"]), c["body"])
         c["body"] = re.sub(r"(<table>.*?</table>)", r'<div class="table">\1</div>', c["body"], flags=re.S)
+        c["body"] = re.sub(r'<pre><code class="language-mermaid">(.*?)</code></pre>', r'<pre class="mermaid">\1</pre>',
+                           c["body"], flags=re.S)
     if errors:
         raise SystemExit("broken links:\n  " + "\n  ".join(errors))
     return chapters
@@ -123,6 +129,8 @@ padding:1px 5px;border-radius:4px}
 pre{background:var(--code);padding:14px 16px;border-radius:8px;overflow-x:auto;margin:0 0 16px;
 border:1px solid var(--line)}
 pre code{background:none;padding:0;font-size:13px}
+pre.mermaid{background:var(--panel);text-align:center;font-size:13px}
+pre.mermaid svg{max-width:100%;height:auto}
 .table{overflow-x:auto;margin:0 0 18px;border:1px solid var(--line);border-radius:8px}
 table{border-collapse:collapse;width:100%;font-size:14.5px}
 th,td{text-align:left;vertical-align:top;padding:8px 12px;border-bottom:1px solid var(--line)}
@@ -146,6 +154,12 @@ def render(chapters, digest, version):
         sub = "".join(f'<li><a href="#{i}">{t}</a></li>' for i, t in c["heads"])
         nav.append(f'<li><a href="#{c["key"]}">{c["title"]}</a>' + (f"<ol>{sub}</ol>" if sub else "") + "</li>")
     body = "\n".join(f'<section class="chapter" id="{c["key"]}">\n{c["body"]}\n</section>' for c in chapters)
+    diagrams = ""
+    if '<pre class="mermaid">' in body:
+        diagrams = (f'<script type="module">import mermaid from "{MERMAID}";\n'
+                    "const dark=matchMedia('(prefers-color-scheme: dark)').matches"
+                    "&&document.documentElement.dataset.theme!=='light';\n"
+                    "mermaid.initialize({startOnLoad:true,theme:dark?'dark':'neutral',flowchart:{useMaxWidth:true,htmlLabels:true}});</script>\n")
     return f"""<!DOCTYPE html>
 <!-- Generated from docs/manual/*.md by scripts/build_manual.py: do not edit by hand. -->
 <html lang="en">
@@ -170,7 +184,7 @@ def render(chapters, digest, version):
 <p class="meta">Generated from the Markdown sources in <code>docs/manual/</code>.</p>
 </main>
 </div>
-</body>
+{diagrams}</body>
 </html>
 """
 

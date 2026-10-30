@@ -1,7 +1,8 @@
 # 5. Scenario: local
 
-The team runs on your computer, inside your session. You talk to a lead
-session, which delegates to the role agents and reports back. Everything in
+The team runs on your computer, inside your session. You talk to the main
+session (the agent you started), which hands each task to the role agent and
+reports back. Everything in
 [4. Run the project](04-run-the-project.md) applies; this chapter adds how to
 work with each tool.
 
@@ -12,7 +13,7 @@ work with each tool.
 | Starting in minutes: no secrets, no workflows, no server | You need to be there: when you close the session, the work stops |
 | A tight feedback loop: you see each step and correct it at once | One machine: tasks run one after another or a few at a time, on your laptop's resources |
 | Exploring, prototypes, small features, design work | Less trail: decisions live in commits and specs, not in issue threads, unless you also use a tracker |
-| Alignment handled automatically: the lead runs designer and the affected roles right away | Your subscription or API budget pays for every turn of every agent |
+| Alignment handled automatically: the main session runs designer and the affected roles right away | Your subscription or API budget pays for every turn of every agent |
 | Your own credentials and tools, no CI minutes | Long sessions grow expensive: use handoff notes |
 
 Choose it to begin with, for one-person projects, and for the design work of
@@ -27,8 +28,68 @@ backlog grows and you want the team to work while you do something else.
 
 Use `"tracker": "local"` to keep issues as Markdown files in `docs/tasks/`,
 or your real tracker if the project has one: issues, splits and dispatch work
-the same. Keep `ci` for the project's own CI: it checks your merge requests
-even when nobody runs agents there.
+the same. With GitHub or GitLab issues but no `ci-agents` feature, dispatch
+does not add labels that would start CI jobs: it prints what to run, as for
+the other trackers. Keep `ci` for the project's own CI: it checks your merge
+requests even when nobody runs agents there.
+
+## What a task produces
+
+Each task is done on its own branch (`feat/<task>-<slug>`), with small commits.
+At the end the agent runs the tests and, if the repository has a remote,
+pushes the branch and opens a merge request, which the project's CI checks;
+your tool asks before running those commands unless you allowed them. Without
+a remote, the branch stays on your computer: review it and merge it yourself.
+Agents never push to `main` and never merge. With a tracker, the merge
+request closes the issue on GitHub and GitLab; on the other trackers, close it
+yourself after the merge (for local files, `state: "done"`).
+
+## Where the CI runs
+
+The project's CI (`ci.yml` on GitHub, `.gitlab/ci/ci.yml` on GitLab) is run by
+the platform that hosts the repository, not by your computer. Working locally
+does not change that: the agents run on your machine, but the checks need the
+repository to be on GitHub or GitLab. The template takes it for granted that
+the code is hosted there, even if all the development happens locally:
+
+- **With a remote.** The agent pushes the branch and opens the merge request;
+  the CI runs on it and you see the result in the merge request or with `gh pr
+  checks`, `gh run list` (GitHub) or `glab ci status` (GitLab). You can
+  therefore check that a commit passes before you merge. An agent running
+  locally waits for the checks and fixes what fails
+  (rule in `docs/agents/ci.md`). Turn on branch
+  protection so that a red CI blocks the merge
+  ([4. Review and merge](04-run-the-project.md#review-and-merge)). A private
+  repository is enough: nobody else needs to see the code.
+- **Without a remote.** Nothing runs in CI: there is no platform to run it. The
+  same steps are scripts you can run yourself, and the `/local-ci` skill runs
+  them all and fixes what fails (below).
+- **No CI at all.** With `"ci": "none"` in the profile the CI files are not
+  installed. Agents still follow TDD and the test gate; vulnerabilities and
+  licenses are checked by nobody. Use it for throwaway experiments.
+
+### Run the CI checks locally: `/local-ci`
+
+The template skill `local-ci` runs on your computer the same checks as the CI:
+build, type check, tests, UI tests (when `playwright.config.ts` exists),
+static analysis, licenses, vulnerabilities and secrets. It reads the project's
+CI file and `AGENTS.md > Commands` to know what to run, runs every check, fixes
+the failures and runs the failed ones again (three rounds at most).
+
+```text
+> /local-ci                    all the checks
+> /local-ci static             only one: build, test, ui, static, licenses, vulnerabilities
+```
+
+Use it for convenience, before you push, so the real CI does not come back
+red; or as the **alternative to the CI** when the project has no real one
+(no remote, or `"ci": "none"`). It fixes the cause, not the check: it never
+weakens a test, edits `ci/scanners.env` or suppresses a finding; false
+positives, licenses and secrets that must be rotated are reported to you. The
+fixes stay in the working tree, uncommitted. It is not the real CI: a green run
+on your computer proves nothing to anyone else, and the platform's CI stays
+the one that gates the merge. The security steps need the network, to install
+their tools and fetch the vulnerability data.
 
 ## With Claude Code
 
@@ -36,15 +97,17 @@ Start `claude` in the repository. The roles are subagents in `.claude/agents/`:
 
 ```text
 > @backend implement task 2 of docs/design/login.md
-> implement the login feature from docs/design/login.md   (the lead delegates by role)
+> implement the login feature from docs/design/login.md   (the main session delegates by role)
 > @devops add a staging deploy job                       (it writes the config, never applies it)
 ```
 
-- Each agent preloads its skills and has its own context; the lead receives a
+- Each agent preloads its skills and has its own context; the main session receives a
   summary, not the whole work.
 - Hooks: commands that change real environments are blocked for everyone; a
-  task cannot be closed while the tests fail; after each delegation the lead
-  is reminded of open alignment entries; frontend files are linted when saved.
+  role agent cannot report its task as finished while the test suite fails
+  (the test gate: it must fix them first); after each delegation the main
+  session is reminded of open alignment entries; frontend files are linted
+  when saved.
 - Denied commands (`git push --force`, push to `main`, merge, `terraform
   apply`...) are in `.claude/settings.json`.
 - **Agent teams** (experimental in Claude Code): several agents work in
@@ -67,7 +130,7 @@ reads `.codex/`. Approve the project hooks once with `/hooks`.
 - Forbidden commands are in `.codex/rules/agent-team.rules`, and the same
   hook as Claude Code blocks commands on real environments.
 - Codex has no per-agent hooks: the test gate and the alignment reminder are
-  rules in `AGENTS.md` that the lead follows, not checks.
+  rules in `AGENTS.md` that the main session follows, not checks.
 - Pin the model in `.codex/config.toml` if you do not want Codex's default.
 
 ## With OpenCode
@@ -92,17 +155,50 @@ handoff notes are the same for everybody.
 
 ## Issues in the local scenario
 
-A local session does not need issues: give the lead a spec and a task number.
-With a tracker, the lead can pick work from it:
+A local session does not need issues: give the main session a spec and a
+task number. With a tracker, ask it to pick work from it:
 
 ```text
-> python3 scripts/dispatch.py      shows the ready tasks
-> implement issue #14              the lead reads it and delegates to its role
+> /agent-team:dispatch             the ready tasks; on your yes, marks them as started
+  #14: start it yourself: in a session, delegate to @backend with "carry out #14"
+> carry out #14                    the main session reads the issue and hands it to backend
 ```
 
-The default starter for trackers other than GitHub and GitLab prints the
-command to start each task; with `"starter": "command"` it can open a new
-terminal session for you instead ([9. Reference](09-reference.md#starters)).
+Dispatch marks the task as started (`agent:backend`) and prints how to run
+it; it runs nothing by itself. Run it in this session, or in a second terminal
+to work on two tasks at once. You can also run the scripts yourself in a
+shell: `python3 scripts/dispatch.py` shows the plan, `--apply` marks the tasks.
+
+To have dispatch open the session for you, set a start command in
+`.agent-team/config.json`, for example on Linux with GNOME:
+
+```json
+{"starter": "command",
+ "start_command": "gnome-terminal -- claude \"carry out {id} following docs/roles/{role}.md\""}
+```
+
+The command runs without a shell, with `{id}`, `{role}` and the other values
+of [9. Starters](09-reference.md#starters) filled in.
+
+## Keep the issues in line with the specs
+
+Dispatch already checks every task against its spec row before starting it
+([4. When a spec changes](04-run-the-project.md#when-a-spec-changes-after-its-issues-exist)).
+To update the issues as soon as a spec change lands, without running
+create-issues yourself, add `spec-sync` to the profile and link its Git hook
+once (check first that `.git/hooks/` has no `post-merge` or `post-commit` of
+yours):
+
+```bash
+ln -s ../../scripts/git-hooks/spec-sync.sh .git/hooks/post-merge
+ln -s ../../scripts/git-hooks/spec-sync.sh .git/hooks/post-commit
+```
+
+After a commit, merge or pull on the main branch that changed `docs/design/`,
+it runs `scripts/create-issues.py`: new rows get issues, changed rows of tasks
+not started rewrite them. A failure is printed and never blocks Git. The hook
+sees only what happens in this clone: a merge done in a web interface counts
+at your next `git pull`.
 
 ## The skills by example
 
@@ -137,8 +233,10 @@ agent asks numbered questions and you answer by number.
 
 ```text
 > /agent-team:create-issues
-  milestone create   M0 · Walking skeleton
-  issue create       Login · 1/3 · backend: Auth endpoint ...
+  milestone create   M1 · Login, Orders
+      rename  #9  Design: login (M1)  ->  Login (M1)
+      create        Login · 1/2 · backend: Auth endpoint   (sub-issue of #9)
+      create        Login · 2/2 · frontend: Login page   (depends on: task 1)   (sub-issue of #9)
 > yes
 ```
 
@@ -150,13 +248,38 @@ agent asks numbered questions and you answer by number.
 > ok 7
 ```
 
-**dispatch** - to see what is ready; in a local project the starter prints the
-command to run in a new session:
+**dispatch** - to see what is ready; in a local project it marks the tasks
+and prints what to run:
 
 ```text
 > /agent-team:dispatch
   Would start (2): #1 backend, #3 devops. Waits: #2 (needs #1)
 > yes
+  #1: start it yourself: in a session, delegate to @backend with "carry out #1"
+  #3: start it yourself: in a session, delegate to @devops with "carry out #3"
+> carry out #1
+```
+
+**The two flows in one go** - with `--to-issues` each flow runs to the issues
+and stops before dispatch ([4. The workflow](04-run-the-project.md#the-workflow)).
+Without a remote there is no merge request: the specs are committed on a
+`design/...` branch that you merge yourself. Without a remote, dispatch reads
+the specs from the commit you are on, so run it from your main branch after
+the merge.
+
+```text
+> /agent-team:setup --to-issues
+  ... configuration, project design, foundations spec ...
+  create-issues: M0 foundations tasks #1-#3, M1 Design: #4 login, #5 orders. Create?
+> yes
+  Next: /agent-team:dispatch (foundations), then /agent-team:design-studio --milestone M1 --to-issues
+
+> /agent-team:design-studio --milestone M1 --to-issues
+  ... one round of questions for login and orders ...
+> ok login; ok orders
+  create-issues: #4 becomes "Login (M1)" with 2 sub-issues, #5 becomes the orders task. Create?
+> yes
+  Split: none needed. Start with /agent-team:dispatch.
 ```
 
 **upgrade** - after a new plugin version, or to add a tool:

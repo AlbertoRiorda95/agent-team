@@ -1,7 +1,7 @@
 # Template: a team of AI coding agents
 
 Starter repository for a team of development agents: designer, frontend,
-backend and devops for everyday work, optimizer and security on request, for Claude Code,
+backend and devops for everyday work, optimizer, security and writer (the documentation) on request, for Claude Code,
 OpenCode and Codex. It is installed and kept up to date by the agent-team plugin,
 whose user manual explains every scenario. It holds the team's configuration, not the application code.
 
@@ -107,7 +107,7 @@ and merges sections back into your files, keeping your edits.
 ## Notes
 
 - The agents of each harness (`.claude/agents/`, `.opencode/agents/`, `.codex/agents/`) point to the prompt in `docs/roles/`: one definition per role. It costs one file read when each agent starts.
-- optimizer and security never run as routine steps: ask for them explicitly ("use optimizer on…", "run a security assessment", or the `agent:optimizer` / `agent:security` label). A security assessment costs a few dollars on Opus, so run it once the app is complete or before a release.
+- optimizer, security and writer never run as routine steps: ask for them explicitly ("use optimizer on…", "run a security assessment", "document the application" or `/document`, or the `agent:optimizer` / `agent:security` / `agent:writer` label). A security assessment costs a few dollars on Opus, so run it once the app is complete or before a release.
 <!-- agent-team:if issues -->
 - Issues from the roadmap (remote and custom scenarios): `python3 scripts/create-issues.py --dry-run`, then without `--dry-run`, creates one native milestone per roadmap milestone (M0, M1, … on GitHub and GitLab) and, in it, the task issues of every ready spec and a "Design: <feature>" issue for every feature without a spec. No labels: start a task by adding `agent:<role>` to it. It skips existing titles and milestones, so run it again after every design studio session. Repositories set up with the old layout (one "M0 · …" parent issue with the tasks as sub-issues) move to milestones with `--migrate`. Needs the remote and an authenticated `gh` or `glab`, or another tracker (`docs/general/trackers.md`).
 <!-- agent-team:end -->

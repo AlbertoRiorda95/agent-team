@@ -9,6 +9,7 @@ skills:
   - api-design-principles
   - supabase-postgres-best-practices
   - tdd
+  - clean-architecture
 color: green
 memory: project
 ---

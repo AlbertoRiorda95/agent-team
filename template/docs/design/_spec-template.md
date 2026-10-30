@@ -50,7 +50,8 @@ Breaking for existing clients: no
 
 ## Task breakdown
 <!-- Issue: leave "-" for scripts/create-issues.py to create the issue; "#12" when an
-     existing issue already tracks the row; "done" when it is finished. -->
+     existing issue already tracks the row; "done" when it is finished.
+     Depends on: row numbers of this spec, or <feature>#<n> for a row of another spec. -->
 | # | Role | Task | Depends on | Issue |
 |---|---|---|---|---|
 | 1 | backend | ... | — | - |

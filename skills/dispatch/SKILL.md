@@ -26,8 +26,14 @@ Run `python3 <script> $ARGUMENTS` (without `--apply`) and explain the output:
 
 - the scope (by default the first open milestone that still has tasks);
 - what is running now, and what would start;
-- what waits, and for what: an open dependency, or a role already busy;
-- what is never started automatically: optimizer and security (on-demand),
+- what waits, and for what: an open dependency, a role already busy, a spec
+  not merged into the main branch yet (merge the design merge request), or a
+  row removed from its spec (offer to close the issue; never close it
+  yourself);
+- what would be updated: tasks whose spec row changed since their issue was
+  written are rewritten from the row before they start (the user's yes covers
+  it, with `--apply`);
+- what is never started automatically: optimizer, security and writer (on-demand),
   issues with the `hold` label, "Design:" issues.
 
 Each start is an agent run, so it costs tokens or subscription quota. The

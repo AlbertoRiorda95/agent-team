@@ -3,6 +3,15 @@
 Agent team ships as one repository, `agent-team`. It is a Claude Code
 plugin, and its skills also work in Codex and OpenCode.
 
+## Before you start
+
+| You need | For |
+|---|---|
+| Claude Code, Codex or OpenCode, installed and logged in (table at the end) | running the commands and the agents |
+| Git | everything: the work happens in branches and merge requests |
+| Python 3.11 or newer | the scripts that create issues, split and dispatch |
+| `gh` (GitHub) or `glab` (GitLab), logged in | issues and merge requests on that platform |
+
 ## In Claude Code
 
 ```bash
@@ -23,10 +32,16 @@ as `/agent-team:<skill>`:
 | `/agent-team:upgrade` | bring the project to a new plugin version or a new profile |
 | `/agent-team:next` | see where the project stands and which command to run next (read-only) |
 
-Claude can propose `next`, `design-studio`, `create-issues`, `split-issue` and
-`dispatch` by itself when they fit; each shows its plan and asks before changing
-anything. `setup` and `upgrade` run only when you type them, so they can also
-be typed from the Claude app.
+You can type these commands, or just say what you want ("what should I do
+next?", "split issue 42"): Claude then proposes `next`, `design-studio`,
+`create-issues`, `split-issue` or `dispatch` when one fits, and runs it only
+after you agree. Each one shows its plan and asks before changing anything.
+`setup` and `upgrade` change many files at once, so Claude never proposes
+them: they run only when you type them.
+
+All of them also work when you drive a session from the Claude app on your
+phone, through Remote Control, where you cannot browse the command list
+([5. From your phone](05-scenario-local.md#from-your-phone)).
 
 To try a local checkout without installing: `claude --plugin-dir ./agent-team`.
 
@@ -79,6 +94,3 @@ new template ([8. Change and upgrade](08-change-and-upgrade.md)).
 | Claude Code | `curl -fsSL https://claude.ai/install.sh \| bash` | API key or Claude subscription |
 | Codex | `npm install -g @openai/codex` | trust the project once, so it reads `.codex/`; approve its hooks with `/hooks` |
 | OpenCode | `curl -fsSL https://opencode.ai/install \| bash` or `npm install -g opencode-ai` | connect the providers you use with `/connect` |
-
-Python 3.11 or newer and Git are needed by the scripts; `gh` or `glab` for
-GitHub or GitLab issues.

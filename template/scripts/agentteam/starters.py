@@ -107,10 +107,11 @@ KINDS = {c.name: c for c in (Label, GitLabPipeline, Command, Print)}
 
 def make(cfg, tracker):
     name = cfg.get("starter", "auto")
+    in_ci = "ci-agents" in cfg.get("features", ["ci-agents"])   # no "features": the full template
     if name == "auto":
-        if tracker.name == "github":
+        if tracker.name == "github" and in_ci:
             name = "label"
-        elif tracker.name == "gitlab":
+        elif tracker.name == "gitlab" and in_ci:
             name = "gitlab-pipeline"
         elif cfg.get("start_command"):
             name = "command"

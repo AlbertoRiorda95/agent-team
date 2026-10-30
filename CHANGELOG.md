@@ -3,6 +3,123 @@
 Every release has **Upgrade notes**: the steps `/agent-team:upgrade` cannot do
 by changing files, because they need your hands on the platform or a decision.
 
+Versions: the patch for documentation and small fixes, the minor for new
+features, the major for changes that break existing projects.
+
+## Unreleased
+
+### Template
+- `clean-architecture` skill for the backend, preloaded by `backend`. `setup`
+  keeps it when the stack and the project allow layering and removes it for a
+  script or a thin CRUD.
+
+- `writer` role (on demand) and `/document` skill: design document, ICD, user
+  manual, install and operations guide and API guide in `docs/software/`, and
+  a short `README.md` that points to them. The writer cannot write anywhere
+  else (a hook in Claude Code, permissions in OpenCode, a rule in Codex), so
+  it never collides with the designer's `docs/design/`.
+- The CI builds the reference documentation from the code (`reference-docs`
+  job, `ci/reference.sh`: OpenAPI with Redocly, typedoc, pdoc; other stacks
+  are added in the script) and keeps it as an artifact.
+- `local-ci` skill: runs the CI's checks on your computer and fixes the
+  failures, for convenience before a push or instead of the CI when the
+  project has none.
+
+- `AGENTS.md` and `CLAUDE.md`: when a session is long or changes phase, the
+  agent suggests `/handoff` and then `/clear`; it never runs it, and does not
+  suggest it after a short session.
+
+### Documentation
+- The manual explains the development approach (design first, TDD, clean
+  architecture when it fits, CI with tests and vulnerability checks, human
+  review) and where the CI runs in the local scenario, with or without a
+  remote.
+
+### Upgrade notes
+- A project whose profile has no `roles` key gets the `writer` role on upgrade
+  (it only acts when asked); list `roles` without it to opt out.
+- Set the toolchain of the `reference-docs` job in your CI file and check
+  `ci/reference.sh` keeps the generators of your stack. The tool versions
+  were checked against the registries but not run on a real project.
+
+## 1.5.0 - 2026-10-28
+
+### Skills
+- `design-studio --milestone M0`: designs every feature of a roadmap milestone
+  in one session. It drafts the specs from what is already decided, asks one
+  round of questions for all of them, plans the breakdowns together and
+  approves each spec on its own. Ready specs are committed together on
+  `design/<milestone>`.
+- `--to-issues` runs a whole flow, each step still with its own plan and yes,
+  and stops before dispatch:
+  - `setup --to-issues`: setup, project design and foundations, then the
+    issues, with any tracker: foundations tasks ready, the other features as
+    "Design:" issues;
+  - `design-studio <feature> | --milestone M1 --to-issues`: the specs, then
+    the issues, then a split of the tasks that still need one.
+  Neither waits for the merge of the design or setup merge request: the
+  issues are created from its branch, and dispatch waits for the merge.
+- `next` suggests `--milestone` when a milestone has several "Design:" issues.
+
+### Template
+- `create-issues` no longer leaves "Design:" issues behind. When a feature's
+  spec is ready, its "Design:" issue becomes the task (one row in the
+  breakdown) or the feature issue, with the tasks created as its sub-issues
+  (several rows). The feature issue is not a task: dispatch skips it.
+- `dispatch` keeps a task waiting while its spec is not ready on the main
+  branch ("spec ... not merged"): the remote's default branch after a fetch,
+  or the current commit without a remote.
+- Every task issue carries a fingerprint of its spec row. When the row changes
+  (a review of the design merge request), `create-issues` and `dispatch`
+  rewrite the issue if its task has not started, and list it if it has;
+  dispatch keeps a task whose row was removed waiting. No task starts on an
+  outdated spec.
+- New feature `spec-sync`: create-issues runs by itself when a change to
+  `docs/design/` reaches the main branch - `.github/workflows/spec-sync.yml`,
+  the `spec-sync` job in `.gitlab/ci/spec-sync.yml`, or the Git hook
+  `scripts/git-hooks/spec-sync.sh` in the local scenario.
+- Jira has one level of sub-tasks: the tasks of a feature issue, and the parts
+  of a sub-task, are Tasks with a "Relates" link to their parent, so a task of
+  a feature can still be split into sub-tasks.
+- GitLab: the issue a task belongs to (the feature, or the issue it was split
+  from) is no longer listed among its children.
+- Trackers can edit an issue's title and description (`edit_issue`, all six).
+- A breakdown row can depend on a row of another spec: `app-shell#2` in
+  "Depends on". `create-issues` creates the other spec's issue first, even
+  when the roadmap lists the features the other way round, and links the two
+  in the text and natively.
+- The design studio procedure (`docs/roles/design-studio.md`) has a
+  "Milestone session" section; the spec template documents `<feature>#<n>`.
+
+### Fixes
+- `dispatch` in a local project with GitHub or GitLab issues no longer adds
+  `agent:<role>` labels that start nothing: without the `ci-agents` feature
+  the default starter prints what to run.
+- Merge requests of a task with a GitHub or GitLab issue end with
+  `Closes #<issue>` (`docs/agents/merge-requests.md`), so the merge closes the
+  issue on GitLab too and its dependents can start.
+
+### Documentation
+- The manual reviewed by a first-time reader: a glossary at the end of
+  chapter 1, terms explained before they are used, "While a task runs"
+  (follow, iterate on the merge request, stop, retry, reject) and "Change the
+  plan" in chapter 4, when an issue counts as done and who closes it, what a
+  local task produces, the GitLab set-up and iteration, what a run costs.
+- "The workflow" in "Run the project": the two flows as diagrams, with
+  `--to-issues` and a full example; the flows in the local and remote
+  scenarios. The HTML manual draws Mermaid diagrams (loaded from a CDN).
+
+### Upgrade notes
+- Task issues created before 1.5.0 have no row fingerprint: the first
+  `create-issues` or `dispatch` after the upgrade adds it, rewriting each
+  open task that has not started from its current row (shown as "update" in
+  the dry run). Started tasks are left as they are.
+- `spec-sync` is off until you add it to `features` and run the upgrade; in
+  the local scenario, link the hook as `docs/manual` chapter 5 says.
+- After the upgrade, `/agent-team:design-studio --milestone <code>`
+  replaces one session per "Design:" issue, and `create-issues` reuses the
+  "Design:" issues of the features you specify from now on.
+
 ## 1.4.0 - 2026-10-28
 
 ### Fixes

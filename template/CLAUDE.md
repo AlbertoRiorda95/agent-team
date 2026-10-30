@@ -8,7 +8,8 @@
   (web-design-guidelines, webapp-testing, security-review, diagnosing-bugs,
   github-actions-templates) are used when the role prompt says so.
 - Between tasks: `/clear`. When a session has grown long or changes phase:
-  `/handoff`, then `/clear`.
+  `/handoff`, then `/clear`. You cannot run `/handoff`: when the session is
+  long or changes phase, suggest it to the user at the end of your reply.
 
 # Compact instructions
 

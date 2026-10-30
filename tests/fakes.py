@@ -81,7 +81,11 @@ class FakeGitHub:
         n, sub = int(m.group(1)), m.group(2)
         if sub == "":
             if method == "PATCH":
-                self.issues[n]["milestone"] = int(f["milestone"])
+                if "milestone" in f:
+                    self.issues[n]["milestone"] = int(f["milestone"])
+                for k in ("title", "body"):
+                    if k in f:
+                        self.issues[n][k] = f[k]
                 return P("{}")
             if "--jq" in args and args[args.index("--jq") + 1] == ".id":
                 return P(str(self.issues[n]["id"]))
@@ -118,7 +122,8 @@ class FakeJira:
         self.issues[key] = {"key": key, "fields": {
             "summary": summary, "description": description, "status": {"statusCategory": {"key": "new"}},
             "resolution": None, "labels": [], "fixVersions": [version] if version else [],
-            "parent": {"key": parent} if parent else None, "issuelinks": [], "creator": {"displayName": "Alberto"}}}
+            "parent": {"key": parent} if parent else None, "issuelinks": [], "creator": {"displayName": "Alberto"},
+            "issuetype": {"name": "Subtask" if parent else "Task", "subtask": bool(parent)}}}
         return key
 
     def done(self, key, resolution="Done"):
@@ -168,8 +173,9 @@ class FakeJira:
             if com:
                 return {"comments": self.comments.get(key, [])}
             if method == "PUT":
-                upd = body["update"]
+                upd = body.get("update", {})
                 f = self.issues[key]["fields"]
+                f.update(body.get("fields", {}))
                 for op in upd.get("fixVersions", []):
                     f["fixVersions"].append(next(v for v in self.versions if v["id"] == op["add"]["id"]))
                 for op in upd.get("labels", []):
@@ -250,6 +256,9 @@ class FakeRedmine:
                     i["journals"].append({"notes": upd["notes"], "user": {"id": 7, "name": "Alberto"}})
                 if "parent_issue_id" in upd:
                     i["parent"] = {"id": upd["parent_issue_id"]} if upd["parent_issue_id"] else None
+                for k in ("subject", "description"):
+                    if k in upd:
+                        i[k] = upd[k]
                 return None
             issue = dict(self.issues[n])
             if "relations" in q.get("include", ""):
@@ -314,6 +323,9 @@ class FakeLinear:
                 i["projectMilestone"] = inp["projectMilestoneId"]
             if "parentId" in inp:
                 i["parent"] = inp["parentId"]
+            for k in ("title", "description"):
+                if k in inp:
+                    i[k] = inp[k]
             i["labels"] = sorted(set(i["labels"] + inp.get("addedLabelIds", [])) - set(inp.get("removedLabelIds", [])))
             return {"data": {"issueUpdate": {"success": True}}}
         if "issueRelationCreate" in qy:
@@ -402,6 +414,9 @@ class FakeGitLab:
             if method == "PUT":
                 if "milestone_id" in f:
                     i["milestone"] = int(f["milestone_id"])
+                for k in ("title", "description"):
+                    if k in f:
+                        i[k] = f[k]
                 if "add_labels" in f:
                     i["labels"] = sorted(set(i["labels"] + [f["add_labels"]]))
                 if "remove_labels" in f:

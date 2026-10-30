@@ -166,6 +166,38 @@
    "role_optimizer"
   ],
   [
+   ".claude/agents/writer.md",
+   "harness_claude and role_writer"
+  ],
+  [
+   ".opencode/agents/writer.md",
+   "harness_opencode and role_writer"
+  ],
+  [
+   ".codex/agents/writer.toml",
+   "harness_codex and role_writer"
+  ],
+  [
+   "docs/roles/writer.md",
+   "role_writer"
+  ],
+  [
+   "docs/software/*",
+   "role_writer"
+  ],
+  [
+   "scripts/hooks/writer-writes.sh",
+   "harness_claude and role_writer"
+  ],
+  [
+   ".claude/skills/document/*",
+   "harness_claude and role_writer"
+  ],
+  [
+   ".agents/skills/document/*",
+   "(harness_codex or harness_opencode) and role_writer"
+  ],
+  [
    ".claude/agents/security.md",
    "harness_claude and role_security"
   ],
@@ -188,6 +220,10 @@
   [
    "docs/security/*",
    "role_security"
+  ],
+  [
+   "scripts/git-hooks/*",
+   "issues and spec_sync"
   ],
   [
    "scripts/hooks/security-*.sh",
@@ -250,6 +286,10 @@
    "ci_github and ci_agents and tracker_github and split and harness_claude"
   ],
   [
+   ".github/workflows/spec-sync.yml",
+   "ci_github and issues and spec_sync"
+  ],
+  [
    ".github/workflows/claude.yml",
    "ci_github and ci_agents and harness_claude"
   ],
@@ -276,6 +316,10 @@
   [
    "ci/agent-mr.sh",
    "ci_gitlab and ci_agents and (harness_codex or harness_opencode)"
+  ],
+  [
+   ".gitlab/ci/spec-sync.yml",
+   "ci_gitlab and issues and spec_sync"
   ],
   [
    ".gitlab/issue_templates/*",

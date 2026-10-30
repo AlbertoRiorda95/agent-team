@@ -9,6 +9,10 @@
   `docs/alignment/` since you started; if it did, adapt or report it.
 
 ## Merge request description
+When the task has a GitHub or GitLab issue, the description ends with
+`Closes #<issue>`: merging the MR then closes the issue, which is what frees
+the tasks that depend on it. On other trackers the user closes it.
+
 Every MR description has these sections, short:
 - **Summary**: what changed and why; for a structural change, the smallest
   sketch that makes it clear (a call tree, a file tree, a diff of a component

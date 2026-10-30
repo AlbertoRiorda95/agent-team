@@ -3,9 +3,10 @@
 **Run your software project as the lead of a development team whose
 developers are AI agents.** You decide what to build in a design session,
 approve the plan, choose what starts, and merge. The team (designer,
-frontend, backend, devops; optimizer and security when you ask) asks the
+frontend, backend, devops; optimizer, security and writer when you ask) asks the
 questions, writes the specs, turns them into issues, implements each task on
-its own branch and opens merge requests that explain themselves.
+its own branch and opens merge requests (pull requests on GitHub) that
+explain themselves.
 
 It works with **Claude Code, Codex and OpenCode**, and in three scenarios:
 
@@ -15,7 +16,9 @@ It works with **Claude Code, Codex and OpenCode**, and in three scenarios:
 | **Remote repository** | in GitHub Actions or GitLab CI, started from issues | no: you come back to merge requests | a backlog, parallel tasks, a full trail |
 | **Custom orchestrator** | where your orchestrator runs them, from Jira, Linear, Redmine or your queue | no | your tracker, your infrastructure, your priorities |
 
-Design, issues, splits, dispatch and upgrades work the same in all three.
+The way you work is the same in all three: design a feature with the
+designer, turn its spec into issues, split the big ones, start the ready
+tasks, review and merge ([What Agent team is](docs/manual/01-what-it-is.md)).
 
 ## Get started
 
@@ -50,13 +53,15 @@ page in [`docs/manual.html`](docs/manual.html):
 | `/agent-team:design-studio <feature>` | a design session with the designer: questions in rounds, a ready spec with its task breakdown |
 | `/agent-team:create-issues` | milestones and issues from the roadmap and the ready specs, after a dry run |
 | `/agent-team:split-issue <n>` | one issue into one task per role, created only after your yes |
-| `/agent-team:dispatch` | starts the tasks whose dependencies are merged |
+| `/agent-team:dispatch` | starts the tasks whose dependencies are done (merged and their issues closed) |
 | `/agent-team:upgrade` | a new plugin version, or a new profile, merged with your changes |
 | `/agent-team:next` | where the project stands and which command to run next; read-only |
 
-Claude can propose `next`, `design-studio`, `create-issues`, `split-issue` and
-`dispatch` by itself when they fit; each shows its plan and asks before changing
-anything. `setup` and `upgrade` run only when you type them.
+You can also just say what you want: Claude proposes `next`, `design-studio`,
+`create-issues`, `split-issue` or `dispatch` when one fits, and runs it only
+after you agree; each shows its plan and asks before changing anything.
+`setup` and `upgrade` change many files at once, so they run only when you
+type them.
 
 ## Repository layout
 

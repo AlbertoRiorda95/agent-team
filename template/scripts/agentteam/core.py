@@ -11,8 +11,8 @@ import subprocess
 import urllib.error
 import urllib.request
 
-ROLES = {"designer", "frontend", "backend", "optimizer", "devops", "security"}
-ON_DEMAND = {"optimizer", "security"}
+ROLES = {"designer", "frontend", "backend", "optimizer", "devops", "security", "writer"}
+ON_DEMAND = {"optimizer", "security", "writer"}
 HOLD = "hold"
 MARK_CREATED = "created-by: scripts/create-issues.py"
 
@@ -110,6 +110,10 @@ class Tracker:
 
     def set_milestone(self, issue, milestone_ref):
         raise Unsupported("milestones")
+
+    def edit_issue(self, issue, title, body):
+        """Replace the title and the description (body in markdown, as for create_issue)."""
+        raise Unsupported("editing issues")
 
     def link_child(self, parent, child):
         raise Unsupported("sub-issues")

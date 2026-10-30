@@ -27,9 +27,19 @@ Every created issue carries a key (spec and row), so it is recognized again even
 if its title changes. Dependencies are written in the text ("Depends on") and,
 where the tracker has them, as native "blocked by" relations.
 
+Every task issue carries a fingerprint of its spec row. When the row changes
+(for example in the review of the design merge request), the issue is rewritten
+from it if its task has not started; a started one is only listed.
+
+When a feature that has a "Design:" issue gets a ready spec, that issue is
+reused instead of left behind: with one task in the breakdown it is renamed and
+rewritten as that task; with several it becomes the feature issue ("<Spec> (M1)")
+and the tasks are created as its sub-issues.
+
 Issues get no labels: a task starts when you add agent:<role>, or with
-scripts/dispatch.py. The script never closes issues and changes existing ones
-only to give a milestone to those that have none.
+scripts/dispatch.py. The script never closes issues; it changes existing ones
+only to give a milestone to those that have none and to turn "Design:" issues
+into the feature or the task, as above.
 
 Usage:
   python3 scripts/create-issues.py --dry-run      # show the plan
@@ -86,7 +96,8 @@ def main():
         print("Nothing to do: no roadmap in docs/design/project.md and no ready spec with a Task breakdown.")
         return 0
     issues, planned, done = {}, set(), set()
-    count = {"issues": 0, "milestones": 0, "assigned": 0, "deps": 0, "detached": 0}
+    count = {"issues": 0, "milestones": 0, "assigned": 0, "deps": 0, "detached": 0, "renamed": 0, "updated": 0}
+    changed_started = []
 
     def ensure_ms(ms_code, title, description):
         if not has_ms:
@@ -124,8 +135,36 @@ def main():
                       and core.MARK_CREATED in x.body), None)
         return i
 
+    def design_issue(t):
+        """The open "Design:" issue this entry reuses, if any."""
+        for dkey, titles in t.get("adopt", []):
+            i = by_key.get(dkey) or next((by_title[x] for x in titles if x in by_title
+                                          and core.MARK_CREATED in by_title[x].body), None)
+            if i is not None and i.open and id(i) not in {id(x) for x in issues.values()}:
+                return i
+        return None
+
+    def adopt(i, t, body, indent):
+        if a.dry_run:
+            print(f"{indent}rename  {i.id}  {i.title}  ->  {t['title']}")
+        else:
+            trk.edit_issue(i, t["title"], body)
+            count["renamed"] += 1
+            print(f"{indent}renamed {i.id}  {t['title']}")
+        i.title, i.body = t["title"], body
+        issues[t["key"]] = i
+
     def ensure(t, ms_ref, ms_title, indent=""):
         key = t["key"]
+        if t.get("kind") == "feature":
+            planned.add(key)
+            i = by_key.get(key)
+            if i is not None:
+                issues[key] = i
+                print(f"{indent}exists  {i.id}  {i.title}")
+            elif (d := design_issue(t)) is not None:
+                adopt(d, t, t["body"], indent)
+            return
         if t["ref"] == "done":
             done.add(key)
             print(f"{indent}done          {key}")
@@ -141,25 +180,48 @@ def main():
             return
         planned.add(key)
         i = find_existing(t)
+        dep_txt, deps = specs.deps_text(t, lambda d: issues.get(d) or by_key.get(d), done)
         if i is not None:
             issues[key] = i
-            print(f"{indent}exists  {i.id}  {i.title}")
             assign(i, ms_ref, ms_title, indent)
+            want, have = specs.ROW_MARK.search(t["body"]), specs.row_of(i)
+            if not (want and i.open and have != want.group(1)):
+                print(f"{indent}exists  {i.id}  {i.title}")
+            elif core.started(i):
+                print(f"{indent}exists  {i.id}  {i.title}" + ("   (spec row changed after the start)" if have else ""))
+                if have:
+                    changed_started.append(i)
+            elif a.dry_run:
+                print(f"{indent}update  {i.id}  {t['title']}   (spec row " + ("changed)" if have else "fingerprint added)"))
+            else:
+                trk.edit_issue(i, t["title"], t["body"].replace("{deps}", dep_txt))
+                count["updated"] += 1
+                for d in deps:
+                    if str(d.ref) not in [str(b) for b in trk.blockers(i)] and trk.add_dependency(i, d):
+                        count["deps"] += 1
+                print(f"{indent}updated {i.id}  {t['title']}")
             return
-        deps = [issues[d] for d in t["deps"] if d in issues]
-        dep_txt = ", ".join([d.id for d in deps] + [f"task {d.split('#')[-1]} (done)" for d in t["deps"] if d in done]
-                            + [f"task {d.split('#')[-1]}" for d in t["deps"] if d not in issues and d not in done]) or "none"
+        parent = issues.get(t.get("parent"))
+        under = f"   (sub-issue of {parent.id})" if parent is not None else ""
+        d = design_issue(t)
+        if d is not None:
+            adopt(d, t, t["body"].replace("{deps}", dep_txt), indent)
+            if not a.dry_run:
+                for dep in deps:
+                    if trk.add_dependency(d, dep):
+                        count["deps"] += 1
+            return
         if a.dry_run:
-            print(f"{indent}create        {t['title']}" + (f"   (depends on: {dep_txt})" if t["deps"] else ""))
+            print(f"{indent}create        {t['title']}" + (f"   (depends on: {dep_txt})" if t["deps"] else "") + under)
             return
-        i = trk.create_issue(t["title"], t["body"].replace("{deps}", dep_txt), ms_ref)
+        i = trk.create_issue(t["title"], t["body"].replace("{deps}", dep_txt), ms_ref, parent=parent)
         i.milestone = ms_title
         issues[key] = i
         count["issues"] += 1
         for d in deps:
             if trk.add_dependency(i, d):
                 count["deps"] += 1
-        print(f"{indent}created {i.id}  {t['title']}")
+        print(f"{indent}created {i.id}  {t['title']}{under}")
 
     for ms, children in groups:
         ms_ref, ms_title = ensure_ms(*ms) if ms else (None, None)
@@ -194,12 +256,18 @@ def main():
     matched = {id(i) for i in issues.values()}
     stale = [i for i in existing if i.open and core.MARK_CREATED in i.body and not i.body.startswith("## Milestone ")
              and id(i) not in matched and core.key_of(i) not in planned]
+    if changed_started:
+        print("\nStarted before their spec row changed (check the work against the spec, or stop it):")
+        for i in changed_started:
+            print(f"  {i.id}  {i.title}")
     if stale:
         print("\nCreated by this script but no longer in the plan (close them if obsolete):")
         for i in stale:
             print(f"  {i.id}  {i.title}")
     if not a.dry_run:
         print(f"\n{count['issues']} issue(s) and {count['milestones']} milestone(s) created, "
+              f"{count['renamed']} Design: issue(s) turned into features or tasks, "
+              f"{count['updated']} updated from their spec row, "
               f"{count['assigned']} issue(s) given a milestone, {count['deps']} native dependencies"
               + (f", {count['detached']} detached from old milestone issues." if a.migrate else "."))
     return 0
