@@ -11,6 +11,7 @@ import contextlib
 import importlib.util
 import io
 import json
+import re
 import os
 import shutil
 import subprocess
@@ -420,6 +421,24 @@ class TrackerFlow(unittest.TestCase):
         self.assertEqual(core.code(page.milestone), "M0 Foundations")
         rc, out = call("create-issues.py")
         self.assertIn("0 issue(s) and 0 milestone(s) created", out)
+
+    def test_team_issue_per_spec(self):
+        """create-issues --team: one agent:team issue for the whole breakdown, started by dispatch like a role."""
+        sc = scenarios()[0]
+        json.dump(sc.cfg, open(".agent-team/config.json", "w"))
+        sc.install()
+        rc, out = call("create-issues.py", "--team")
+        self.assertEqual(rc, 0, out)
+        by = {i.title: i for i in config.tracker(config.load()).issues()}
+        team = by["Foundations · team task (tasks 1, 2, 3)"]
+        self.assertEqual(core.role_of(team), "team")
+        self.assertNotIn("Roles:", team.body)
+        self.assertFalse(any(" · 1/3 · " in t for t in by))
+        rc, out = call("create-issues.py", "--team")
+        self.assertIn("0 issue(s) and 0 milestone(s) created", out)
+        rc, out = call("dispatch.py")
+        self.assertEqual(rc, 0, out)
+        self.assertRegex(out, rf"{re.escape(team.id)}.*team")
 
     def test_cross_issue_local(self):
         self.run_cross_issue(scenarios()[0])

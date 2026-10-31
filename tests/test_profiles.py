@@ -23,7 +23,7 @@ from agentteam import profile  # noqa: E402
 
 PROFILES = {
     "full": {},
-    "claude-github": {"harnesses": ["claude"], "ci": "github", "tracker": "github",   # team-tasks: retired, ignored
+    "claude-github": {"harnesses": ["claude"], "ci": "github", "tracker": "github",
                       "features": ["ci-agents", "team-tasks", "split", "dispatch"]},
     "codex-jira": {"harnesses": ["codex"], "ci": "github", "tracker": "jira", "features": ["ci-agents", "spec-sync"]},
     "opencode-claude-gitlab": {"harnesses": ["opencode", "claude"], "ci": "gitlab", "tracker": "gitlab",
@@ -134,6 +134,11 @@ class Rendered(unittest.TestCase):
         oc = json.load(open(os.path.join(d["no-tracker"], "opencode.json")))
         self.assertNotIn("litellm", oc.get("provider", {}))
         agents = open(os.path.join(d["codex-jira"], "AGENTS.md")).read()
+        self.assertNotIn("## Team tasks", agents)
+        self.assertFalse(os.path.exists(os.path.join(d["codex-jira"], ".codex/agents/team.toml")))
+        self.assertIn("## Team tasks", open(os.path.join(d["claude-github"], "AGENTS.md")).read())
+        for f in (".claude/agents/team.md", "docs/roles/team.md"):
+            self.assertTrue(os.path.exists(os.path.join(d["claude-github"], f)), f)
         self.assertNotIn("Claude Code:", agents)
         self.assertIn("Codex:", agents)
         wf = open(os.path.join(d["codex-claude-github"], ".github/workflows/agents.yml")).read()

@@ -119,6 +119,14 @@ deployment interface. When you make one, read and follow
 `docs/agents/alignment.md` before opening the MR. Never adapt other
 roles' code yourself.
 
+<!-- agent-team:if team_tasks -->
+## Team tasks
+A team task (`agent:team`) is one issue across several roles done by one
+agent alone, without delegating, with the responsibilities of every role it
+touches: `docs/roles/team.md`. As the lead, delegate to `team` only when the
+user asks for a team task.
+
+<!-- agent-team:end -->
 <!-- agent-team:if split -->
 ## Splitting issues
 When you are asked to propose how to split an issue into task issues

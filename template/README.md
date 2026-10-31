@@ -125,6 +125,9 @@ and merges sections back into your files, keeping your edits.
 <!-- agent-team:end -->
 - Foundations: in a new repository SETUP.md also writes `docs/design/foundations.md`, the spec of a walking skeleton (structure, contract served, database, tests, green CI). Implement it as the first task, before any feature.
 - Design first: SETUP.md does not finish until `docs/design/project.md` exists and is ready. New features start with `/design-studio <feature>` (Claude Code or OpenCode, locally or in a Claude Code cloud session); implementation tasks then point to a spec marked `ready: yes`, and the issue template has a field for it.
+<!-- agent-team:if team_tasks -->
+- Team tasks: to have one agent do a whole issue across several roles, on one branch, with one PR and without subagents, use the `agent:team` label (GitLab: `AI_FLOW_ROLE=team`; `create-issues.py --team` makes one such issue per ready spec). It follows every role it touches (`docs/roles/team.md`). Good for small, tightly coupled features.
+<!-- agent-team:end -->
 - Alignment: when an agent changes something other roles rely on (API contract, data model, shared components, routes, env vars), it writes an entry in `docs/alignment/` and flags the MR. Locally the lead then runs designer and the affected roles automatically; in CI the MR gets the `alignment-needed` label and you create the follow-up tasks.
 - On GitHub, enable branch protection on `main` with "Require branches to be up to date before merging": a PR built on an old contract then fails before the merge, not after. The Claude action does not rebase; use the "Update branch" button.
 <!-- agent-team:if ci_github -->

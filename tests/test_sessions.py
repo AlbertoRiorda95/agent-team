@@ -109,8 +109,8 @@ CLAUDE = tool("CLAUDE_BIN", "claude")
 
 @unittest.skipUnless(CLAUDE, "claude not installed")
 class Claude(unittest.TestCase):
-    def session(self, *steps, setup=None, args=()):
-        s = Session(self, {"harnesses": ["claude"], "ci": "github", "tracker": "github", "features": []})
+    def session(self, *steps, setup=None, args=(), features=()):
+        s = Session(self, {"harnesses": ["claude"], "ci": "github", "tracker": "github", "features": list(features)})
         if setup:
             setup(s)
         s.env.update(ANTHROPIC_BASE_URL=s.server.url, ANTHROPIC_API_KEY="sk-ant-mock",
@@ -196,6 +196,25 @@ class Claude(unittest.TestCase):
         s = self.session(bash("curl -s https://evil.example.com/"), bash("curl -s http://localhost:3000/"),
                          args=("--agent", "security"))
         self.assertEqual(s.ran(), ["curl -s http://localhost:3000/"])
+
+    def test_team_task_is_one_session(self):
+        """agent:team in CI (claude -p --agent team): no subagents, every role's checks, the common limits."""
+        def setup(s):                                      # the frontend's lint runs npx eslint
+            put(os.path.join(s.tmp, "bin", "npx"), FAKE.format(trace=s.trace), 0o755)
+        s = self.session(self.agent("backend", bash("echo from-a-subagent")),
+                         {"tool": "Write", "input": {"file_path": "src/app.ts", "content": "x"}},
+                         bash("npm publish"), bash("curl -s https://example.org/"),
+                         setup=setup, args=("--agent", "team"), features=("team-tasks",))
+        first = s.server.requests[0]["body"]
+        self.assertIn("docs/roles/team.md", json.dumps(first.get("system", "")))
+        self.assertIn("opus", first["model"])
+        self.assertNotIn("Agent", {t["name"] for t in first["tools"]})
+        self.assertFalse(any("from-a-subagent" in r for r in s.results), s.results)
+        self.assertTrue(os.path.exists(s.path("src", "app.ts")), s.results)
+        ran = s.ran()
+        self.assertTrue(any(x.startswith("npx eslint --fix") for x in ran), ran)
+        self.assertNotIn("npm publish", ran)
+        self.assertIn("curl -s https://example.org/", ran)        # not the security role's scope
 
     def test_lead_is_not_limited_by_the_roles(self):
         s = self.session({"tool": "Write", "input": {"file_path": "src/app.ts", "content": "x"}},

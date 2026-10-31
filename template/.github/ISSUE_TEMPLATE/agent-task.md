@@ -1,6 +1,6 @@
 ---
 name: Agent task
-about: A task for one agent (agent:<role>)
+about: A task for one agent (agent:<role>), or for one agent that does every role it touches (agent:team)
 title: ""
 labels: []
 ---

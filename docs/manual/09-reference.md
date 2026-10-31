@@ -41,7 +41,7 @@ it has `--to-issues`.
 | `python3 scripts/agent-team.py profile` | the profile, and what is outside it |
 | `python3 scripts/agent-team.py prune [--dry-run]` | removes files and sections outside the profile |
 | `python3 scripts/tracker.py check \| config \| list \| show N` | the tracker: connection, settings, open issues, one issue |
-| `python3 scripts/create-issues.py [--dry-run] [--migrate]` | milestones and issues; a "Design:" issue whose spec is ready becomes the task (one row) or the feature with the tasks as sub-issues; `--migrate` moves old "M0 · ..." parent issues to milestones |
+| `python3 scripts/create-issues.py [--dry-run] [--team] [--migrate]` | milestones and issues; a "Design:" issue whose spec is ready becomes the task (one row) or the feature with the tasks as sub-issues; `--migrate` moves old "M0 · ..." parent issues to milestones |
 | `python3 scripts/split-issue.py check \| propose \| create` | the split of one issue: validate a plan, post it, create it; `"depends_on": ["12:api"]` waits for a task of issue 12's plan, which must be created first |
 | `python3 scripts/dispatch.py [--apply] [--per-role N] [--max N] [--milestone M1 \| --all]` | the ready tasks, checked against their spec row on the main branch; with `--apply` rewrites the changed ones and starts them |
 | `scripts/git-hooks/spec-sync.sh` | feature `spec-sync`, local: Git hook (`post-merge`, `post-commit`) that runs create-issues after a spec change on the main branch |
@@ -89,6 +89,7 @@ Environment variables `AGENT_TEAM_TRACKER`, `AGENT_TEAM_STARTER` and
 | Label | Meaning |
 |---|---|
 | `agent:<role>` | the task runs on that role; on GitHub adding it starts the agent |
+| `agent:team` | the whole task by one agent, every role it touches, without subagents (GitLab: `AI_FLOW_ROLE=team`) |
 | `agent:split` | GitHub: Claude proposes a split in a comment (GitLab: `SPLIT_ISSUE`) |
 | `hold` | dispatch never starts this task |
 | `alignment-needed` | the merge request changes something other roles rely on |

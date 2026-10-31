@@ -92,9 +92,9 @@ class CreateLabels(unittest.TestCase):
 
     def test_full_profile(self):
         got = self.labels({"ci": "github", "tracker": "github",
-                           "features": ["ci-agents", "dispatch", "split"]})
+                           "features": ["ci-agents", "dispatch", "split", "team-tasks"]})
         roles = {f"agent:{r}" for r in ("designer", "frontend", "backend", "optimizer", "devops", "security", "writer")}
-        self.assertEqual(got, roles | {"agent:split", "hold", "alignment-needed", "ai-review"})
+        self.assertEqual(got, roles | {"agent:team", "agent:split", "hold", "alignment-needed", "ai-review"})
 
     def test_only_the_roles_of_the_project(self):
         got = self.labels({"ci": "github", "tracker": "github", "features": ["ci-agents"],

@@ -18,6 +18,7 @@ case "$1:$AGENT:$TOOL" in
   pre:security:Write|pre:security:Edit)   S=security-writes.sh ;;
   pre:security:Bash)                      S=security-scope.sh ;;
   post:frontend:Write|post:frontend:Edit) S=lint-frontend.sh ;;
+  post:team:Write|post:team:Edit)         S=lint-frontend.sh ;;   # team holds the frontend role too
   *) exit 0 ;;
 esac
 [ -x "$H/$S" ] || exit 0

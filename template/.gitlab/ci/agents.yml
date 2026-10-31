@@ -6,6 +6,10 @@
 # start it again. Pass TASK_ID (the issue number) with the trigger:
 # resource_group then queues jobs for the same task instead of running two
 # agents on it in parallel. Without TASK_ID all agent jobs run one at a time.
+# agent-team:if team_tasks
+# AI_FLOW_ROLE=team runs a team task: one session of the team agent
+# (docs/roles/team.md) does the whole issue, without subagents.
+# agent-team:end
 # agent-team:if harness_claude
 claude:
   stage: ai

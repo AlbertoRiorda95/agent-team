@@ -153,6 +153,7 @@ The full list is in [3. What you get](03-set-up-a-project.md#what-you-get).
 | **split** | turning one issue into one task per role, after your approval |
 | **dispatch** | the command that starts the tasks that are ready: dependencies done, a free slot for the role, spec merged |
 | **starter** | what "start" means for dispatch: add a label, run a pipeline, call your orchestrator, or print what to do |
+| **team task** | one issue across several roles done by one agent alone, without subagents, on one branch, with one merge request |
 | **alignment** | a change other roles rely on (API, data model, shared component, route, variable): recorded in `docs/alignment/` and flagged on the merge request |
 | **handoff** | a short note an agent writes so a fresh session can continue without the whole history |
 | **profile** | `.agent-team/config.json`: which tools, CI, tracker, roles and **profile features** (optional parts such as `ci-agents` or `dispatch`) the project uses |

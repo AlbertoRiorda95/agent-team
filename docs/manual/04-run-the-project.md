@@ -299,7 +299,8 @@ A task that is still too big for one merge request is split afterwards
 
 `create-issues` shows the plan first and creates only on your yes. It adds no
 labels, so nothing starts on its own. Running it again creates only what is
-missing, so run it after every design session.
+missing, so run it after every design session. With `--team`, each ready
+spec becomes one [team task](#team-tasks) instead of one issue per row.
 
 ### When a spec changes after its issues exist
 
@@ -565,6 +566,22 @@ label.
 
 Breaking contract changes are planned as expand-contract: add the new form,
 move the callers, remove the old form last, with `main` green at every step.
+
+## Team tasks
+
+A small, tightly coupled feature can be one task for several roles: one
+issue, one branch, one merge request. One agent, `team`, does all of it
+alone: it holds the responsibilities of every role the task touches, follows
+their rules for each part (contract first, UI tests, TDD, the frontend's
+lint) and works in the order of the standard sequence. It starts no
+subagents, so no tokens go to coordinating them. Use it when separate merge
+requests would only wait on each other; prefer separate tasks otherwise.
+
+It needs the `team-tasks` profile feature. Start it with the `agent:team`
+label on GitHub or `AI_FLOW_ROLE=team` on GitLab
+([6. Scenario: remote](06-scenario-remote.md#team-tasks)), or locally by
+asking the lead for a team task. `create-issues --team` creates one such
+issue per ready spec.
 
 ## On-demand roles
 

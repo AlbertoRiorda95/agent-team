@@ -1,6 +1,7 @@
 ---
 name: create-issues
 description: Use when the roadmap and ready specs in docs/design/ should become issues. Creates the milestones and issues (GitHub, GitLab, local files, Jira, Linear or Redmine) from the roadmap and the ready specs, but only after showing the plan and getting the user's yes; nothing is created before. Idempotent - existing issues and milestones are skipped, "Design:" issues of features now specified become the feature or its task, nothing is closed or labeled - so it can be run again at any stage, for example after every design studio session.
+argument-hint: "[--team]"
 ---
 
 Create the issues of the project's roadmap and ready specs. Talk to the user in
@@ -30,7 +31,8 @@ project's copy unless the user says otherwise.
 
 ## 3. Show the plan
 
-Run `python3 <script> --dry-run` and
+Run `python3 <script> --dry-run` (add `--team` if the user passed it: one
+`agent:team` issue per ready spec instead of one issue per row) and
 summarize the output for the user:
 
 - milestones to create and those that exist;

@@ -257,7 +257,9 @@ How will the team work? Explain the three scenarios in a few lines and ask:
 For the remote scenario also ask: Claude Code with an API key or a
 subscription token (`ANTHROPIC_API_KEY` or `CLAUDE_CODE_OAUTH_TOKEN`), Codex
 (`OPENAI_API_KEY`), OpenCode (which providers and models: the exact model IDs
-as the provider documents them, or LiteLLM)?
+as the provider documents them, or LiteLLM)? And whether they want team tasks
+(`agent:team`: one agent does a whole issue across several roles, without
+subagents, one MR: `docs/roles/team.md`).
 
 For the remote and custom scenarios also ask where the issues live. GitHub or
 GitLab need nothing more. For local files, Jira, Linear or Redmine read
@@ -285,7 +287,8 @@ lost: a later profile change plus the template upgrade brings it back.
 - **Roles**: the seven by default; drop those the project does not need
   (designer without a UI, security with nothing to attack yet).
 - **Features**: `ci-agents` (agents started from issues in CI: the remote
-  scenario), `split` (split proposals in CI, with Claude Code),
+  scenario), `team-tasks` (the `team` agent and the `agent:team` label),
+  `split` (split proposals in CI, with Claude Code),
   `dispatch` (start ready tasks at every merge), `spec-sync` (update the
   issues when a spec change reaches the main branch: a CI job on GitHub or
   GitLab, a Git hook locally), `litellm` (the gateway in `infra/litellm/`).
@@ -392,7 +395,7 @@ then removes the files, so there is nothing to delete by hand.
 | Scenario | Profile |
 |---|---|
 | Local | the tool(s) used locally; `ci` of the project CI; `tracker` `none` or `local`; `spec-sync` with a tracker if wanted (then link `scripts/git-hooks/spec-sync.sh` as the `post-merge` and `post-commit` hooks, after checking `.git/hooks/` has none of the user's). |
-| Remote repository | one or more tools (the first leads, `runners` for the others); `ci` and `tracker` the same platform; `ci-agents` plus `split`, `dispatch`, `spec-sync` as wanted; `litellm` for OpenCode through a gateway |
+| Remote repository | one or more tools (the first leads, `runners` for the others); `ci` and `tracker` the same platform; `ci-agents` plus `team-tasks`, `split`, `dispatch`, `spec-sync` as wanted; `litellm` for OpenCode through a gateway |
 | Custom orchestrator | the tools the orchestrator runs; the tracker of its intake; `starter: command` with `start_command` (`docs/general/trackers.md`); the orchestrator runs `scripts/create-issues.py` after merging a change to `docs/design/`; `litellm` if it routes models through the gateway |
 
 After pruning, by hand: on GitLab rename `.gitlab-ci.yml.example` to

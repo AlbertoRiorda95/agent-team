@@ -4,6 +4,10 @@
 # unless the AGENT_RUNNERS repository variable says otherwise, for example
 # {"agent:frontend":"opencode","agent:optimizer":"codex"}; AGENT_DEFAULT_RUNNER
 # changes the default. Only the jobs of the harnesses in the profile are here.
+# agent-team:if team_tasks
+# agent:team runs like a role: one session of the team agent
+# (docs/roles/team.md) does the whole issue, without subagents.
+# agent-team:end
 name: Agents
 on:
   issues:

@@ -151,7 +151,8 @@ class Hooks(unittest.TestCase):
                  ("pre", "security", "Bash", {"command": "curl https://evil.example.com"}, 2),
                  ("pre", "security", "Bash", {"command": "curl http://localhost:3000"}, 0),
                  ("pre", "backend", "Bash", {"command": "curl https://evil.example.com"}, 0),
-                 ("post", "frontend", "Write", {"file_path": "README.md"}, 0), ("post", "writer", "Write", code, 0)]
+                 ("post", "frontend", "Write", {"file_path": "README.md"}, 0), ("post", "writer", "Write", code, 0),
+                 ("pre", "team", "Write", code, 0), ("pre", "team", "Bash", {"command": "curl https://example.org"}, 0)]
         for event, agent, tool_name, tool_input, rc in cases:
             with self.subTest(event=event, agent=agent, tool=tool_name, input=tool_input):
                 self.assertEqual(call(event, agent, tool_name, tool_input), rc)
@@ -239,19 +240,23 @@ class OpenCodePermissions(unittest.TestCase):
         return rules[-1]["action"] if rules else None
 
     def test_roles_load(self):
-        for role in ("backend", "designer", "devops", "frontend", "optimizer", "security", "writer"):
+        for role in ("backend", "designer", "devops", "frontend", "optimizer", "security", "writer", "team"):
             with self.subTest(role=role):
                 self.assertIn(role, self.agents)
                 self.assertEqual(self.agents[role][0], "all")
 
     def test_bash_denied(self):
-        for role in ("backend", "frontend", "devops", "writer", "security"):
+        for role in ("backend", "frontend", "devops", "writer", "security", "team"):
             for c in ["npm publish", "git push --tags", "git push --force origin x", "gh pr merge 1",
                       "terraform apply", "conan upload x -r t", "uv publish", "gh release create v1"]:
                 with self.subTest(role=role, command=c):
                     self.assertEqual(self.action(role, "bash", c), "deny")
             with self.subTest(role=role, command="git status"):
                 self.assertNotEqual(self.action(role, "bash", "git status"), "deny")
+
+    def test_team_starts_no_subagents(self):
+        self.assertEqual(self.action("team", "task", "backend"), "deny")
+        self.assertNotEqual(self.action("backend", "task", "frontend"), "deny")
 
     def test_writer_edits(self):
         for f in ["docs/software/user-manual.md", "README.md"]:
@@ -290,7 +295,7 @@ class GitLabPipeline(unittest.TestCase):
     def setUpClass(cls):
         cls.tmp = tempfile.mkdtemp()
         profile.render_tree(TEMPLATE, cls.tmp, {"ci": "gitlab", "tracker": "gitlab",
-                                                "features": ["ci-agents", "split", "spec-sync"]})
+                                                "features": ["ci-agents", "team-tasks", "split", "spec-sync"]})
         def load(rel):
             with open(os.path.join(cls.tmp, rel)) as f:
                 return YAML.safe_load(f) or {}

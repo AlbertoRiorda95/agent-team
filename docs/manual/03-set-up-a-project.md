@@ -94,6 +94,7 @@ CI*. They do not gate the commands: `/agent-team:split-issue`,
 | Feature | What it adds |
 |---|---|
 | `ci-agents` | the workflows (GitHub) or jobs (GitLab) that run an agent when a task starts: the remote scenario |
+| `team-tasks` | [team tasks](04-run-the-project.md#team-tasks): one agent does a whole issue across several roles, without subagents |
 | `split` | the split proposed on the issue itself in CI, when you add the `agent:split` label |
 | `dispatch` | GitHub: dispatch runs by itself every time an issue closes |
 | `spec-sync` | the issues are updated by themselves every time a spec change is merged ([4. When a spec changes](04-run-the-project.md#when-a-spec-changes-after-its-issues-exist)) |
@@ -110,7 +111,7 @@ back ([8. Change and upgrade](08-change-and-upgrade.md)).
 | Scenario | Typical profile |
 |---|---|
 | Local | your tool(s); `ci` for the project's CI; `tracker` `none`, `local` or the one you already use; `spec-sync` with a tracker, if you like |
-| Remote repository | one or more tools; `ci` and `tracker` the same platform; `ci-agents`, plus `split`, `dispatch`, `spec-sync` as you like |
+| Remote repository | one or more tools; `ci` and `tracker` the same platform; `ci-agents`, plus `team-tasks`, `split`, `dispatch`, `spec-sync` as you like |
 | Custom orchestrator | the tools your orchestrator runs; the tracker of its intake; a `start_command` ([7. Scenario: custom](07-scenario-custom.md)) |
 
 ## What you get

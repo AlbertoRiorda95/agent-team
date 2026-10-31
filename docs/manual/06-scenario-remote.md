@@ -27,7 +27,7 @@ while you are away, or when several people review the team's work.
 
 ```json
 {"harnesses": ["claude"], "ci": "github", "tracker": "github",
- "features": ["ci-agents", "split", "dispatch"]}
+ "features": ["ci-agents", "team-tasks", "split", "dispatch"]}
 ```
 
 With several tools, list them and assign roles to the others:
@@ -54,7 +54,7 @@ workflows cannot read this file, so on GitHub the same routing goes in the
    each, comment out the `anthropic_api_key:` line and uncomment the
    `claude_code_oauth_token:` line next to it.
 2. **Labels**: `./scripts/create-labels.sh` creates `agent:<role>` for your
-   roles, `agent:split`, `hold`, `alignment-needed`, `ai-review`.
+   roles, `agent:team`, `agent:split`, `hold`, `alignment-needed`, `ai-review`.
 3. **Branch protection** on `main`: pull requests only, the CI checks
    required, "Require branches to be up to date before merging".
 4. **Routing**, with more than one tool: the `AGENT_RUNNERS` repository
@@ -124,6 +124,13 @@ proposed split as a comment; nothing is created. Then reply on the issue:
 
 A script creates exactly the plan you approved; the model creates nothing.
 
+### Team tasks
+
+Add `agent:team` to an issue: one session of the `team` agent does the whole
+issue, every role it touches, and opens one pull request with a section per
+role. It runs on any tool, routed like a role (`AGENT_RUNNERS`:
+`{"agent:team":"codex"}`), with the same limits as any task.
+
 ### Ask and review
 
 - `@claude <request>` in a comment on an issue or a pull request, or on a
@@ -165,7 +172,7 @@ pipeline with variables, never on pushes:
 |---|---|
 | `AI_FLOW_INPUT` | the task, or "carry out issue 14 following docs/roles/backend.md" |
 | `TASK_ID` | the issue number: jobs for the same task queue instead of running together |
-| `AI_FLOW_ROLE` | the role (needed by Codex and OpenCode) |
+| `AI_FLOW_ROLE` | the role (needed by Codex and OpenCode); `team` for a [team task](04-run-the-project.md#team-tasks) |
 | `AI_FLOW_HARNESS` | `claude`, `codex` or `opencode`; default: the first tool of the profile |
 | `SPLIT_ISSUE`, `SPLIT_CONFIRM`, `SPLIT_FEEDBACK` | the split (below) |
 

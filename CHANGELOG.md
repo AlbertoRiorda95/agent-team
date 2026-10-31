@@ -55,13 +55,18 @@ features, the major for changes that break existing projects.
   agent suggests `/handoff` and then `/clear`; it never runs it, and does not
   suggest it after a short session.
 
-### Removed
-- Team tasks: the `team-tasks` profile feature, the `agent:team` label and its
-  job, the GitLab `claude-team` job and `AI_FLOW_ROLES`, `create-issues.py
-  --team`, `@claude ok team` (`SPLIT_CONFIRM=team`) in a split, and "Team task
-  possible" in the spec template. Work for several roles is several tasks
-  with dependencies; locally the lead runs them in order. A profile that
-  still lists `team-tasks` loads: the feature is ignored.
+### Changed
+- Team tasks run as one agent, `team` (`docs/roles/team.md`, with an agent
+  for Claude Code, Codex and OpenCode), instead of a coordinator that
+  delegated each role to a subagent: the coordination cost tokens and gave
+  no better result. The agent does the whole issue alone, with the
+  responsibilities and the rules of every role it touches (the frontend's
+  lint hook too), and cannot start subagents. `agent:team` is routed like a
+  role, so it runs on any tool (`AGENT_RUNNERS`); on GitLab it is
+  `AI_FLOW_ROLE=team` in the normal job. Gone with the coordinator: the
+  `Roles:` line, the GitLab `claude-team` job and `AI_FLOW_ROLES`, `@claude ok
+  team` (`SPLIT_CONFIRM=team`) in a split, "Team task possible" in the spec
+  template. `create-issues.py --team` now makes one team issue per ready spec.
 
 ### Documentation
 - The manual explains the development approach (design first, TDD, clean
@@ -162,13 +167,12 @@ features, the major for changes that break existing projects.
 - `.claude/settings.json` and the role agents changed (hooks): the upgrade
   merges them; if you added hooks to an agent's frontmatter, move them to
   `role-hooks.sh`. The hooks need `jq` wherever the agents run.
-- Team tasks are gone: the upgrade takes the `team` job (GitLab:
-  `claude-team`) and the `AGENTS.md` section out of your files, merging with
-  your edits; if you customized the job, the conflict shows it. It keeps
-  `docs/agents/team-tasks.md` and reports it as no longer in the template:
-  delete it, and the `Roles:` line of the issue template. On GitHub delete
-  the label (`gh label delete agent:team`); turn open `agent:team` issues
-  into separate tasks (`/agent-team:split-issue`).
+- Team tasks: the upgrade takes the coordinator's `team` job (GitLab:
+  `claude-team`) out of your files, merging with your edits; if you
+  customized the job, the conflict shows it, and the toolchain you added
+  belongs in the role job now. It keeps `docs/agents/team-tasks.md` and
+  reports it as no longer in the template: delete it, and the `Roles:` line
+  of the issue template. Open `agent:team` issues keep working.
 
 ## 1.5.0 - 2026-10-28
 

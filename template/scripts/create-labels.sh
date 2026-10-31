@@ -8,6 +8,9 @@ for r in designer frontend backend optimizer devops security writer; do
   [ -f "docs/roles/$r.md" ] || continue
   gh label create "agent:$r" --description "Task for the $r agent" --color 5319e7 --force
 done
+# agent-team:if team_tasks
+gh label create "agent:team" --description "Team task: one agent does every role the task touches, no subagents" --color 5319e7 --force
+# agent-team:end
 # agent-team:if split and harness_claude
 gh label create "agent:split" --description "Ask Claude to propose a split into task issues (split.yml)" --color 5319e7 --force
 # agent-team:end

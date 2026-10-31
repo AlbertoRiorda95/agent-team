@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="light dark">
-<meta name="manual-source" content="sha256:f24cc2487164994a2c067a97adeaa7e4157222ee3960946efb4227fe519685e2">
+<meta name="manual-source" content="sha256:c0b1823f990e640758991b0e077bb24151b3a8df58d8c28a32742d0908305ca6">
 <meta name="manual-builder" content="python-markdown 3.11.2">
 <title>Agent team: user manual</title>
 <style>
@@ -66,7 +66,7 @@ h1{font-size:26px}
 <nav aria-label="Contents">
 <p class="brand">Agent team</p>
 <p class="sub">User manual</p>
-<ol><li><a href="#c00">Agent team: user manual</a></li><li><a href="#c01">1. What Agent team is</a><ol><li><a href="#c01-you-are-the-lead">You are the lead</a></li><li><a href="#c01-the-team">The team</a></li><li><a href="#c01-how-work-flows">How work flows</a></li><li><a href="#c01-how-the-team-develops">How the team develops</a></li><li><a href="#c01-three-scenarios">Three scenarios</a></li><li><a href="#c01-what-you-get-in-the-repository">What you get in the repository</a></li><li><a href="#c01-words-used-in-this-manual">Words used in this manual</a></li></ol></li><li><a href="#c02">2. Install</a><ol><li><a href="#c02-before-you-start">Before you start</a></li><li><a href="#c02-in-claude-code">In Claude Code</a></li><li><a href="#c02-in-codex-or-opencode">In Codex or OpenCode</a></li><li><a href="#c02-without-the-plugin">Without the plugin</a></li><li><a href="#c02-updating-the-plugin">Updating the plugin</a></li><li><a href="#c02-what-each-tool-needs">What each tool needs</a></li></ol></li><li><a href="#c03">3. Set up a project</a><ol><li><a href="#c03-the-steps">The steps</a></li><li><a href="#c03-the-profile">The profile</a></li><li><a href="#c03-what-you-get">What you get</a></li><li><a href="#c03-after-the-setup">After the setup</a></li></ol></li><li><a href="#c04">4. Run the project</a><ol><li><a href="#c04-the-workflow">The workflow</a></li><li><a href="#c04-design">Design</a></li><li><a href="#c04-issues">Issues</a></li><li><a href="#c04-split">Split</a></li><li><a href="#c04-start">Start</a></li><li><a href="#c04-while-a-task-runs">While a task runs</a></li><li><a href="#c04-change-the-plan">Change the plan</a></li><li><a href="#c04-review-and-merge">Review and merge</a></li><li><a href="#c04-alignment">Alignment</a></li><li><a href="#c04-on-demand-roles">On-demand roles</a></li><li><a href="#c04-long-sessions">Long sessions</a></li></ol></li><li><a href="#c05">5. Scenario: local</a><ol><li><a href="#c05-why-use-it">Why use it</a></li><li><a href="#c05-profile">Profile</a></li><li><a href="#c05-what-a-task-produces">What a task produces</a></li><li><a href="#c05-where-the-ci-runs">Where the CI runs</a></li><li><a href="#c05-with-claude-code">With Claude Code</a></li><li><a href="#c05-with-codex">With Codex</a></li><li><a href="#c05-with-opencode">With OpenCode</a></li><li><a href="#c05-several-tools-in-one-project">Several tools in one project</a></li><li><a href="#c05-issues-in-the-local-scenario">Issues in the local scenario</a></li><li><a href="#c05-keep-the-issues-in-line-with-the-specs">Keep the issues in line with the specs</a></li><li><a href="#c05-the-skills-by-example">The skills by example</a></li><li><a href="#c05-from-your-phone">From your phone</a></li></ol></li><li><a href="#c06">6. Scenario: remote repository</a><ol><li><a href="#c06-why-use-it">Why use it</a></li><li><a href="#c06-profile">Profile</a></li><li><a href="#c06-github">GitHub</a></li><li><a href="#c06-gitlab">GitLab</a></li><li><a href="#c06-the-skills-by-example">The skills by example</a></li><li><a href="#c06-costs-and-safety">Costs and safety</a></li></ol></li><li><a href="#c07">7. Scenario: custom orchestrator</a><ol><li><a href="#c07-why-use-it">Why use it</a></li><li><a href="#c07-the-connection-points">The connection points</a></li><li><a href="#c07-option-a-multica-a-board-with-agents-as-team-members">Option A: Multica, a board with agents as team members</a></li><li><a href="#c07-option-b-your-own-orchestrator">Option B: your own orchestrator</a></li><li><a href="#c07-litellm-one-gateway-for-many-providers">LiteLLM: one gateway for many providers</a></li></ol></li><li><a href="#c08">8. Change and upgrade</a><ol><li><a href="#c08-change-the-profile">Change the profile</a></li><li><a href="#c08-upgrade-to-a-new-plugin-version">Upgrade to a new plugin version</a></li><li><a href="#c08-how-your-changes-are-kept">How your changes are kept</a></li><li><a href="#c08-a-project-set-up-by-hand">A project set up by hand</a></li></ol></li><li><a href="#c09">9. Reference</a><ol><li><a href="#c09-skills">Skills</a></li><li><a href="#c09-scripts">Scripts</a></li><li><a href="#c09-files-the-agents-read-by-situation">Files the agents read by situation</a></li><li><a href="#c09-configuration">Configuration</a></li><li><a href="#c09-starters">Starters</a></li><li><a href="#c09-labels">Labels</a></li><li><a href="#c09-ci-secrets-and-variables">CI secrets and variables</a></li><li><a href="#c09-where-the-tools-find-things">Where the tools find things</a></li><li><a href="#c09-what-a-run-costs">What a run costs</a></li><li><a href="#c09-token-costs">Token costs</a></li><li><a href="#c09-this-manual">This manual</a></li></ol></li><li><a href="#c10">10. Integrations not yet validated</a></li></ol>
+<ol><li><a href="#c00">Agent team: user manual</a></li><li><a href="#c01">1. What Agent team is</a><ol><li><a href="#c01-you-are-the-lead">You are the lead</a></li><li><a href="#c01-the-team">The team</a></li><li><a href="#c01-how-work-flows">How work flows</a></li><li><a href="#c01-how-the-team-develops">How the team develops</a></li><li><a href="#c01-three-scenarios">Three scenarios</a></li><li><a href="#c01-what-you-get-in-the-repository">What you get in the repository</a></li><li><a href="#c01-words-used-in-this-manual">Words used in this manual</a></li></ol></li><li><a href="#c02">2. Install</a><ol><li><a href="#c02-before-you-start">Before you start</a></li><li><a href="#c02-in-claude-code">In Claude Code</a></li><li><a href="#c02-in-codex-or-opencode">In Codex or OpenCode</a></li><li><a href="#c02-without-the-plugin">Without the plugin</a></li><li><a href="#c02-updating-the-plugin">Updating the plugin</a></li><li><a href="#c02-what-each-tool-needs">What each tool needs</a></li></ol></li><li><a href="#c03">3. Set up a project</a><ol><li><a href="#c03-the-steps">The steps</a></li><li><a href="#c03-the-profile">The profile</a></li><li><a href="#c03-what-you-get">What you get</a></li><li><a href="#c03-after-the-setup">After the setup</a></li></ol></li><li><a href="#c04">4. Run the project</a><ol><li><a href="#c04-the-workflow">The workflow</a></li><li><a href="#c04-design">Design</a></li><li><a href="#c04-issues">Issues</a></li><li><a href="#c04-split">Split</a></li><li><a href="#c04-start">Start</a></li><li><a href="#c04-while-a-task-runs">While a task runs</a></li><li><a href="#c04-change-the-plan">Change the plan</a></li><li><a href="#c04-review-and-merge">Review and merge</a></li><li><a href="#c04-alignment">Alignment</a></li><li><a href="#c04-team-tasks">Team tasks</a></li><li><a href="#c04-on-demand-roles">On-demand roles</a></li><li><a href="#c04-long-sessions">Long sessions</a></li></ol></li><li><a href="#c05">5. Scenario: local</a><ol><li><a href="#c05-why-use-it">Why use it</a></li><li><a href="#c05-profile">Profile</a></li><li><a href="#c05-what-a-task-produces">What a task produces</a></li><li><a href="#c05-where-the-ci-runs">Where the CI runs</a></li><li><a href="#c05-with-claude-code">With Claude Code</a></li><li><a href="#c05-with-codex">With Codex</a></li><li><a href="#c05-with-opencode">With OpenCode</a></li><li><a href="#c05-several-tools-in-one-project">Several tools in one project</a></li><li><a href="#c05-issues-in-the-local-scenario">Issues in the local scenario</a></li><li><a href="#c05-keep-the-issues-in-line-with-the-specs">Keep the issues in line with the specs</a></li><li><a href="#c05-the-skills-by-example">The skills by example</a></li><li><a href="#c05-from-your-phone">From your phone</a></li></ol></li><li><a href="#c06">6. Scenario: remote repository</a><ol><li><a href="#c06-why-use-it">Why use it</a></li><li><a href="#c06-profile">Profile</a></li><li><a href="#c06-github">GitHub</a></li><li><a href="#c06-gitlab">GitLab</a></li><li><a href="#c06-the-skills-by-example">The skills by example</a></li><li><a href="#c06-costs-and-safety">Costs and safety</a></li></ol></li><li><a href="#c07">7. Scenario: custom orchestrator</a><ol><li><a href="#c07-why-use-it">Why use it</a></li><li><a href="#c07-the-connection-points">The connection points</a></li><li><a href="#c07-option-a-multica-a-board-with-agents-as-team-members">Option A: Multica, a board with agents as team members</a></li><li><a href="#c07-option-b-your-own-orchestrator">Option B: your own orchestrator</a></li><li><a href="#c07-litellm-one-gateway-for-many-providers">LiteLLM: one gateway for many providers</a></li></ol></li><li><a href="#c08">8. Change and upgrade</a><ol><li><a href="#c08-change-the-profile">Change the profile</a></li><li><a href="#c08-upgrade-to-a-new-plugin-version">Upgrade to a new plugin version</a></li><li><a href="#c08-how-your-changes-are-kept">How your changes are kept</a></li><li><a href="#c08-a-project-set-up-by-hand">A project set up by hand</a></li></ol></li><li><a href="#c09">9. Reference</a><ol><li><a href="#c09-skills">Skills</a></li><li><a href="#c09-scripts">Scripts</a></li><li><a href="#c09-files-the-agents-read-by-situation">Files the agents read by situation</a></li><li><a href="#c09-configuration">Configuration</a></li><li><a href="#c09-starters">Starters</a></li><li><a href="#c09-labels">Labels</a></li><li><a href="#c09-ci-secrets-and-variables">CI secrets and variables</a></li><li><a href="#c09-where-the-tools-find-things">Where the tools find things</a></li><li><a href="#c09-what-a-run-costs">What a run costs</a></li><li><a href="#c09-token-costs">Token costs</a></li><li><a href="#c09-this-manual">This manual</a></li></ol></li><li><a href="#c10">10. Integrations not yet validated</a></li></ol>
 </nav>
 <main>
 <section class="chapter" id="c00">
@@ -459,6 +459,10 @@ each scenario (<a href="#c08">8. Change and upgrade</a>).</p>
 <td>what "start" means for dispatch: add a label, run a pipeline, call your orchestrator, or print what to do</td>
 </tr>
 <tr>
+<td><strong>team task</strong></td>
+<td>one issue across several roles done by one agent alone, without subagents, on one branch, with one merge request</td>
+</tr>
+<tr>
 <td><strong>alignment</strong></td>
 <td>a change other roles rely on (API, data model, shared component, route, variable): recorded in <code>docs/alignment/</code> and flagged on the merge request</td>
 </tr>
@@ -743,6 +747,10 @@ CI</em>. They do not gate the commands: <code>/agent-team:split-issue</code>,
 <td>the workflows (GitHub) or jobs (GitLab) that run an agent when a task starts: the remote scenario</td>
 </tr>
 <tr>
+<td><code>team-tasks</code></td>
+<td><a href="#c04-team-tasks">team tasks</a>: one agent does a whole issue across several roles, without subagents</td>
+</tr>
+<tr>
 <td><code>split</code></td>
 <td>the split proposed on the issue itself in CI, when you add the <code>agent:split</code> label</td>
 </tr>
@@ -780,7 +788,7 @@ back (<a href="#c08">8. Change and upgrade</a>).</p>
 </tr>
 <tr>
 <td>Remote repository</td>
-<td>one or more tools; <code>ci</code> and <code>tracker</code> the same platform; <code>ci-agents</code>, plus <code>split</code>, <code>dispatch</code>, <code>spec-sync</code> as you like</td>
+<td>one or more tools; <code>ci</code> and <code>tracker</code> the same platform; <code>ci-agents</code>, plus <code>team-tasks</code>, <code>split</code>, <code>dispatch</code>, <code>spec-sync</code> as you like</td>
 </tr>
 <tr>
 <td>Custom orchestrator</td>
@@ -1201,7 +1209,8 @@ not left behind:</p>
 (<a href="#c04-split">Split</a>).</p>
 <p><code>create-issues</code> shows the plan first and creates only on your yes. It adds no
 labels, so nothing starts on its own. Running it again creates only what is
-missing, so run it after every design session.</p>
+missing, so run it after every design session. With <code>--team</code>, each ready
+spec becomes one <a href="#c04-team-tasks">team task</a> instead of one issue per row.</p>
 <h3 id="c04-when-a-spec-changes-after-its-issues-exist">When a spec changes after its issues exist</h3>
 <p>Issues can be created before the design merge request is merged
 (<a href="#c04-the-workflow">The workflow</a>), so the spec can still change: a reviewer asks
@@ -1506,6 +1515,19 @@ label.</p>
 </ul>
 <p>Breaking contract changes are planned as expand-contract: add the new form,
 move the callers, remove the old form last, with <code>main</code> green at every step.</p>
+<h2 id="c04-team-tasks">Team tasks</h2>
+<p>A small, tightly coupled feature can be one task for several roles: one
+issue, one branch, one merge request. One agent, <code>team</code>, does all of it
+alone: it holds the responsibilities of every role the task touches, follows
+their rules for each part (contract first, UI tests, TDD, the frontend's
+lint) and works in the order of the standard sequence. It starts no
+subagents, so no tokens go to coordinating them. Use it when separate merge
+requests would only wait on each other; prefer separate tasks otherwise.</p>
+<p>It needs the <code>team-tasks</code> profile feature. Start it with the <code>agent:team</code>
+label on GitHub or <code>AI_FLOW_ROLE=team</code> on GitLab
+(<a href="#c06-team-tasks">6. Scenario: remote</a>), or locally by
+asking the lead for a team task. <code>create-issues --team</code> creates one such
+issue per ready spec.</p>
 <h2 id="c04-on-demand-roles">On-demand roles</h2>
 <p>Dispatch never starts these: you ask for them.</p>
 <ul>
@@ -1901,7 +1923,7 @@ Everything in <a href="#c04">4. Run the project</a> applies.</p>
 while you are away, or when several people review the team's work.</p>
 <h2 id="c06-profile">Profile</h2>
 <pre><code class="language-json">{&quot;harnesses&quot;: [&quot;claude&quot;], &quot;ci&quot;: &quot;github&quot;, &quot;tracker&quot;: &quot;github&quot;,
- &quot;features&quot;: [&quot;ci-agents&quot;, &quot;split&quot;, &quot;dispatch&quot;]}
+ &quot;features&quot;: [&quot;ci-agents&quot;, &quot;team-tasks&quot;, &quot;split&quot;, &quot;dispatch&quot;]}
 </code></pre>
 <p>With several tools, list them and assign roles to the others:
 <code>"harnesses": ["claude", "codex"], "runners": {"optimizer": "codex"}</code>. The
@@ -1945,7 +1967,7 @@ workflows cannot read this file, so on GitHub the same routing goes in the
    each, comment out the <code>anthropic_api_key:</code> line and uncomment the
    <code>claude_code_oauth_token:</code> line next to it.
 2. <strong>Labels</strong>: <code>./scripts/create-labels.sh</code> creates <code>agent:&lt;role&gt;</code> for your
-   roles, <code>agent:split</code>, <code>hold</code>, <code>alignment-needed</code>, <code>ai-review</code>.
+   roles, <code>agent:team</code>, <code>agent:split</code>, <code>hold</code>, <code>alignment-needed</code>, <code>ai-review</code>.
 3. <strong>Branch protection</strong> on <code>main</code>: pull requests only, the CI checks
    required, "Require branches to be up to date before merging".
 4. <strong>Routing</strong>, with more than one tool: the <code>AGENT_RUNNERS</code> repository
@@ -2017,6 +2039,11 @@ proposed split as a comment; nothing is created. Then reply on the issue:</p>
 </tbody>
 </table></div>
 <p>A script creates exactly the plan you approved; the model creates nothing.</p>
+<h3 id="c06-team-tasks">Team tasks</h3>
+<p>Add <code>agent:team</code> to an issue: one session of the <code>team</code> agent does the whole
+issue, every role it touches, and opens one pull request with a section per
+role. It runs on any tool, routed like a role (<code>AGENT_RUNNERS</code>:
+<code>{"agent:team":"codex"}</code>), with the same limits as any task.</p>
 <h3 id="c06-ask-and-review">Ask and review</h3>
 <ul>
 <li><code>@claude &lt;request&gt;</code> in a comment on an issue or a pull request, or on a
@@ -2068,7 +2095,7 @@ pipeline with variables, never on pushes:</p>
 </tr>
 <tr>
 <td><code>AI_FLOW_ROLE</code></td>
-<td>the role (needed by Codex and OpenCode)</td>
+<td>the role (needed by Codex and OpenCode); <code>team</code> for a <a href="#c04-team-tasks">team task</a></td>
 </tr>
 <tr>
 <td><code>AI_FLOW_HARNESS</code></td>
@@ -2610,7 +2637,7 @@ it has <code>--to-issues</code>.</p>
 <td>the tracker: connection, settings, open issues, one issue</td>
 </tr>
 <tr>
-<td><code>python3 scripts/create-issues.py [--dry-run] [--migrate]</code></td>
+<td><code>python3 scripts/create-issues.py [--dry-run] [--team] [--migrate]</code></td>
 <td>milestones and issues; a "Design:" issue whose spec is ready becomes the task (one row) or the feature with the tasks as sub-issues; <code>--migrate</code> moves old "M0 · ..." parent issues to milestones</td>
 </tr>
 <tr>
@@ -2749,6 +2776,10 @@ it has <code>--to-issues</code>.</p>
 <tr>
 <td><code>agent:&lt;role&gt;</code></td>
 <td>the task runs on that role; on GitHub adding it starts the agent</td>
+</tr>
+<tr>
+<td><code>agent:team</code></td>
+<td>the whole task by one agent, every role it touches, without subagents (GitLab: <code>AI_FLOW_ROLE=team</code>)</td>
 </tr>
 <tr>
 <td><code>agent:split</code></td>

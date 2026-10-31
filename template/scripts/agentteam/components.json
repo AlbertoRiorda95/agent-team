@@ -178,6 +178,22 @@
    "role_writer"
   ],
   [
+   ".claude/agents/team.md",
+   "harness_claude and team_tasks"
+  ],
+  [
+   ".opencode/agents/team.md",
+   "harness_opencode and team_tasks"
+  ],
+  [
+   ".codex/agents/team.toml",
+   "harness_codex and team_tasks"
+  ],
+  [
+   "docs/roles/team.md",
+   "team_tasks"
+  ],
+  [
    "docs/software/*",
    "role_writer"
   ],
