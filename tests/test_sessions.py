@@ -197,6 +197,24 @@ class Claude(unittest.TestCase):
                          args=("--agent", "security"))
         self.assertEqual(s.ran(), ["curl -s http://localhost:3000/"])
 
+    def test_usage_counts_the_tokens(self):
+        """scripts/usage.py: the action's result and the local transcripts give the tokens the model reported."""
+        s = self.session(bash("echo hi"))
+        calls = len([q for q in s.server.requests if q["path"].split("?")[0].endswith("/messages")])
+        put(os.path.join(s.tmp, "result.json"), json.dumps(s.result))
+        for args in (["claude-result", os.path.join(s.tmp, "result.json")], ["claude-sessions"]):
+            out = os.path.join(s.tmp, "usage.jsonl")
+            if os.path.exists(out):
+                os.remove(out)
+            r = s.run(["python3", "scripts/usage.py", *args, "--json", out, "--summary", os.path.join(s.tmp, "sum.md")])
+            self.assertEqual(r.returncode, 0, r.stderr)
+            rows = [json.loads(x) for x in open(out)]
+            with self.subTest(source=args[0]):
+                self.assertEqual(len(rows), 1, rows)
+                self.assertEqual((rows[0]["input"], rows[0]["output"]), (10 * calls, 5 * calls))
+                self.assertGreater(rows[0]["cost_usd"], 0)
+        self.assertIn("| claude |", open(os.path.join(s.tmp, "sum.md")).read())
+
     def test_team_task_is_one_session(self):
         """agent:team in CI (claude -p --agent team): no subagents, every role's checks, the common limits."""
         def setup(s):                                      # the frontend's lint runs npx eslint
@@ -337,6 +355,14 @@ class Codex(unittest.TestCase):
             with self.subTest(role=role):
                 self.assertRegex(tools, rf"{role}: {{\\n.*?reasoning effort is set to `{effort}`")
 
+    def test_usage_counts_the_tokens(self):
+        s = self.session({"tool": "exec_command", "input": {"cmd": "echo hi"}})
+        r = s.run(["python3", "scripts/usage.py", "codex-sessions", "--json", os.path.join(s.tmp, "u.jsonl")])
+        self.assertEqual(r.returncode, 0, r.stderr)
+        rows = [json.loads(x) for x in open(os.path.join(s.tmp, "u.jsonl"))]
+        n = len(s.server.requests)
+        self.assertEqual([(x["tool"], x["input"], x["output"]) for x in rows], [("codex", 10 * n, 5 * n)])
+
     def test_rules_block_in_a_session(self):
         cmd = lambda c: {"tool": "exec_command", "input": {"cmd": c}}   # noqa: E731
         blocked = ["npm publish", "git push --tags", "terraform apply", "./gradlew publish", "cd lib && mvn -B deploy",
@@ -370,6 +396,15 @@ class OpenCode(unittest.TestCase):
         if answered:
             self.assertTrue(s.results, s.output[-2000:])
         return s
+
+    def test_usage_counts_the_tokens(self):
+        s = self.session("backend", bash("git status"))
+        r = s.run(["python3", "scripts/usage.py", "opencode", "--json", os.path.join(s.tmp, "u.jsonl")], timeout=300)
+        self.assertEqual(r.returncode, 0, r.stderr)
+        rows = [json.loads(x) for x in open(os.path.join(s.tmp, "u.jsonl"))]
+        self.assertEqual(len(rows), 1, rows)
+        self.assertEqual((rows[0]["input"], rows[0]["output"]), (10 * rows[0]["calls"], 5 * rows[0]["calls"]))
+        self.assertIn("mock/mock-model", rows[0]["model"])
 
     def test_denied_commands_never_run(self):
         for role in ("backend", "devops", "writer"):

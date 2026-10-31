@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="light dark">
-<meta name="manual-source" content="sha256:c0b1823f990e640758991b0e077bb24151b3a8df58d8c28a32742d0908305ca6">
+<meta name="manual-source" content="sha256:a45a382e9c4c9a75264f5471e39c5d5ca6dc33b3e0f55acbb008901ff15066b4">
 <meta name="manual-builder" content="python-markdown 3.11.2">
 <title>Agent team: user manual</title>
 <style>
@@ -2189,8 +2189,9 @@ changes on a branch:</p>
 </code></pre>
 <h2 id="c06-costs-and-safety">Costs and safety</h2>
 <ul>
-<li>Each task is one agent run, and each <code>@claude</code> mention one more. The CI minutes are those of your plan. What a run costs:
-  <a href="#c09-what-a-run-costs">9. What a run costs</a>.</li>
+<li>Each task is one agent run, and each <code>@claude</code> mention one more. The CI
+  minutes are those of your plan. Each run's summary page shows the tokens
+  and the cost it used (<a href="#c09-measure-it">9. Measure it</a>).</li>
 <li>Agents in CI use <code>--max-turns</code> limits, compact at 200,000 tokens and never
   run in the background, so a run ends with a merge request or a comment
   saying why it could not.</li>
@@ -2657,6 +2658,10 @@ it has <code>--to-issues</code>.</p>
 <td>GitHub labels</td>
 </tr>
 <tr>
+<td><code>python3 scripts/usage.py [--since DATE]</code></td>
+<td>tokens and cost of this project's agent sessions, local or in CI (<a href="#c09-measure-it">Measure it</a>)</td>
+</tr>
+<tr>
 <td><code>./scripts/install-skills.sh</code>, <code>./scripts/check-skills.sh</code></td>
 <td>recommended skills for your stack, and a check that the agents find them</td>
 </tr>
@@ -2962,11 +2967,20 @@ reads, so the template bounds each run instead:</p>
 </tbody>
 </table></div>
 <p>A turn is one model response, with its tool calls. Every run compacts its
-context at 200,000 tokens. To see what runs actually cost, look at your
-provider's usage page after a few tasks; with the custom orchestrator, the
-Claude Agent SDK reports the cost of each run, and LiteLLM the spend per
-role. Start with low dispatch limits (one task per role, three in total) and
-raise them once you know your numbers.</p>
+context at 200,000 tokens. Start with low dispatch limits (one task per role,
+three in total) and raise them once you know your numbers.</p>
+<h3 id="c09-measure-it">Measure it</h3>
+<p>Every agent run in CI reports what it used: the input, cache and output
+tokens, the calls, the time and, for Claude Code and OpenCode, the cost at
+list price. On GitHub the table is in the run's summary page and in the
+<code>usage-&lt;job&gt;</code> artifact; on GitLab it is at the end of the job log and in the
+<code>usage.jsonl</code> artifact. With a subscription the tokens count against your
+plan's limits, and the cost is what they would cost through the API.</p>
+<p>For the work you do locally (setup, a design session, <code>create-issues</code>, a
+split, a task run by hand), run <code>python3 scripts/usage.py</code>. It reads what
+Claude Code, Codex and OpenCode record on your computer and shows one row per
+session of this project; <code>--since 2026-11-01</code> keeps the recent ones. With
+LiteLLM, <code>key-spend.sh</code> also gives the spend of each role's key.</p>
 <h2 id="c09-token-costs">Token costs</h2>
 <p>What every agent reads on every turn costs on every request: <code>AGENTS.md</code>
 (about 1,200 tokens after setup), <code>CLAUDE.md</code>, the descriptions of the agents

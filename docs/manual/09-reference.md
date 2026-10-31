@@ -46,6 +46,7 @@ it has `--to-issues`.
 | `python3 scripts/dispatch.py [--apply] [--per-role N] [--max N] [--milestone M1 \| --all]` | the ready tasks, checked against their spec row on the main branch; with `--apply` rewrites the changed ones and starts them |
 | `scripts/git-hooks/spec-sync.sh` | feature `spec-sync`, local: Git hook (`post-merge`, `post-commit`) that runs create-issues after a spec change on the main branch |
 | `./scripts/create-labels.sh` | GitHub labels |
+| `python3 scripts/usage.py [--since DATE]` | tokens and cost of this project's agent sessions, local or in CI ([Measure it](#measure-it)) |
 | `./scripts/install-skills.sh`, `./scripts/check-skills.sh` | recommended skills for your stack, and a check that the agents find them |
 
 ## Files the agents read by situation
@@ -140,11 +141,23 @@ reads, so the template bounds each run instead:
 | Codex or OpenCode jobs | 60 minutes |
 
 A turn is one model response, with its tool calls. Every run compacts its
-context at 200,000 tokens. To see what runs actually cost, look at your
-provider's usage page after a few tasks; with the custom orchestrator, the
-Claude Agent SDK reports the cost of each run, and LiteLLM the spend per
-role. Start with low dispatch limits (one task per role, three in total) and
-raise them once you know your numbers.
+context at 200,000 tokens. Start with low dispatch limits (one task per role,
+three in total) and raise them once you know your numbers.
+
+### Measure it
+
+Every agent run in CI reports what it used: the input, cache and output
+tokens, the calls, the time and, for Claude Code and OpenCode, the cost at
+list price. On GitHub the table is in the run's summary page and in the
+`usage-<job>` artifact; on GitLab it is at the end of the job log and in the
+`usage.jsonl` artifact. With a subscription the tokens count against your
+plan's limits, and the cost is what they would cost through the API.
+
+For the work you do locally (setup, a design session, `create-issues`, a
+split, a task run by hand), run `python3 scripts/usage.py`. It reads what
+Claude Code, Codex and OpenCode record on your computer and shows one row per
+session of this project; `--since 2026-11-01` keeps the recent ones. With
+LiteLLM, `key-spend.sh` also gives the spend of each role's key.
 
 ## Token costs
 

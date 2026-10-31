@@ -23,7 +23,7 @@ claude:
     CLAUDE_CODE_DISABLE_BACKGROUND_TASKS: "1"  # In CI everything runs in the foreground: background subagents or commands are lost when the run ends.
     CLAUDE_CODE_AUTO_COMPACT_WINDOW: "200000"  # compact at 200K tokens instead of near the 1M window
   before_script:
-    - apk update && apk add --no-cache git curl bash jq
+    - apk update && apk add --no-cache git curl bash jq python3
     - curl -fsSL https://claude.ai/install.sh | bash
     - export PATH="$HOME/.local/bin:$PATH"
   script:
@@ -38,6 +38,13 @@ claude:
       --allowedTools "Bash Read Edit Write mcp__gitlab"
       --max-turns 30
       ${AI_FLOW_ROLE:+--agent "$AI_FLOW_ROLE"}
+  # tokens and cost of this run, in the log and as the usage.jsonl artifact (scripts/usage.py)
+  after_script:
+    - python3 scripts/usage.py --title "${AI_FLOW_ROLE:-task} #$TASK_ID" --json usage.jsonl || true
+  artifacts:
+    when: always
+    paths: [usage.jsonl]
+    expire_in: 90 days
 
 # agent-team:end
 
@@ -84,6 +91,13 @@ claude-split:
       --model claude-sonnet-5-5
       --allowedTools "Read Write Glob Grep Bash(glab issue view:*) Bash(glab issue note:*) Bash(glab api projects/$CI_PROJECT_ID/issues/$SPLIT_ISSUE/links) Bash(python3 scripts/split-issue.py check:*) Bash(python3 scripts/split-issue.py propose:*)"
       --max-turns 25
+  # tokens and cost of this run, in the log and as the usage.jsonl artifact (scripts/usage.py)
+  after_script:
+    - python3 scripts/usage.py --title "split #$SPLIT_ISSUE" --json usage.jsonl || true
+  artifacts:
+    when: always
+    paths: [usage.jsonl]
+    expire_in: 90 days
 
 split-create:
   stage: ai
@@ -124,7 +138,7 @@ codex:
     GITLAB_TOKEN: $GITLAB_ACCESS_TOKEN
     GITLAB_HOST: $CI_SERVER_URL
   before_script:
-    - apk add --no-cache git bash jq glab
+    - apk add --no-cache git bash jq glab python3
     - npm install -g @openai/codex  # CUSTOMIZE: pin a version (@openai/codex@<version>)
     - printenv OPENAI_API_KEY | codex login --with-api-key
   script:
@@ -140,6 +154,13 @@ codex:
 
       Task: $AI_FLOW_INPUT"
     - ./ci/agent-mr.sh codex
+  # tokens and cost of this run, in the log and as the usage.jsonl artifact (scripts/usage.py)
+  after_script:
+    - python3 scripts/usage.py --title "${AI_FLOW_ROLE:-task} #$TASK_ID" --json usage.jsonl || true
+  artifacts:
+    when: always
+    paths: [usage.jsonl]
+    expire_in: 90 days
 # agent-team:end
 
 # agent-team:if harness_opencode
@@ -158,7 +179,7 @@ opencode:
     GITLAB_TOKEN: $GITLAB_ACCESS_TOKEN
     GITLAB_HOST: $CI_SERVER_URL
   before_script:
-    - apk add --no-cache git bash jq glab
+    - apk add --no-cache git bash jq glab python3
     - npm install -g opencode-ai  # CUSTOMIZE: pin a version (opencode-ai@<version>)
   script:
     - >
@@ -170,4 +191,11 @@ opencode:
 
       Task: $AI_FLOW_INPUT" | tee /tmp/agent-summary.md
     - ./ci/agent-mr.sh opencode
+  # tokens and cost of this run, in the log and as the usage.jsonl artifact (scripts/usage.py)
+  after_script:
+    - python3 scripts/usage.py --title "${AI_FLOW_ROLE:-task} #$TASK_ID" --json usage.jsonl || true
+  artifacts:
+    when: always
+    paths: [usage.jsonl]
+    expire_in: 90 days
 # agent-team:end

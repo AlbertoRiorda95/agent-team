@@ -288,8 +288,9 @@ changes on a branch:
 
 ## Costs and safety
 
-- Each task is one agent run, and each `@claude` mention one more. The CI minutes are those of your plan. What a run costs:
-  [9. What a run costs](09-reference.md#what-a-run-costs).
+- Each task is one agent run, and each `@claude` mention one more. The CI
+  minutes are those of your plan. Each run's summary page shows the tokens
+  and the cost it used ([9. Measure it](09-reference.md#measure-it)).
 - Agents in CI use `--max-turns` limits, compact at 200,000 tokens and never
   run in the background, so a run ends with a merge request or a comment
   saying why it could not.

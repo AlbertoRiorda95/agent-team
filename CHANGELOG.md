@@ -55,6 +55,12 @@ features, the major for changes that break existing projects.
   agent suggests `/handoff` and then `/clear`; it never runs it, and does not
   suggest it after a short session.
 
+- Every agent run reports its tokens, calls, time and cost at list price:
+  in the summary of the GitHub run and a `usage-<job>` artifact, at the end
+  of the GitLab job log and a `usage.jsonl` artifact. `scripts/usage.py`
+  gives the same for the local sessions of the project (Claude Code, Codex,
+  OpenCode), so the cost of an operation is measured, not guessed.
+
 ### Changed
 - Team tasks run as one agent, `team` (`docs/roles/team.md`, with an agent
   for Claude Code, Codex and OpenCode), instead of a coordinator that

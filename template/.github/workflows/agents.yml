@@ -42,6 +42,7 @@ jobs:
           LABEL: ${{ github.event.label.name }}
         run: echo "name=${LABEL#agent:}" >> "$GITHUB_OUTPUT"
       - uses: anthropics/claude-code-action@f27be6b65a4652f08a2ba3cff79114829b588967  # v1.0.252
+        id: claude
         env:
           # In CI everything runs in the foreground: background subagents or commands are lost when the run ends.
           CLAUDE_CODE_DISABLE_BACKGROUND_TASKS: "1"
@@ -90,6 +91,20 @@ jobs:
             --max-turns 40
             --model ${{ contains(fromJSON('["agent:designer","agent:frontend"]'), github.event.label.name) && 'claude-sonnet-5-5' || 'claude-opus-5-5' }}
             --allowedTools "Read,Write,Edit,Glob,Grep,Bash(git:*),Bash(npm:*),Bash(npx:*),Bash(gh pr create:*),Bash(gh pr edit:*),Bash(gh pr view:*),Bash(gh issue view:*),Bash(gh issue comment:*)"
+      # Tokens and cost of this run: in the job summary, and as the usage artifact (scripts/usage.py).
+      - name: Usage
+        if: always()
+        env:
+          RESULT: ${{ steps.claude.outputs.execution_file }}
+          TITLE: ${{ github.event.label.name }} #${{ github.event.issue.number }}
+        run: python3 scripts/usage.py claude-result "$RESULT" --title "$TITLE" --json "$RUNNER_TEMP/usage.jsonl"
+      - if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
+        with:
+          name: usage-${{ github.job }}
+          path: ${{ runner.temp }}/usage.jsonl
+          if-no-files-found: ignore
+          retention-days: 90
 
   # agent-team:end
 
@@ -135,6 +150,19 @@ jobs:
             you changed, add the docs/alignment/ entry, the "## Alignment
             impact" section and the alignment-needed label. Do not start
             other agents.
+      # Tokens of this run: in the job summary, and as the usage artifact (scripts/usage.py).
+      - name: Usage
+        if: always()
+        env:
+          TITLE: ${{ github.event.label.name }} #${{ github.event.issue.number }}
+        run: python3 scripts/usage.py opencode --title "$TITLE" --json "$RUNNER_TEMP/usage.jsonl"
+      - if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
+        with:
+          name: usage-${{ github.job }}
+          path: ${{ runner.temp }}/usage.jsonl
+          if-no-files-found: ignore
+          retention-days: 90
   # agent-team:end
 
   # agent-team:if harness_codex
@@ -209,8 +237,23 @@ jobs:
           openai-api-key: ${{ secrets.OPENAI_API_KEY }}
           prompt-file: ${{ runner.temp }}/task.md
           sandbox: workspace-write
+          # its sessions stay here, for the usage step
+          codex-home: ${{ runner.temp }}/codex-home
           model: ${{ vars.CODEX_MODEL }}
           effort: ${{ contains(fromJSON('["agent:designer","agent:frontend"]'), github.event.label.name) && 'medium' || 'high' }}
+      # Tokens of this run: in the job summary, and as the usage artifact (scripts/usage.py).
+      - name: Usage
+        if: always()
+        env:
+          TITLE: ${{ github.event.label.name }} #${{ github.event.issue.number }}
+        run: python3 scripts/usage.py codex-sessions "$RUNNER_TEMP/codex-home/sessions" --title "$TITLE" --json "$RUNNER_TEMP/usage.jsonl"
+      - if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
+        with:
+          name: usage-${{ github.job }}
+          path: ${{ runner.temp }}/usage.jsonl
+          if-no-files-found: ignore
+          retention-days: 90
       - name: Keep the change
         run: |
           git -c core.hooksPath=/dev/null add -A
