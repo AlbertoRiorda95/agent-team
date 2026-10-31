@@ -2,7 +2,8 @@
 
 You are setting up the **agent-team template** for a new project. The template
 defines a team of agents: designer, frontend, backend and devops for everyday
-work, optimizer and security that run only on explicit request,
+work, optimizer, security and writer (the documentation) that run only on
+explicit request,
 plus the rules, hooks, workflows and gateway they need. It ships with
 placeholder values written for a React + Node + Postgres app on GitHub; your
 job is to replace them with the user's real project data.
@@ -77,7 +78,11 @@ repository (an existing CI is a source too: keep its steps):
 - toolchain: the setup action on GitHub (`actions/setup-node`,
   `setup-python`, `setup-java`, `setup-go`...) and the image on GitLab;
 - install, lint, type check, build and test commands; the lockfile used as
-  cache key; without a type check command, propose one (`tsc --noEmit`,
+  cache key; every job that installs dependencies keeps
+  `./ci/registry.sh login` (with its `env:`) right before the install
+  command, whatever the stack (`npm ci`, `pip install`, `mvn`, `gradle`,
+  `conan install`...), and so do `agents.yml` and the publish job (D4);
+  without a type check command, propose one (`tsc --noEmit`,
   `mypy`, `pyright`...) or remove the step;
 - the semgrep rulesets of the stack's languages in `ci/scanners.env`
   (`SEMGREP_CONFIG`, for example `p/ci p/typescript` or `p/ci p/python`);
@@ -111,6 +116,7 @@ what you found in the repository, and ask the user to confirm or correct:
 | devops | `.github/workflows/` or `.gitlab-ci.yml`, `Dockerfile*`, `compose*.yml`, `deploy/`, `charts/`, `infra/`, `Makefile` |
 | optimizer | no folder of its own: works on tested code anywhere, on request |
 | security | writes only `docs/security/`; reads everything, on request |
+| writer | writes only `docs/software/` and the project `README.md`; reads everything, on request |
 
 Also ask:
 - Where the design tokens live (default `src/styles/tokens.css`), or whether
@@ -126,6 +132,27 @@ Also ask:
   designer in a backend service). A removed role must disappear from every
   file in the table below.
 
+### D1. One application or several services
+Ask whether the repository holds one application or several services or
+subsystems (a monorepo: `services/orders/`, `services/billing/`, a shared
+`libs/`...). With several:
+- list each service with its folder, its language and its contract, and
+  fill the `## Services` table in `AGENTS.md` (remove the comment around it);
+- the role boundaries become per service: `docs/roles/<role>.md` →
+  `## Boundaries` (for example backend: `services/*/src/`, `services/*/migrations/`),
+  the routing lines of `AGENTS.md`, `.github/CODEOWNERS` per service folder;
+- the issues: every task row and split task starts with its service
+  (`[orders] Add the endpoint`); dispatch then runs one task per role and per
+  service (`--per-role` counts per service) and a task without a service
+  waits for all of them;
+- the CI builds and tests only what changed: a job per service with path
+  filters (GitHub: `paths` or a matrix built from the changed folders;
+  GitLab: `rules: changes:`), or the monorepo tool the project uses (Nx,
+  Turborepo, Gradle, Bazel, Go workspaces). The security scans stay on the
+  whole repository.
+Services in separate repositories are not supported yet: set up each as its
+own project.
+
 ### D2. API contract
 - Where does the contract between frontend and backend live? OpenAPI file
   (default `docs/api/openapi.yaml`), shared TypeScript types or schemas, a
@@ -136,6 +163,80 @@ Also ask:
   yet, propose one and add the command to `## Commands`.
 - Which changes count as breaking for this project (the default list is in
   `AGENTS.md` → API contract).
+
+### D3. Reuse: the team's libraries
+Ask whether the team has libraries of its own that this project should use
+(give a GitHub/GitLab link for each). For each: what it is for, how to get it
+(a package registry and the package name; a Git dependency at a tag when
+there is no registry; a submodule only to build it from source), the
+version range, where its documentation is. Write them in
+`docs/general/libraries.md`.
+
+The registry connection is `ci/registry.sh`, the same in every CI job, in
+the release job and on a laptop; set it up in `ci/registry.env`:
+`REGISTRY_KIND` (the package manager, see D4), `REGISTRY_URL` (empty: no
+team registry), the npm scope or the id of the Maven server, Gradle
+repository or Conan remote. No token goes in a committed file: the script
+reads it from the environment and writes it into the package manager's
+user-level configuration.
+- **Read** (every job that installs dependencies runs `ci/registry.sh login`,
+  C2): on GitHub Packages or GitLab's package registry of the same
+  organization the job token is enough (`GITHUB_TOKEN` with
+  `packages: read`, which `ci.yml` grants; `CI_JOB_TOKEN`, after adding this
+  project to the library project's job token allowlist). Otherwise create a
+  **read-only** token and store it as `REGISTRY_TOKEN`: a repository secret on
+  GitHub, a masked variable on GitLab.
+- **Locally**: each person exports their own `REGISTRY_TOKEN` and runs
+  `./ci/registry.sh login` once; agents in a local session use it through
+  the package manager and cannot read the files it writes (denied in
+  `.claude/settings.json`).
+- **Dependabot**: a `registries:` entry in `.github/dependabot.yml` with
+  `token: ${{secrets.DEPENDABOT_REGISTRY_TOKEN}}`, a Dependabot secret
+  (Settings > Secrets > Dependabot: Actions secrets are not visible to it).
+  Dependabot has no Conan support.
+
+No libraries: leave the file with its example removed, saying "none yet".
+
+### D4. Publishing: this project as a package
+Ask whether this project is itself a package other projects use (a library,
+an SDK, a shared component). If yes, set `PUBLISH_PACKAGE=yes` and make sure,
+whatever the stack, that there is a step that uploads it, and one that
+installs it on this machine when there is no registry:
+
+| Stack | `REGISTRY_KIND` | `publish` (to `REGISTRY_URL`) | `local` (this machine) |
+|---|---|---|---|
+| Node | `npm` | `npm publish` | `npm pack` into `LOCAL_REPOSITORY` |
+| Python | `pypi` | `python -m build`, `twine upload` | wheel into `LOCAL_REPOSITORY` (`pip install --find-links`) |
+| Java, Maven | `maven` | `mvn deploy` (`distributionManagement` with the server id) | `mvn install` (`~/.m2`) |
+| Java/Kotlin, Gradle | `gradle` | `gradle publish` (`maven-publish`, the repository named `REGISTRY_ID` with `credentials(PasswordCredentials)`) | `gradle publishToMavenLocal` |
+| C/C++, Conan 2 | `conan` | `conan create`, `conan upload` to the remote `REGISTRY_ID` (Artifactory, Nexus, GitLab; not GitHub Packages) | `conan create` (Conan's cache) |
+| anything else (cargo, Go, NuGet, Helm...) | `custom` | `PUBLISH_COMMAND` | `LOCAL_COMMAND` |
+
+For `custom`, write the commands in `ci/registry.env` (`LOGIN_COMMAND`,
+`PUBLISH_COMMAND`, `LOCAL_COMMAND`): they read the token from
+`$REGISTRY_AUTH_TOKEN`, never print it, and write it only in the user-level
+configuration. Add the tool's publish command to the blocked list of
+`scripts/hooks/block-infra-commands.sh`, `.codex/rules/agent-team.rules` and
+the `deny` of OpenCode, and its credential file to the `Read(...)` denials
+of `.claude/settings.json`.
+
+Then, from the scenario (F):
+- **With a remote CI**: `publish.yml` (GitHub) and the `publish` job
+  (GitLab) run on a `v*` tag in the `release` environment; set their
+  toolchain, install and test commands as in C2. A token with write access
+  goes there only, as `REGISTRY_PUBLISH_TOKEN`: an environment secret of
+  `release` on GitHub, with a required reviewer and the deployment limited to
+  `v*` tags; a protected, masked variable scoped to `release` on GitLab, with
+  `v*` as protected tags. On the platform's own registry the job token
+  publishes and no secret is needed.
+- **Local, or no registry**: the release is `git tag vX.Y.Z` and
+  `./ci/registry.sh local`, run by the user; the projects that use the
+  package take it from the local repository (`~/.m2`, Conan's cache,
+  `LOCAL_REPOSITORY`). With a registry, the user can also publish from their computer:
+  `REGISTRY_PUBLISH_TOKEN=... ./ci/registry.sh publish`.
+
+Agents never publish and never push tags (hooks and permission rules of
+every tool): the user pushes the tag, or runs the command.
 
 ### E. Design system
 - Brand colors, fonts, spacing scale, base components, breakpoints.
@@ -157,8 +258,8 @@ For the remote scenario also ask: Claude Code with an API key or a
 subscription token (`ANTHROPIC_API_KEY` or `CLAUDE_CODE_OAUTH_TOKEN`), Codex
 (`OPENAI_API_KEY`), OpenCode (which providers and models: the exact model IDs
 as the provider documents them, or LiteLLM)? And whether they want team tasks
-in CI (one issue, several roles in sequence on one branch, one MR:
-`AGENTS.md` > Team tasks).
+(`agent:team`: one agent does a whole issue across several roles, without
+subagents, one MR: `docs/roles/team.md`).
 
 For the remote and custom scenarios also ask where the issues live. GitHub or
 GitLab need nothing more. For local files, Jira, Linear or Redmine read
@@ -183,12 +284,14 @@ lost: a later profile change plus the template upgrade brings it back.
 - **CI platform**: `github`, `gitlab`, `both` (rare) or `none`.
 - **Tracker**: from block F (`github`, `gitlab`, `local`, `jira`, `linear`,
   `redmine`, or `none` for no issues at all).
-- **Roles**: the six by default; drop those the project does not need
+- **Roles**: the seven by default; drop those the project does not need
   (designer without a UI, security with nothing to attack yet).
 - **Features**: `ci-agents` (agents started from issues in CI: the remote
-  scenario), `team-tasks`, `split` (split proposals in CI, with Claude Code),
-  `dispatch` (start ready tasks at every merge), `litellm` (the gateway in
-  `infra/litellm/`).
+  scenario), `team-tasks` (the `team` agent and the `agent:team` label),
+  `split` (split proposals in CI, with Claude Code),
+  `dispatch` (start ready tasks at every merge), `spec-sync` (update the
+  issues when a spec change reaches the main branch: a CI job on GitHub or
+  GitLab, a Git hook locally), `litellm` (the gateway in `infra/litellm/`).
 
 The profile goes into `.agent-team/config.json`, together with the tracker
 settings of block F, for example:
@@ -199,7 +302,7 @@ settings of block F, for example:
   "runners": {"optimizer": "codex"},
   "ci": "github",
   "tracker": "github",
-  "roles": ["designer", "frontend", "backend", "devops", "optimizer", "security"],
+  "roles": ["designer", "frontend", "backend", "devops", "optimizer", "security", "writer"],
   "features": ["ci-agents", "split", "dispatch"]
 }
 ```
@@ -215,6 +318,7 @@ Propose the defaults and ask only whether to change them:
 | optimizer | opus | high |
 | devops | opus | high |
 | security | opus | high |
+| writer | sonnet | medium |
 
 ### H. Skills
 `scripts/install-skills.sh` installs skills written for React, Postgres and
@@ -228,9 +332,17 @@ GitHub Actions. Show the list and ask which ones fit the stack:
 | tdd, diagnosing-bugs | always | frontend, backend |
 | supabase-postgres-best-practices | Postgres | backend, optimizer |
 | api-design-principles | there is an HTTP API | backend |
+| clean-architecture (shipped in the template, nothing to install) | the backend is in a language and framework that let you layer the code (TypeScript, Java, Kotlin, C#, Python, Go, PHP...) and has real business rules, not only CRUD over a database | backend (preloaded) |
 | security-review | always | security (preloaded), backend (on demand) |
 | code-simplifier | always | optimizer |
 | gha-security-review, github-actions-templates | GitHub Actions | devops |
+
+If the clean-architecture row does not fit (no backend, a script, a framework
+that imposes its own structure, a thin CRUD), delete
+`.claude/skills/clean-architecture/` and `.agents/skills/clean-architecture/`,
+and its line in `skills:` of `.claude/agents/backend.md`, and the clean
+architecture rule in `docs/roles/backend.md`. If it fits, set the folder names
+in the skill to the stack's.
 
 For a stack the list doesn't cover, offer to search with `npx skills find
 "<topic>"` and propose at most one or two skills per role: every installed
@@ -246,15 +358,20 @@ skill adds its description to every session.
 | Commands | `AGENTS.md` → `## Commands`; `docs/roles/frontend.md` (lint/test line); `scripts/hooks/gate-test.sh` (test command); `scripts/hooks/lint-frontend.sh` (file extensions and single-file linter); `.gitlab-ci.yml.example` (image, install steps) |
 | Folder layout | `AGENTS.md` → `## How work is delegated`; `docs/roles/*.md` → `## Boundaries` of each role; `.github/CODEOWNERS`; `.claude/settings.json` → `Read(...)` deny rules for secret paths |
 | Token location | `docs/roles/designer.md`, `docs/roles/frontend.md`, `.claude/skills/design-system/SKILL.md` |
+| Clean architecture | `.claude/skills/clean-architecture/SKILL.md` and its copy in `.agents/skills/` (folder names), or remove it as in step H |
 | Design system | `.claude/skills/design-system/SKILL.md` (rewrite; keep it under ~60 lines) |
-| Removed role | delete `docs/roles/<role>.md`, `.claude/agents/<role>.md`, `.opencode/agents/<role>.md`; remove it from `AGENTS.md` (on-demand roles) and `docs/agents/workflow.md` (sequence), `CLAUDE.md`, `scripts/create-labels.sh`, the model expression in `.github/workflows/agents.yml`. For security also delete `scripts/hooks/security-*.sh`, `docs/roles/security-scope.txt`, `docs/security/` and the matching `.gitignore` lines |
+| Removed role | delete `docs/roles/<role>.md`, `.claude/agents/<role>.md`, `.opencode/agents/<role>.md`; remove it from `AGENTS.md` (on-demand roles) and `docs/agents/workflow.md` (sequence), `CLAUDE.md`, `scripts/create-labels.sh`, the model expression in `.github/workflows/agents.yml`. For writer also delete `scripts/hooks/writer-writes.sh`, `docs/software/` and the `document` skill (`.claude/skills/document/`, `.agents/skills/document/`). For security also delete `scripts/hooks/security-*.sh`, `docs/roles/security-scope.txt`, `docs/security/` and the matching `.gitignore` lines |
 | Username | `.github/CODEOWNERS` |
 | CI | `.github/workflows/ci.yml` and `.gitlab/ci/ci.yml` (toolchain, commands, cache key, build output); `ci/scanners.env` (policies); `trivy.yaml` only if license categories change |
 | API contract | `AGENTS.md` → `## API contract` (path and generator); `docs/api/README.md`; `docs/roles/frontend.md` and `docs/roles/backend.md` if the wording differs; `.github/CODEOWNERS` (add the contract path) |
 | Commands allowed in CI | `--allowedTools` in `.github/workflows/agents.yml` and `claude.yml` (replace `Bash(npm:*)`, `Bash(npx:*)` with the stack's tools), `.gitlab-ci.yml.example` |
+| Reference generators | `ci/reference.sh` (keep the generators of the stack, add the missing one) and `ci/scanners.env` (versions, `PYTHON_PACKAGE`); the `reference-docs` job of `.github/workflows/ci.yml` and `.gitlab/ci/ci.yml` (toolchain, dependency install); the dev dependency the generator needs (typedoc, for example) |
+| Wanted documents | `docs/software/README.md` (the list the writer writes) |
+| Services (monorepo) | `AGENTS.md` → `## Services` and the routing lines; `docs/roles/*.md` → `## Boundaries`; `.github/CODEOWNERS`; the CI jobs (path filters per service) |
+| Team libraries | `docs/general/libraries.md`; `ci/registry.env`; the committed registry file of the stack, without tokens (`.npmrc` with the scope, `pom.xml` repository ids, the Gradle repository, the Conan remote's name); `REGISTRY_TOKEN` on the platform; `.github/dependabot.yml` |
+| Publishing | `ci/registry.env` (`REGISTRY_KIND`, `PUBLISH_PACKAGE`, the `custom` commands); the toolchain and commands of `.github/workflows/publish.yml` and of the `publish` job in `.gitlab/ci/ci.yml`; `REGISTRY_PUBLISH_TOKEN` in the `release` environment and the protected `v*` tags; for `custom`, the publish command in the blocked lists and its credential file in the `Read(...)` denials |
 | Security scope and tools | `docs/roles/security-scope.txt` (one host per line, never production); the dependency-audit command in `docs/roles/security.md` → `## What you check` item 6 |
 | Scenario | see "Profiles by scenario" below |
-| Team tasks in CI | keep the `team` job in `.github/workflows/agents.yml` and `agent:team` in `scripts/create-labels.sh`, or the `claude-team` job in `.gitlab-ci.yml.example`; if not wanted, remove them and the `## Team tasks` section of `AGENTS.md` and `docs/agents/team-tasks.md` |
 | Automatic start of ready tasks | optional: keep `.github/workflows/dispatch.yml` and `scripts/dispatch.py`; to turn it on set the `AGENT_AUTODISPATCH` variable and the `AGENT_DISPATCH_TOKEN` secret (see the workflow header); otherwise remove the workflow and start tasks by hand or with `python3 scripts/dispatch.py` |
 | Issue tracker, starter | `.agent-team/config.json` (`tracker`, `starter`, `start_command`, the tracker's section; see `docs/general/trackers.md`); nothing for GitHub and GitLab, which are detected. With another tracker and no GitHub/GitLab agents, remove `.github/workflows/split.yml`, `dispatch.yml` and the split jobs of `.gitlab/ci/agents.yml` |
 | Issue split in CI | keep `.github/workflows/split.yml`, `scripts/split-issue.py` and `agent:split` in `scripts/create-labels.sh`, or the `claude-split` and `split-create` jobs in `.gitlab/ci/agents.yml` (they need the `GITLAB_ACCESS_TOKEN` variable); if not wanted, remove them and the `## Splitting issues` section of `AGENTS.md` and `docs/agents/splitting.md` |
@@ -277,9 +394,9 @@ then removes the files, so there is nothing to delete by hand.
 
 | Scenario | Profile |
 |---|---|
-| Local | the tool(s) used locally; `ci` of the project CI; `tracker` `none` or `local`; no features. For Claude Code agent teams, set `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` to `"1"` in `.claude/settings.json` |
-| Remote repository | one or more tools (the first leads, `runners` for the others); `ci` and `tracker` the same platform; `ci-agents` plus `split`, `team-tasks`, `dispatch` as wanted; `litellm` for OpenCode through a gateway |
-| Custom orchestrator | the tools the orchestrator runs; the tracker of its intake; `starter: command` with `start_command` (`docs/general/trackers.md`); `litellm` if it routes models through the gateway |
+| Local | the tool(s) used locally; `ci` of the project CI; `tracker` `none` or `local`; `spec-sync` with a tracker if wanted (then link `scripts/git-hooks/spec-sync.sh` as the `post-merge` and `post-commit` hooks, after checking `.git/hooks/` has none of the user's). |
+| Remote repository | one or more tools (the first leads, `runners` for the others); `ci` and `tracker` the same platform; `ci-agents` plus `team-tasks`, `split`, `dispatch`, `spec-sync` as wanted; `litellm` for OpenCode through a gateway |
+| Custom orchestrator | the tools the orchestrator runs; the tracker of its intake; `starter: command` with `start_command` (`docs/general/trackers.md`); the orchestrator runs `scripts/create-issues.py` after merging a change to `docs/design/`; `litellm` if it routes models through the gateway |
 
 After pruning, by hand: on GitLab rename `.gitlab-ci.yml.example` to
 `.gitlab-ci.yml` and move `.github/CODEOWNERS` to `.gitlab/CODEOWNERS` if it is
@@ -297,15 +414,19 @@ chmod +x scripts/hooks/*.sh scripts/*.sh infra/litellm/*.sh 2>/dev/null
 python3 -c "import json; [json.load(open(f)) for f in ['.claude/settings.json','.mcp.json']]"
 echo '{"tool_input":{"command":"terraform apply"}}' | ./scripts/hooks/block-infra-commands.sh; echo "exit $? (must be 2)"
 ./scripts/hooks/alignment-check.sh; echo "exit $? (must be 0: no open entries yet)"
+./ci/registry.sh local   # with PUBLISH_PACKAGE=yes: the package builds and installs on this machine
 grep -q '^ready: yes' docs/design/project.md && echo "project design ready" || echo "project design NOT ready"
 # with the security role:
 echo '{"tool_input":{"command":"curl https://example.com"}}' | ./scripts/hooks/security-scope.sh; echo "exit $? (must be 2)"
 echo '{"tool_input":{"command":"curl http://localhost:3000/api"}}' | ./scripts/hooks/security-scope.sh; echo "exit $? (must be 0)"
+# with Claude Code: the role checks apply to the role's agent only (role-hooks.sh reads agent_type)
+echo '{"agent_type":"security","tool_name":"Bash","tool_input":{"command":"curl https://example.com"}}' | ./scripts/hooks/role-hooks.sh pre; echo "exit $? (must be 2)"
+echo '{"tool_name":"Bash","tool_input":{"command":"curl https://example.com"}}' | ./scripts/hooks/role-hooks.sh pre; echo "exit $? (must be 0: the lead session)"
 # Codex, if in the profile (with the codex CLI installed):
 codex execpolicy check --rules .codex/rules/agent-team.rules -- git push --force   # must match a forbidden rule
 python3 -c "import tomllib,glob; [tomllib.load(open(f,'rb')) for f in ['.codex/config.toml', *glob.glob('.codex/agents/*.toml')]]"
 # OpenCode, if in the profile (with the opencode CLI installed):
-opencode agent list   # the six roles (or those you kept) appear, with mode all
+opencode agent list   # the roles you kept appear, with mode all
 python3 scripts/agent-team.py prune --dry-run   # must say: Nothing to prune
 ```
 
@@ -420,13 +541,10 @@ the interview and `docs/design/project.md`.
      them to put the foundations tasks in that milestone instead of
      creating "Design:" issues for the same work;
    - Task breakdown: backend, then frontend, then devops (CI and compose).
-     Mark "Team task possible: yes": the pieces are small and tightly
-     coupled. The user may prefer three separate tasks instead.
 2. Ask only what is still open (at most one round), then set `ready: yes`
    when the user confirms.
 3. Commit the spec on its own. Do not write the skeleton code here: it is
-   the first implementation task, run locally or as an `agent:team` issue
-   (GitLab: `AI_FLOW_ROLES`).
+   the first implementation task.
 
 ## Issues from the roadmap (remote and custom scenarios)
 
@@ -443,9 +561,7 @@ starts until the user adds `agent:<role>` to a task.
    the others the configuration and the environment variables of
    `docs/general/trackers.md`.
 2. **If both work:** run `python3 scripts/create-issues.py --dry-run` and show
-   the plan. If the foundations spec says "Team task possible: yes", ask
-   whether the user prefers one team issue (`--team`: one PR) or one issue
-   per task (separate PRs). On the user's yes, run it without `--dry-run`.
+   the plan. On the user's yes, run it without `--dry-run`.
 3. **Otherwise** (no remote yet, no CLI, not authenticated): create nothing
    and add to the open items, in this order: create the repository and push,
    authenticate `gh`/`glab` (or set the tracker's variables), then `python3 scripts/create-issues.py --dry-run`
@@ -453,7 +569,9 @@ starts until the user adds `agent:<role>` to a task.
 
 The script skips titles that already exist and never closes anything, so it is
 safe to run again after every design studio session; it lists the issues it
-created earlier that are no longer in the plan.
+created earlier that are no longer in the plan. When a feature's spec becomes
+ready, its "Design:" issue is renamed into the task (one row) or into the
+feature issue with the tasks as sub-issues (several rows).
 
 ## Report to the user
 
@@ -462,8 +580,10 @@ End with:
 2. the files changed, created and deleted;
 3. what is still open (versions to pin, secrets to create, labels to run,
    branch protection to enable, the CI as a required check on `main`), as a checklist;
-4. a reminder that optimizer and security run only on request, and that a
-   security assessment is best run once the application is complete;
+4. a reminder that optimizer, security and writer run only on request, that a
+   security assessment is best run once the application is complete, and that
+   `/document` writes the software documentation (`docs/software/`) while the
+   CI builds the reference from the code;
    on GitHub, a reminder to enable branch protection on `main` with "Require
    branches to be up to date before merging" and to run
    `./scripts/create-labels.sh` (it also creates `alignment-needed`); on

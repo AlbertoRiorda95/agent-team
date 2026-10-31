@@ -3,9 +3,10 @@
 **Run your software project as the lead of a development team whose
 developers are AI agents.** You decide what to build in a design session,
 approve the plan, choose what starts, and merge. The team (designer,
-frontend, backend, devops; optimizer and security when you ask) asks the
+frontend, backend, devops; optimizer, security and writer when you ask) asks the
 questions, writes the specs, turns them into issues, implements each task on
-its own branch and opens merge requests that explain themselves.
+its own branch and opens merge requests (pull requests on GitHub) that
+explain themselves.
 
 It works with **Claude Code, Codex and OpenCode**, and in three scenarios:
 
@@ -15,7 +16,9 @@ It works with **Claude Code, Codex and OpenCode**, and in three scenarios:
 | **Remote repository** | in GitHub Actions or GitLab CI, started from issues | no: you come back to merge requests | a backlog, parallel tasks, a full trail |
 | **Custom orchestrator** | where your orchestrator runs them, from Jira, Linear, Redmine or your queue | no | your tracker, your infrastructure, your priorities |
 
-Design, issues, splits, dispatch and upgrades work the same in all three.
+The way you work is the same in all three: design a feature with the
+designer, turn its spec into issues, split the big ones, start the ready
+tasks, review and merge ([What Agent team is](docs/manual/01-what-it-is.md)).
 
 ## Get started
 
@@ -50,13 +53,15 @@ page in [`docs/manual.html`](docs/manual.html):
 | `/agent-team:design-studio <feature>` | a design session with the designer: questions in rounds, a ready spec with its task breakdown |
 | `/agent-team:create-issues` | milestones and issues from the roadmap and the ready specs, after a dry run |
 | `/agent-team:split-issue <n>` | one issue into one task per role, created only after your yes |
-| `/agent-team:dispatch` | starts the tasks whose dependencies are merged |
+| `/agent-team:dispatch` | starts the tasks whose dependencies are done (merged and their issues closed) |
 | `/agent-team:upgrade` | a new plugin version, or a new profile, merged with your changes |
 | `/agent-team:next` | where the project stands and which command to run next; read-only |
 
-Claude can propose `next`, `design-studio`, `create-issues`, `split-issue` and
-`dispatch` by itself when they fit; each shows its plan and asks before changing
-anything. `setup` and `upgrade` run only when you type them.
+You can also just say what you want: Claude proposes `next`, `design-studio`,
+`create-issues`, `split-issue` or `dispatch` when one fits, and runs it only
+after you agree; each shows its plan and asks before changing anything.
+`setup` and `upgrade` change many files at once, so they run only when you
+type them.
 
 ## Repository layout
 
@@ -67,7 +72,7 @@ scripts/            template_sync.py (install and upgrade), build_manual.py (the
 template/           the project template the plugin installs
 docs/manual/        the user manual, one Markdown file per chapter
 docs/manual.html    the same manual as one page, generated
-tests/              template install and upgrade, profiles, trackers
+tests/              template install and upgrade, profiles, trackers, guardrails, registry
 ```
 
 ## Develop
@@ -76,13 +81,27 @@ tests/              template install and upgrade, profiles, trackers
 claude plugin validate . --strict          # manifest, marketplace, skills
 bash tests/test_template_sync.sh           # install and upgrade scenarios
 python3 tests/test_profiles.py             # every sample profile renders, loads and lints; switching profiles
-python3 tests/test_trackers.py             # issue scripts on the six trackers (fakes)
+python3 tests/test_trackers.py             # issue scripts on the six trackers (fakes), and a real Redmine (Docker)
+python3 tests/test_upgrade.py              # upgrade from the released version (main) to this tree
+python3 tests/test_tools.py                # hooks, Codex rules, OpenCode permissions, GitLab pipeline schema
+python3 tests/test_registry.py             # ci/registry.sh offline, and live with Docker (REGISTRY_LIVE=0 to skip)
+python3 tests/test_pins.py                 # every pinned action SHA is the release its comment names (network)
+python3 tests/test_scripts.py              # labels, spec-sync hook, skills scripts, Dependabot and workflow schemas
+python3 tests/test_sessions.py             # Claude Code, Codex, OpenCode sessions against a scripted model; custom scenario
+python3 tests/test_install.py              # the plugin installed from a marketplace and updated (claude CLI)
+python3 tests/test_ci_scripts.py           # install-scanners, scan, reference on sample projects (network, venv)
+python3 tests/test_litellm.py              # the LiteLLM gateway with Docker (LITELLM_LIVE=0 to skip)
+python3 tests/test_links.py                # external links of the documentation (network)
 python3 scripts/build_manual.py            # after editing docs/manual/*.md
 git config core.hooksPath .githooks        # refuse commits with a stale docs/manual.html
 ```
 
 The `Validate` workflow runs these checks on every pull request, plus
-`actionlint` on the template's workflows and `build_manual.py --check`. For
+`actionlint` on the template's workflows and `build_manual.py --check`; it
+installs the Codex and OpenCode CLIs, check-jsonschema and Conan so that no
+test is skipped, and runs the hooks, the registry script and the profiles on
+macOS too. The tests that drive a tool skip when it is missing locally;
+the sessions use `tests/mockllm.py`, a scripted model, so they need no API key. For
 every release, bump `version` in `.claude-plugin/plugin.json` and add a
 `CHANGELOG.md` entry with its upgrade notes: projects stay on the version they
 installed until they upgrade.

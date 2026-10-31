@@ -12,8 +12,7 @@ Plan (JSON):
        "acceptance": ["Checkable without reading the code"],
        "files": ["docs/api/openapi.yaml"],
        "depends_on": []}                   # keys of earlier tasks, or "<issue>:<key>" (see below)
-    ],
-    "team": {"roles": ["backend", "frontend"], "reason": "Small and tightly coupled."}   # optional
+    ]
   }
 
 A task may also wait for a task of another issue's plan: "depends_on": ["12:api"]
@@ -25,7 +24,7 @@ import re
 
 from . import core
 
-ROLES = ["designer", "frontend", "backend", "devops", "optimizer", "security"]
+ROLES = ["designer", "frontend", "backend", "devops", "optimizer", "security", "writer"]
 MAX_TASKS = 6
 START, END = "split-plan v1", "split-plan-end"
 LABEL = "agent:split"
@@ -106,35 +105,24 @@ def validate(plan, issue_number=None):
                 elif x is not None and issue_number is None and same_issue(x[0], plan.get("parent")):
                     err.append(f'{w}: "{d}" is this issue: use the key "{x[1]}" alone')
         keys.append(k)
-    team = plan.get("team")
-    if team is not None:
-        roles = team.get("roles") if isinstance(team, dict) else None
-        used = {t.get("role") for t in tasks if isinstance(t, dict)}
-        if not isinstance(roles, list) or len(roles) < 2 or any(r not in used for r in roles):
-            err.append('"team.roles" must list at least two roles used by the tasks')
-        else:
-            text("team reason", team.get("reason"), 300)
     return err
 
 
-def confirm_text(trk, issue_id, n_tasks, has_team):
+def confirm_text(trk, issue_id, n_tasks):
     if trk.name == "github":
         ok = f"reply `@claude ok` to create these {n_tasks} issues as sub-issues of {issue_id}, without labels"
-        team = "reply `@claude ok team` to create one `agent:team` issue instead"
         change = "reply `@claude` followed by what to change: a new proposal replaces this one"
     elif trk.name == "gitlab":
         n = issue_id.lstrip("#")
         ok = (f"run the pipeline with `SPLIT_ISSUE={n}` and `SPLIT_CONFIRM=ok` to create these "
               f"{n_tasks} issues, linked to {issue_id}, without labels")
-        team = "use `SPLIT_CONFIRM=team` to create one team-task issue instead"
         change = f"run it with `SPLIT_ISSUE={n}` and `SPLIT_FEEDBACK` set to what to change"
     else:
         n = issue_id.lstrip("#")
         ok = (f"confirm in the conversation that asked for it (`/agent-team:split-issue {n}`), or run "
               f"`python3 scripts/split-issue.py create {n}` to create these {n_tasks} sub-issues")
-        team = f"add `--team` to create one team-task issue instead"
         change = "ask for the changes in the conversation: a new proposal replaces this one"
-    return f"**To confirm**, {ok}." + (f" Or {team}." if has_team else ""), f"**To change it**, {change}."
+    return f"**To confirm**, {ok}.", f"**To change it**, {change}."
 
 
 def render(plan, trk, issue_id):
@@ -148,17 +136,14 @@ def render(plan, trk, issue_id):
         acc = "\n".join(f"- {a}" for a in t["acceptance"])
         files = ", ".join(f"`{f}`" for f in t.get("files", [])) or "-"
         details.append(f"**{i} · {t['role']}: {t['title']}**\n\n{t['task']}\n\nAcceptance:\n{acc}\n\nFiles: {files}")
-    team = plan.get("team")
-    confirm, change = confirm_text(trk, issue_id, len(tasks), bool(team))
-    team_txt = (f"**Team task:** possible with roles {', '.join(team['roles'])}. {team['reason']}"
-                if team else "**Team task:** not suggested.")
+    confirm, change = confirm_text(trk, issue_id, len(tasks))
     fold = trk.html_markers                      # <details> only where HTML renders
     lines = [trk.marker(START), f"### Proposed split of {issue_id}", "", plan["summary"],
              (f"\nSpec: `{plan['spec']}`" if plan.get("spec") else ""), "",
              "| # | Role | Task | Depends on |", "|---|---|---|---|", rows, "",
              "<details><summary>Task details</summary>" if fold else "#### Task details", "",
              "\n\n---\n\n".join(details), "", "</details>" if fold else "", "",
-             team_txt, "", confirm, change, "",
+             confirm, change, "",
              "<details><summary>Plan data (what the confirmation creates)</summary>" if fold else "#### Plan data", "",
              "```json", json.dumps(plan, indent=2, ensure_ascii=False), "```", "",
              "</details>" if fold else "", trk.marker(END)]

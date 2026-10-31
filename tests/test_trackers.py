@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """End-to-end checks of create-issues.py, dispatch.py and split-issue.py on every
 tracker: the local one for real, GitHub (gh CLI), Jira, Linear and Redmine
-against the in-memory fakes in tests/fakes.py.
+against the in-memory fakes in tests/fakes.py, and Redmine for real too, in
+Docker (RedmineLive; REDMINE_LIVE=0 to skip): the fakes are checked against a
+real server.
 
 Run: python3 tests/test_trackers.py
 """
@@ -9,11 +11,15 @@ import contextlib
 import importlib.util
 import io
 import json
+import re
 import os
 import shutil
+import subprocess
 import sys
 import tempfile
+import time
 import unittest
+import urllib.request
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 SCRIPTS = os.path.join(ROOT, "template", "scripts")
@@ -87,7 +93,7 @@ class Scenario:
             os.environ[k] = v
         if self.name in ("github", "gitlab"):
             core.sh = self.fake.sh
-        elif self.fake is not None:
+        elif hasattr(self.fake, "http"):                      # a fake; a live server has none
             core.http_json = self.fake.http
 
     def close(self, issue, completed=True):
@@ -216,8 +222,6 @@ class TrackerFlow(unittest.TestCase):
         self.assertIn(api.ref, [str(b) for b in trk().blockers(ui)])
         rc, out = call("split-issue.py", "create", parent.number)
         self.assertIn("0 issue(s) created", out)
-        with self.assertRaises(SystemExit):
-            call("split-issue.py", "create", parent.number, "--team")
 
     def run_cross_issue(self, sc):
         """Two hand-written issues: the frontend task of the second waits for the backend task of the first."""
@@ -259,6 +263,182 @@ class TrackerFlow(unittest.TestCase):
         rc, out = call("split-issue.py", "create", second.number)
         self.assertIn("0 issue(s) created", out)
         self.assertEqual(len(kids(second)), 1)
+
+    def run_design_to_tasks(self, sc):
+        """Design: issues first; then a two-row spec makes its issue the feature, a one-row spec makes it the task."""
+        open("docs/design/project.md", "w").write(
+            "# P\n\n## Roadmap\n| Milestone | Features |\n|---|---|\n| M1 Studio | `shell` (navigation, theme), `auth` |\n")
+        os.remove("docs/design/foundations.md")
+        json.dump(sc.cfg, open(".agent-team/config.json", "w"))
+        sc.install()
+        trk = lambda: config.tracker(config.load())  # noqa: E731
+        rc, out = call("create-issues.py")
+        self.assertEqual(rc, 0, out)
+        by = {i.title: i for i in trk().issues()}
+        shell, auth = by["Design: shell (M1 Studio)"], by["Design: auth (M1 Studio)"]
+
+        row = "---\nready: yes\n---\n# {t}\n\n## Task breakdown\n| # | Role | Task | Depends on | Issue |\n|---|---|---|---|---|\n{r}"
+        open("docs/design/shell.md", "w").write(row.format(
+            t="Shell", r="| 1 | backend | Menu endpoint | - | - |\n| 2 | frontend | Navigation bar | 1 | - |\n"))
+        open("docs/design/auth.md", "w").write(row.format(t="Auth", r="| 1 | backend | Login endpoint | - | - |\n"))
+        rc, out = call("create-issues.py", "--dry-run")
+        self.assertIn(f"rename  {shell.id}  Design: shell (M1 Studio)  ->  Shell (M1 Studio)", out)
+        self.assertIn(f"(sub-issue of {shell.id})", out)
+        rc, out = call("create-issues.py")
+        self.assertEqual(rc, 0, out)
+        self.assertIn("2 issue(s) and 0 milestone(s) created, 2 Design: issue(s) turned into features or tasks", out)
+        self.assertNotIn("no longer in the plan", out)
+
+        feature, task = trk().get(shell.ref), trk().get(auth.ref)
+        self.assertEqual(feature.title, "Shell (M1 Studio)")
+        self.assertTrue(core.key_of(feature).endswith("shell.md#feature"))
+        kids = trk().children(feature)
+        self.assertEqual(sorted(core.role_of(k) for k in kids), ["backend", "frontend"])
+        self.assertEqual(task.title, "Auth · 1/1 · backend: Login endpoint")
+        self.assertEqual(core.role_of(task), "backend")
+        self.assertEqual(core.code(task.milestone), "M1 Studio")
+
+        rc, out = call("create-issues.py")
+        self.assertIn("0 issue(s) and 0 milestone(s) created, 0 Design: issue(s)", out)
+        rc, out = call("dispatch.py")
+        self.assertNotIn("Issues without a role", out)
+        self.assertIn("Login endpoint", out)
+        if sc.name == "jira":                                  # one level of sub-tasks: the feature's tasks are Tasks
+            self.assertEqual({sc.fake.issues[k.ref]["fields"]["issuetype"]["name"] for k in kids}, {"Task"})
+
+        # a task of the feature can still be split
+        menu = next(k for k in kids if core.role_of(k) == "backend")
+        json.dump(dict(PLAN, parent=menu.number), open("plan.json", "w"))
+        call("split-issue.py", "propose", menu.number, "plan.json")
+        rc, out = call("split-issue.py", "create", menu.number)
+        self.assertIn("2 issue(s) created", out)
+        self.assertEqual(len(trk().children(trk().get(menu.ref))), 2)
+
+    def test_design_to_tasks_local(self):
+        self.run_design_to_tasks(scenarios()[0])
+
+    def test_design_to_tasks_github(self):
+        self.run_design_to_tasks(scenarios()[1])
+
+    def test_design_to_tasks_jira(self):
+        self.run_design_to_tasks(scenarios()[2])
+
+    def test_design_to_tasks_redmine(self):
+        self.run_design_to_tasks(scenarios()[3])
+
+    def test_design_to_tasks_gitlab(self):
+        self.run_design_to_tasks(scenarios()[4])
+
+    def test_design_to_tasks_linear(self):
+        self.run_design_to_tasks(scenarios()[5])
+
+    @unittest.skipUnless(shutil.which("git"), "git not installed")
+    def test_dispatch_follows_the_spec_on_main(self):
+        """Issues from a design branch wait for its merge; a row changed on main rewrites them; a removed one waits."""
+        env = {"GIT_AUTHOR_NAME": "t", "GIT_AUTHOR_EMAIL": "t@t", "GIT_COMMITTER_NAME": "t",
+               "GIT_COMMITTER_EMAIL": "t@t", "GIT_CONFIG_GLOBAL": os.devnull}
+        os.environ.update(env)                                   # tearDown restores the environment
+        git = lambda *a: subprocess.run(["git", *a], check=True, capture_output=True)  # noqa: E731
+        open("docs/design/project.md", "w").write(
+            "# P\n\n## Roadmap\n| Milestone | Features |\n|---|---|\n| M0 Base | `shell` |\n")
+        os.remove("docs/design/foundations.md")
+        json.dump({"tracker": "local", "starter": "label"}, open(".agent-team/config.json", "w"))
+        open(".gitignore", "w").write("docs/tasks/\norigin.git/\n")
+        git("init", "--bare", "-b", "main", "origin.git")
+        git("init", "-b", "main")
+        git("remote", "add", "origin", os.path.abspath("origin.git"))
+        git("add", ".")
+        git("commit", "-m", "project")
+        git("push", "origin", "main")
+        spec = ("---\nready: yes\n---\n# Shell\n\n## Task breakdown\n| # | Role | Task | Depends on | Issue |\n"
+                "|---|---|---|---|---|\n| 1 | backend | {t} | - | - |\n{more}")
+        git("checkout", "-b", "design/m0")
+        open("docs/design/shell.md", "w").write(spec.format(t="Menu endpoint", more="| 2 | frontend | Menu | 1 | - |\n"))
+        git("add", ".")
+        git("commit", "-m", "design: shell")
+
+        rc, out = call("create-issues.py")                        # from the design branch, before the merge
+        self.assertIn("2 issue(s) and 1 milestone(s) created", out)
+        rc, out = call("dispatch.py")
+        self.assertIn("spec docs/design/shell.md not merged into origin/main yet", out)
+        self.assertIn("Nothing to start", out)
+
+        git("checkout", "main")
+        git("merge", "--ff-only", "design/m0")
+        git("push", "origin", "main")
+        rc, out = call("dispatch.py")
+        self.assertIn("Would start (1)", out)
+        self.assertNotIn("Would update", out)
+
+        # the review changes row 1 on main: the issue is rewritten before it starts
+        open("docs/design/shell.md", "w").write(spec.format(t="Menu endpoint with paging", more="| 2 | frontend | Menu | 1 | - |\n"))
+        git("commit", "-am", "review: paging")
+        git("push", "origin", "main")
+        rc, out = call("dispatch.py", "--apply")
+        self.assertIn("Updating from the spec on origin/main (1)", out)
+        t = config.tracker(config.load())
+        api = next(i for i in t.issues() if core.key_of(i) == "docs/design/shell.md#1")
+        self.assertIn("Menu endpoint with paging", api.title)
+        self.assertTrue(core.started(api))
+        rc, out = call("create-issues.py")
+        self.assertIn("0 updated from their spec row", out)
+
+        # row 2 removed: its task waits, and create-issues lists it
+        open("docs/design/shell.md", "w").write(spec.format(t="Menu endpoint with paging", more=""))
+        git("commit", "-am", "review: no frontend")
+        git("push", "origin", "main")
+        rc, out = call("dispatch.py")
+        self.assertIn("its row is no longer in docs/design/shell.md on origin/main", out)
+        rc, out = call("create-issues.py")
+        self.assertIn("no longer in the plan", out)
+
+        # spec-sync hook: a commit on main that adds a row creates its issue by itself
+        os.symlink(SCRIPTS, "scripts")
+        os.symlink("../../scripts/git-hooks/spec-sync.sh", ".git/hooks/post-commit")
+        open("docs/design/shell.md", "w").write(spec.format(t="Menu endpoint with paging", more="| 3 | devops | Deploy | 1 | - |\n"))
+        r = subprocess.run(["git", "commit", "-am", "review: deploy"], capture_output=True, text=True)
+        self.assertIn("spec-sync: docs/design/ changed on main", r.stdout + r.stderr)
+        self.assertTrue(any(core.key_of(i) == "docs/design/shell.md#3" for i in t.issues()), r.stdout + r.stderr)
+
+    def test_dependency_on_another_spec(self):
+        """Roadmap order "shell, auth"; a row of shell waits for row 1 of auth: auth is created first."""
+        open("docs/design/project.md", "w").write(
+            "# P\n\n## Roadmap\n| Milestone | Features |\n|---|---|\n| M0 Foundations | `shell` (navigation), `auth` |\n")
+        os.remove("docs/design/foundations.md")
+        row = "---\nready: yes\n---\n# {t}\n\n## Task breakdown\n| # | Role | Task | Depends on | Issue |\n|---|---|---|---|---|\n{r}"
+        open("docs/design/shell.md", "w").write(row.format(t="Shell", r="| 1 | frontend | Login page | auth#1 | - |\n"))
+        open("docs/design/auth.md", "w").write(row.format(t="Auth", r="| 1 | backend | Login endpoint | - | - |\n"))
+        sc = scenarios()[0]
+        json.dump(sc.cfg, open(".agent-team/config.json", "w"))
+        rc, out = call("create-issues.py")
+        self.assertEqual(rc, 0, out)
+        self.assertLess(out.index("Login endpoint"), out.index("Login page"), out)
+        t = config.tracker(config.load())
+        by = {i.title: i for i in t.issues()}
+        api, page = by["Auth · 1/1 · backend: Login endpoint"], by["Shell · 1/1 · frontend: Login page"]
+        self.assertIn(api.id, core.section(page.body, "Depends on"))
+        self.assertIn(api.ref, [str(b) for b in t.blockers(page)])
+        self.assertEqual(core.code(page.milestone), "M0 Foundations")
+        rc, out = call("create-issues.py")
+        self.assertIn("0 issue(s) and 0 milestone(s) created", out)
+
+    def test_team_issue_per_spec(self):
+        """create-issues --team: one agent:team issue for the whole breakdown, started by dispatch like a role."""
+        sc = scenarios()[0]
+        json.dump(sc.cfg, open(".agent-team/config.json", "w"))
+        sc.install()
+        rc, out = call("create-issues.py", "--team")
+        self.assertEqual(rc, 0, out)
+        by = {i.title: i for i in config.tracker(config.load()).issues()}
+        team = by["Foundations · team task (tasks 1, 2, 3)"]
+        self.assertEqual(core.role_of(team), "team")
+        self.assertNotIn("Roles:", team.body)
+        self.assertFalse(any(" · 1/3 · " in t for t in by))
+        rc, out = call("create-issues.py", "--team")
+        self.assertIn("0 issue(s) and 0 milestone(s) created", out)
+        rc, out = call("dispatch.py")
+        self.assertEqual(rc, 0, out)
+        self.assertRegex(out, rf"{re.escape(team.id)}.*team")
 
     def test_cross_issue_local(self):
         self.run_cross_issue(scenarios()[0])
@@ -306,6 +486,19 @@ class Units(unittest.TestCase):
         self.assertEqual(label, "milestone M6 · x")
         self.assertIn("M0 (1)", d.not_tasks(issues, label)[0])
 
+    def test_dispatch_slots_per_service(self):
+        d = script("dispatch.py")
+        mk = lambda n, svc, labels=(): core.Issue(  # noqa: E731
+            n, f"#{n}", f"F · {n}/9 · backend: {'[' + svc + '] ' if svc else ''}task {n}",
+            "## Task\nx\n\nTo start it: add `agent:backend`.", labels=list(labels), milestone="M1 · x")
+        self.assertEqual(core.service_of(mk(1, "orders")), "orders")
+        self.assertIsNone(core.service_of(mk(1, None)))
+        # one backend task per service; the task without a service waits for both
+        issues = [mk(1, "orders", ["agent:backend"]), mk(2, "orders"), mk(3, "billing"), mk(4, None)]
+        _, _, start, waiting, _ = d.plan(issues, core.Tracker({}), 1, 5)
+        self.assertEqual([i.number for i, _ in start], ["3"])
+        self.assertEqual(sorted(i.number for i, _ in waiting), ["2", "4"])
+
     def test_key_with_spaces(self):
         for marker in ("<!-- key: design:M0 Foundations:foundations -->", "[agent-team] key: design:M0 Foundations:foundations"):
             self.assertEqual(core.key_of(core.Issue(1, "#1", "t", f"x\n\n{marker}\n")), "design:M0 Foundations:foundations")
@@ -331,6 +524,15 @@ class Units(unittest.TestCase):
             self.assertTrue(check(bad), bad)
         self.assertTrue(check("13:api"))                       # its own issue: use the key alone
 
+    def test_auto_starter_needs_agents_in_ci(self):
+        from agentteam import starters
+        gh = core.Tracker({})
+        gh.name = "github"
+        self.assertEqual(starters.make({"features": ["ci-agents"]}, gh).name, "label")
+        self.assertEqual(starters.make({}, gh).name, "label")                       # full template
+        self.assertEqual(starters.make({"features": []}, gh).name, "print")         # local scenario, GitHub issues
+        self.assertEqual(starters.make({"features": [], "start_command": "x {id}"}, gh).name, "command")
+
     def test_jira_markup(self):
         from agentteam.trackers.jira import md_to_jira
         out = md_to_jira("## Task\n- one\n`agent:backend`\n```json\n{}\n```\n| a | b |\n|---|---|\n| 1 | 2 |")
@@ -352,6 +554,114 @@ class Units(unittest.TestCase):
         self.assertEqual(st.start(issue, "backend"), "ran echo")
         self.assertFalse(os.path.exists("/tmp/pwned"))
 
+
+
+def docker_ok():
+    return shutil.which("docker") and subprocess.run(["docker", "info"], capture_output=True).returncode == 0
+
+
+REDMINE_SETUP = """
+Setting.rest_api_enabled = '1'
+IssueStatus.find_or_create_by!(name: 'On hold') { |s| s.is_closed = false }
+Role.all.each { |r| Tracker.all.each { |t| IssueStatus.all.each { |a| IssueStatus.all.each { |b|
+  WorkflowTransition.find_or_create_by!(role: r, tracker: t, old_status: a, new_status: b) unless a == b } } } }
+puts 'KEY=' + User.find_by_login('admin').api_key
+"""
+
+
+class RealRedmine:
+    """A Redmine server in Docker, with its default data, an "On hold" status and the REST API on."""
+
+    def __init__(self):
+        with socket_free() as port:
+            self.url = f"http://127.0.0.1:{port}"
+        self.id = subprocess.run(["docker", "run", "-d", "--rm", "-p", f"127.0.0.1:{port}:3000", "redmine:6"],
+                                 capture_output=True, text=True, check=True).stdout.strip()
+        end = time.time() + 300
+        while time.time() < end:
+            try:
+                urllib.request.urlopen(self.url + "/", timeout=5).close()
+                break
+            except OSError:
+                time.sleep(3)
+        r = subprocess.run(["docker", "exec", self.id, "bash", "-c",
+                            "cd /usr/src/redmine && REDMINE_LANG=en bundle exec rake redmine:load_default_data "
+                            f">/dev/null && bundle exec rails runner \"$0\"", REDMINE_SETUP],
+                           capture_output=True, text=True, timeout=600)
+        keys = [line[4:] for line in r.stdout.splitlines() if line.startswith("KEY=")]
+        if not keys:
+            self.stop()
+            raise RuntimeError(r.stdout[-2000:] + r.stderr[-2000:])
+        self.key = keys[0]
+        self.n = 0
+
+    def stop(self):
+        subprocess.run(["docker", "rm", "-f", self.id], capture_output=True)
+
+    def api(self, method, path, body=None):
+        req = urllib.request.Request(self.url + path, method=method, data=json.dumps(body).encode() if body else None,
+                                     headers={"X-Redmine-API-Key": self.key, "Content-Type": "application/json"})
+        with urllib.request.urlopen(req, timeout=30) as r:
+            data = r.read()
+        return json.loads(data) if data.strip() else {}
+
+    def project(self):
+        """A new empty project for each test."""
+        self.n += 1
+        ident = f"app{self.n}"
+        self.api("POST", "/projects.json", {"project": {"name": f"App {self.n}", "identifier": ident, "is_public": True,
+                                                        "enabled_module_names": ["issue_tracking"]}})
+        return ident
+
+    def close(self, n, name="Closed"):
+        statuses = {s["name"]: s["id"] for s in self.api("GET", "/issue_statuses.json")["issue_statuses"]}
+        self.api("PUT", f"/issues/{n}.json", {"issue": {"status_id": statuses[name]}})
+
+
+@contextlib.contextmanager
+def socket_free():
+    import socket
+    with socket.socket() as s:
+        s.bind(("127.0.0.1", 0))
+        port = s.getsockname()[1]
+    yield port
+
+
+@unittest.skipUnless(os.environ.get("REDMINE_LIVE", "1") != "0" and docker_ok(), "Docker not available (or REDMINE_LIVE=0)")
+class RedmineLive(TrackerFlow):
+    """The same flows as the fake Redmine, against a real one."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.server = RealRedmine()
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.server.stop()
+
+    def scenario(self):
+        return Scenario("redmine", {"tracker": "redmine", "starter": "label",
+                                    "redmine": {"url": self.server.url, "project": self.server.project()}},
+                        self.server, {"REDMINE_API_KEY": self.server.key})
+
+    def test_flow(self):
+        self.run_flow(self.scenario())
+
+    def test_design_to_tasks(self):
+        self.run_design_to_tasks(self.scenario())
+
+    def test_check(self):
+        sc = self.scenario()
+        json.dump(sc.cfg, open(".agent-team/config.json", "w"))
+        sc.install()
+        r = subprocess.run([sys.executable, os.path.join(SCRIPTS, "tracker.py"), "check"], capture_output=True,
+                           text=True, env=os.environ.copy())
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertIn("as admin", r.stdout)
+
+
+for _name in [n for n in vars(TrackerFlow) if n.startswith("test_")]:   # only the flows above, not the fakes' tests
+    setattr(RedmineLive, _name, None)
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

@@ -1,5 +1,5 @@
 ---
-description: Interactive design session for the project design or a new feature
+description: Interactive design session for the project design, a new feature, or a milestone (--milestone M0)
 ---
 
 Run a design studio session for: $ARGUMENTS

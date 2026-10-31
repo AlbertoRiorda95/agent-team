@@ -25,3 +25,9 @@ misconfigurations (`ci/scan.sh`).
   --watch`, or `glab ci status` until the pipeline ends), fix what fails and
   push again. Agents that run inside CI jobs do not wait: the user or the
   orchestrator sends the failures back.
+- The `reference-docs` job builds the reference from the code with
+  `ci/reference.sh`; if it fails, the code or the generator's configuration is
+  at fault (a missing doc comment is not a failure). Never write the reference
+  by hand.
+- Before you push you can run the same checks with the `local-ci` skill; it
+  does not replace waiting for the real CI when there is one.

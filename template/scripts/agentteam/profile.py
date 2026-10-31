@@ -7,8 +7,8 @@ means "everything", which is how the full template looks):
   "harnesses": ["claude", "codex"],   claude | opencode | codex; the first one leads
   "ci": "github",                     github | gitlab | both | none
   "tracker": "github",                see config.py; "none" for no issue tracker
-  "roles": ["designer", "frontend", "backend", "devops", "optimizer", "security"],
-  "features": ["ci-agents", "team-tasks", "split", "dispatch", "litellm"]
+  "roles": ["designer", "frontend", "backend", "devops", "optimizer", "security", "writer"],
+  "features": ["ci-agents", "team-tasks", "split", "dispatch", "spec-sync", "litellm"]
 
 scripts/agentteam/components.json maps template paths to expressions over tags
 (harness_codex, lead_claude, ci_github, tracker_jira, issues, role_security,
@@ -32,8 +32,8 @@ COMPONENTS = os.path.join("scripts", "agentteam", "components.json")
 HARNESSES = ("claude", "opencode", "codex")
 CIS = ("github", "gitlab")
 TRACKERS = ("github", "gitlab", "local", "jira", "linear", "redmine")
-ROLES = ("designer", "frontend", "backend", "devops", "optimizer", "security")
-FEATURES = ("ci-agents", "team-tasks", "split", "dispatch", "litellm")
+ROLES = ("designer", "frontend", "backend", "devops", "optimizer", "security", "writer")
+FEATURES = ("ci-agents", "team-tasks", "split", "dispatch", "spec-sync", "litellm")
 RETIRED = {"guide"}   # features of older templates: accepted and ignored
 LEAD = "__AGENT_TEAM_LEAD__"
 BEGIN = re.compile(r"^\s*(?:#|<!--|//)\s*agent-team:if\s+(.+?)\s*(?:-->)?\s*$")

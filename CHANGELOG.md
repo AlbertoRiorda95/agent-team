@@ -3,6 +3,255 @@
 Every release has **Upgrade notes**: the steps `/agent-team:upgrade` cannot do
 by changing files, because they need your hands on the platform or a decision.
 
+Versions: the patch for documentation and small fixes, the minor for new
+features, the major for changes that break existing projects.
+
+## Unreleased
+
+### Template
+- `clean-architecture` skill for the backend, preloaded by `backend`. `setup`
+  keeps it when the stack and the project allow layering and removes it for a
+  script or a thin CRUD.
+
+- `writer` role (on demand) and `/document` skill: design document, ICD, user
+  manual, install and operations guide and API guide in `docs/software/`, and
+  a short `README.md` that points to them. The writer cannot write anywhere
+  else (a hook in Claude Code, permissions in OpenCode, a rule in Codex), so
+  it never collides with the designer's `docs/design/`.
+- The CI builds the reference documentation from the code (`reference-docs`
+  job, `ci/reference.sh`: OpenAPI with Redocly, typedoc, pdoc; other stacks
+  are added in the script) and keeps it as an artifact.
+- Software reuse: specs have a `## Reuse` section (and a readiness item);
+  `docs/agents/dependencies.md` gives the order (the project's code, the
+  team's libraries, a trusted library, own code) and the checklist for a
+  third-party library, starting with checking that the package really exists;
+  merge requests list **Dependencies**. The team's libraries are listed in
+  `docs/general/libraries.md` (setup asks for them, with their registry); an
+  agent never changes one from the project and proposes an issue for it.
+- `ci/registry.sh` (settings in `ci/registry.env`): the connection to the
+  team's package registry, the same in every CI job, in the agent jobs and
+  on a laptop. Package managers: npm, PyPI, Maven, Gradle, Conan 2, and
+  `custom` with your own commands for any other. Tokens come from the environment, never
+  from a committed file: the job token on GitHub Packages and GitLab,
+  otherwise a read-only `REGISTRY_TOKEN`.
+- Publishing: `publish.yml` (GitHub) and the `publish` job (GitLab) publish
+  the project's package on a `v*` tag, in the `release` environment, with
+  `REGISTRY_PUBLISH_TOKEN` stored only there. Agents cannot publish or push
+  tags (hooks and permission rules of every tool). `ci/registry.sh local`
+  installs the package in the machine's local repository (`mvn install`,
+  `gradle publishToMavenLocal`, `conan create`, `npm pack`, a wheel): the
+  release of the local scenario. Setup step D4 sets up publishing for any
+  stack.
+- optimizer proposes an issue for code that can be shared; it never merges
+  it by itself.
+- Monorepo: setup lists the services in `AGENTS.md` and makes role
+  boundaries, CODEOWNERS and CI per service; a task names its service
+  (`[orders] ...`), and dispatch runs one task per role and per service.
+- `local-ci` skill: runs the CI's checks on your computer and fixes the
+  failures, for convenience before a push or instead of the CI when the
+  project has none.
+
+- `AGENTS.md` and `CLAUDE.md`: when a session is long or changes phase, the
+  agent suggests `/handoff` and then `/clear`; it never runs it, and does not
+  suggest it after a short session.
+
+### Changed
+- Team tasks run as one agent, `team` (`docs/roles/team.md`, with an agent
+  for Claude Code, Codex and OpenCode), instead of a coordinator that
+  delegated each role to a subagent: the coordination cost tokens and gave
+  no better result. The agent does the whole issue alone, with the
+  responsibilities and the rules of every role it touches (the frontend's
+  lint hook too), and cannot start subagents. `agent:team` is routed like a
+  role, so it runs on any tool (`AGENT_RUNNERS`); on GitLab it is
+  `AI_FLOW_ROLE=team` in the normal job. Gone with the coordinator: the
+  `Roles:` line, the GitLab `claude-team` job and `AI_FLOW_ROLES`, `@claude ok
+  team` (`SPLIT_CONFIRM=team`) in a split, "Team task possible" in the spec
+  template. `create-issues.py --team` now makes one team issue per ready spec.
+
+### Documentation
+- The manual explains the development approach (design first, TDD, clean
+  architecture when it fits, CI with tests and vulnerability checks, human
+  review) and where the CI runs in the local scenario, with or without a
+  remote.
+- How another project uses a package released with `registry.sh local`, for
+  each package manager (chapter 5).
+- Codex runs the project hooks only after you trust them, and never in CI,
+  where its rules are the guard (chapters 5, 6 and 9).
+- Chapter 10 lists the integrations that exist but have not yet been
+  validated against a real system: Jira, Linear, Multica and GitLab.
+
+### Fixes
+- `block-infra-commands.sh` was bypassed by an option before the verb
+  (`kubectl -n prod apply`, `npm --registry x publish`, `docker --context x
+  push`); it now also blocks `poetry`/`uv`/`yarn`/`pnpm publish`, `gem push`,
+  `gh release create`, `git push --follow-tags` and `git push origin tag v1`,
+  and reading the package managers' credential files from Bash (`cat
+  ~/.npmrc`, `pip config list`...), which the `Read(...)` denials did not
+  cover. OpenCode denies the same commands. Codex's rules, the only guard
+  where its hooks do not run (`codex exec`, CI), now cover them too in their
+  usual form: `npm unpublish`, `bun publish`, `mvn deploy`, `./gradlew
+  publish`, `helm push`, `kubectl scale`, `gcloud run deploy`, `registry.sh
+  publish`, `git push --follow-tags`, `pip config list`...
+- `security-scope.sh` let through a host written without a scheme (`curl
+  example.com`, `wget 10.0.0.5:8080`).
+- `ci/registry.sh`: the pip login always wrote an `https://` index URL and did
+  not encode the token (an `http` registry, or a token with `@`, `:` or `/`,
+  could not be read); the PyPI publish uploaded old files left in `dist/`;
+  Gradle did not find the credentials when Java's home differs from `$HOME`
+  (now also passed as `ORG_GRADLE_PROJECT_*`); Maven refused the
+  `settings.xml` that `actions/setup-java` writes on a runner.
+- Claude Code hooks were called with a relative path (`./scripts/hooks/...`):
+  after a `cd` in the session the hook was not found and the command ran.
+  They now start from `"$CLAUDE_PROJECT_DIR"`.
+- The role hooks (writer, security, frontend lint) were in the agents'
+  frontmatter, which Claude Code skips in a folder nobody trusted, as in
+  every headless run, and which never applied in CI, where the session itself
+  played the role. They are now in `.claude/settings.json`, through
+  `scripts/hooks/role-hooks.sh`, which applies them to the role's agent only
+  (`agent_type`); the CI starts the role with `--agent <role>` (`agents.yml`,
+  the GitLab `claude` job, the chapter 7 worker). The security agent's write
+  check now covers Edit too: Claude Code gives Write and Edit together.
+- Without `jq` the hooks let everything through; they now block and say so,
+  and the GitLab agent jobs install `jq`.
+- Issues whose text has Windows line ends (`\r\n`: every Redmine issue, a
+  GitHub issue edited on the web) were read wrong: dispatch saw their key as
+  a dependency and started nothing. Line ends are normalized when an issue is
+  read.
+- `ci/reference.sh` rendered an invalid OpenAPI contract without a word: it
+  now lints it first (`redocly lint`, structural rules unless the project has
+  a `redocly.yaml`).
+
+### Tests
+- `test_tools.py`: every hook with the JSON the tools send, Codex's rules with
+  `codex execpolicy`, OpenCode's permissions as `opencode agent list` resolves
+  them, the GitLab pipeline merged from its includes and checked against
+  GitLab's schema (and `registry.sh login` before every install).
+- `test_registry.py`: `ci/registry.sh` offline, and a real publish and read
+  back with Verdaccio, pypiserver, Reposilite (Maven, Gradle) and conan_server.
+- `test_upgrade.py`: install with the released plugin, customize, upgrade
+  with this one.
+- `test_pins.py`: every pinned action SHA is the release its comment names.
+- `test_sessions.py`: real sessions of Claude Code, Codex and OpenCode against
+  a scripted model (`tests/mockllm.py`, no API key): hooks and permissions
+  block and the command never runs, credentials cannot be read, every role
+  starts with its model and tools, the lead is not limited by the roles; the
+  custom scenario end to end (create-issues, dispatch, `start_command`, a
+  headless worker per role).
+- `test_scripts.py`: `create-labels.sh`, the spec-sync Git hook,
+  `install-skills.sh` and `check-skills.sh`, Dependabot and workflow schemas.
+- `test_ci_scripts.py`: `install-scanners.sh`, `scan.sh` and `reference.sh` on
+  sample projects; each check fails on what it looks for (a vulnerable
+  dependency, a committed secret, a finding introduced by a change); every
+  tool version exists.
+- `test_install.py`: the plugin installed from a marketplace and updated.
+- `test_litellm.py`: the gateway with Docker: a role's key, its model only,
+  the spend, OpenCode through it.
+- `test_registry.py`: a project that uses each package released with `local`.
+- `test_trackers.py`: the issue flows against a real Redmine in Docker too;
+  the fake Redmine now stores `\r\n` as the real one does.
+- `test_links.py`: the external links of the documentation.
+- `Validate` installs the tools these tests drive, and runs hooks, registry
+  script, profiles and project scripts on macOS too.
+
+### Upgrade notes
+- A project whose profile has no `roles` key gets the `writer` role on upgrade
+  (it only acts when asked); list `roles` without it to opt out.
+- With a private registry: fill in `ci/registry.env`, add `REGISTRY_TOKEN`
+  if the job token is not enough, and to publish create the `release`
+  environment with `REGISTRY_PUBLISH_TOKEN`, a required reviewer and protected
+  `v*` tags. Set the toolchain of `publish.yml` (or the GitLab `publish` job)
+  to your stack's.
+- Set the toolchain of the `reference-docs` job in your CI file and check
+  `ci/reference.sh` keeps the generators of your stack. An OpenAPI contract
+  that does not lint now fails the job.
+- `.claude/settings.json` and the role agents changed (hooks): the upgrade
+  merges them; if you added hooks to an agent's frontmatter, move them to
+  `role-hooks.sh`. The hooks need `jq` wherever the agents run.
+- Team tasks: the upgrade takes the coordinator's `team` job (GitLab:
+  `claude-team`) out of your files, merging with your edits; if you
+  customized the job, the conflict shows it, and the toolchain you added
+  belongs in the role job now. It keeps `docs/agents/team-tasks.md` and
+  reports it as no longer in the template: delete it, and the `Roles:` line
+  of the issue template. Open `agent:team` issues keep working.
+
+## 1.5.0 - 2026-10-28
+
+### Skills
+- `design-studio --milestone M0`: designs every feature of a roadmap milestone
+  in one session. It drafts the specs from what is already decided, asks one
+  round of questions for all of them, plans the breakdowns together and
+  approves each spec on its own. Ready specs are committed together on
+  `design/<milestone>`.
+- `--to-issues` runs a whole flow, each step still with its own plan and yes,
+  and stops before dispatch:
+  - `setup --to-issues`: setup, project design and foundations, then the
+    issues, with any tracker: foundations tasks ready, the other features as
+    "Design:" issues;
+  - `design-studio <feature> | --milestone M1 --to-issues`: the specs, then
+    the issues, then a split of the tasks that still need one.
+  Neither waits for the merge of the design or setup merge request: the
+  issues are created from its branch, and dispatch waits for the merge.
+- `next` suggests `--milestone` when a milestone has several "Design:" issues.
+
+### Template
+- `create-issues` no longer leaves "Design:" issues behind. When a feature's
+  spec is ready, its "Design:" issue becomes the task (one row in the
+  breakdown) or the feature issue, with the tasks created as its sub-issues
+  (several rows). The feature issue is not a task: dispatch skips it.
+- `dispatch` keeps a task waiting while its spec is not ready on the main
+  branch ("spec ... not merged"): the remote's default branch after a fetch,
+  or the current commit without a remote.
+- Every task issue carries a fingerprint of its spec row. When the row changes
+  (a review of the design merge request), `create-issues` and `dispatch`
+  rewrite the issue if its task has not started, and list it if it has;
+  dispatch keeps a task whose row was removed waiting. No task starts on an
+  outdated spec.
+- New feature `spec-sync`: create-issues runs by itself when a change to
+  `docs/design/` reaches the main branch - `.github/workflows/spec-sync.yml`,
+  the `spec-sync` job in `.gitlab/ci/spec-sync.yml`, or the Git hook
+  `scripts/git-hooks/spec-sync.sh` in the local scenario.
+- Jira has one level of sub-tasks: the tasks of a feature issue, and the parts
+  of a sub-task, are Tasks with a "Relates" link to their parent, so a task of
+  a feature can still be split into sub-tasks.
+- GitLab: the issue a task belongs to (the feature, or the issue it was split
+  from) is no longer listed among its children.
+- Trackers can edit an issue's title and description (`edit_issue`, all six).
+- A breakdown row can depend on a row of another spec: `app-shell#2` in
+  "Depends on". `create-issues` creates the other spec's issue first, even
+  when the roadmap lists the features the other way round, and links the two
+  in the text and natively.
+- The design studio procedure (`docs/roles/design-studio.md`) has a
+  "Milestone session" section; the spec template documents `<feature>#<n>`.
+
+### Fixes
+- `dispatch` in a local project with GitHub or GitLab issues no longer adds
+  `agent:<role>` labels that start nothing: without the `ci-agents` feature
+  the default starter prints what to run.
+- Merge requests of a task with a GitHub or GitLab issue end with
+  `Closes #<issue>` (`docs/agents/merge-requests.md`), so the merge closes the
+  issue on GitLab too and its dependents can start.
+
+### Documentation
+- The manual reviewed by a first-time reader: a glossary at the end of
+  chapter 1, terms explained before they are used, "While a task runs"
+  (follow, iterate on the merge request, stop, retry, reject) and "Change the
+  plan" in chapter 4, when an issue counts as done and who closes it, what a
+  local task produces, the GitLab set-up and iteration, what a run costs.
+- "The workflow" in "Run the project": the two flows as diagrams, with
+  `--to-issues` and a full example; the flows in the local and remote
+  scenarios. The HTML manual draws Mermaid diagrams (loaded from a CDN).
+
+### Upgrade notes
+- Task issues created before 1.5.0 have no row fingerprint: the first
+  `create-issues` or `dispatch` after the upgrade adds it, rewriting each
+  open task that has not started from its current row (shown as "update" in
+  the dry run). Started tasks are left as they are.
+- `spec-sync` is off until you add it to `features` and run the upgrade; in
+  the local scenario, link the hook as `docs/manual` chapter 5 says.
+- After the upgrade, `/agent-team:design-studio --milestone <code>`
+  replaces one session per "Design:" issue, and `create-issues` reuses the
+  "Design:" issues of the features you specify from now on.
+
 ## 1.4.0 - 2026-10-28
 
 ### Fixes

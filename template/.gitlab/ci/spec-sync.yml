@@ -1,0 +1,27 @@
+# .gitlab/ci/spec-sync.yml
+# Feature spec-sync: when a change to docs/design/ reaches the default branch
+# (usually the merge of a design merge request, after its review), bring the
+# issues in line with the specs with scripts/create-issues.py: issues for new
+# breakdown rows, and a rewrite of the issues whose row changed while their
+# task has not started. It never closes or starts an issue: rows removed from a
+# spec are listed in the job log, and dispatch stays yours.
+# Needs GITLAB_ACCESS_TOKEN (masked variable, api scope) for GitLab issues, or
+# the variables of the tracker in use (JIRA_EMAIL and JIRA_API_TOKEN or
+# JIRA_PAT, LINEAR_API_KEY, REDMINE_API_KEY).
+spec-sync:
+  stage: ai
+  image: alpine:3.21
+  resource_group: spec-sync
+  interruptible: false
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_PIPELINE_SOURCE == "push"'
+      changes:
+        - docs/design/**/*
+  variables:
+    GIT_STRATEGY: fetch
+    GITLAB_TOKEN: $GITLAB_ACCESS_TOKEN
+    GITLAB_HOST: $CI_SERVER_URL
+  before_script:
+    - apk add --no-cache git python3 glab
+  script:
+    - python3 scripts/create-issues.py

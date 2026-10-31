@@ -96,6 +96,9 @@ class Adapter(core.Tracker):
     def set_milestone(self, issue, milestone_ref):
         self._put(issue, {"fixed_version_id": milestone_ref})
 
+    def edit_issue(self, issue, title, body):
+        self._put(issue, {"subject": title[:255], "description": body})
+
     def children(self, parent):
         return self._list(project_id=self.project, parent_id=parent.ref)
 

@@ -1,6 +1,6 @@
 ---
 name: create-issues
-description: Use when the roadmap and ready specs in docs/design/ should become issues. Creates the milestones and issues (GitHub, GitLab, local files, Jira, Linear or Redmine) from the roadmap and the ready specs, but only after showing the plan and getting the user's yes; nothing is created before. Idempotent - existing issues and milestones are skipped, nothing is closed or labeled - so it can be run again at any stage, for example after every design studio session.
+description: Use when the roadmap and ready specs in docs/design/ should become issues. Creates the milestones and issues (GitHub, GitLab, local files, Jira, Linear or Redmine) from the roadmap and the ready specs, but only after showing the plan and getting the user's yes; nothing is created before. Idempotent - existing issues and milestones are skipped, "Design:" issues of features now specified become the feature or its task, nothing is closed or labeled - so it can be run again at any stage, for example after every design studio session.
 argument-hint: "[--team]"
 ---
 
@@ -31,18 +31,24 @@ project's copy unless the user says otherwise.
 
 ## 3. Show the plan
 
-Run `python3 <script> --dry-run` (add `--team` if the user passed it) and
+Run `python3 <script> --dry-run` (add `--team` if the user passed it: one
+`agent:team` issue per ready spec instead of one issue per row) and
 summarize the output for the user:
 
 - milestones to create and those that exist;
 - issues to create, per milestone, with their dependencies;
 - issues that exist or are tracked by the `Issue` column, and those that would
   get a milestone they do not have;
+- "Design:" issues whose feature now has a ready spec: they are not left
+  behind but renamed (`rename #81 Design: app-shell (M0) -> ...`). With one row
+  in the breakdown the issue becomes that task; with several it becomes the
+  feature issue and the tasks are created as its sub-issues;
+- issues to update: their spec row changed (or has no fingerprint yet, after
+  an upgrade) and their task has not started, so they are rewritten from it;
+- tasks that started before their row changed: listed, for the user to check
+  the work against the spec or stop it;
 - issues created earlier that are no longer in the plan (the script never
   closes them: the user decides).
-
-If a spec says "Team task possible: yes", ask whether the user wants one
-`agent:team` issue for it (`--team`, one PR) or one issue per task.
 
 If the output reports milestone issues from the old layout ("M0 · ..." parent
 issues), explain that milestones are now native and offer
@@ -57,8 +63,10 @@ of the dependencies, or with `/agent-team:dispatch`.
 
 ## What this never does
 
-It never closes, relabels or rewrites an issue; the only change to an existing
-issue is giving a milestone to one that has none. Running it twice creates
+It never closes or relabels an issue. The only changes to existing issues are
+giving a milestone to one that has none, rewriting a "Design:" issue whose
+spec is now ready into its feature or task, and rewriting a task that has not
+started from its changed spec row, as above. Running it twice creates
 nothing new.
 
 ## In Codex or OpenCode

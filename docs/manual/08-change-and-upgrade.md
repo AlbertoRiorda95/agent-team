@@ -1,5 +1,9 @@
 # 8. Change and upgrade
 
+<!-- nav -->
+[← 7. Scenario: custom orchestrator](07-scenario-custom.md) · [Manual index](README.md) · [9. Reference →](09-reference.md)
+<!-- /nav -->
+
 Two things change over a project's life: the plugin gets new versions, and
 your setup changes (another tracker, Codex next to Claude Code, a role back,
 the move from local to remote). Both go through the same command:
@@ -25,7 +29,7 @@ template for the new profile and shows a plan:
 | `out-of-profile` | a file the profile no longer includes, changed by you: kept, you decide |
 | `removed-by-you` | a file you deleted: not added back |
 
-Sections follow the same rule: drop team tasks and their section leaves
+Sections follow the same rule: drop `split` and its section leaves
 `AGENTS.md`; add Codex back and its lines return, merged with your edits.
 Conflicts, if any, are left marked and resolved with you. The upgrade works
 on a branch and ends with a commit for you to review.
@@ -65,8 +69,9 @@ copy, your file, and the new template file. If only the template changed,
 your file is replaced; if only you changed it, nothing happens; if both
 changed, `git merge-file` merges them and marks the lines it cannot decide.
 
-`README.md`, `docs/design-decisions.md`, `.mcp.json` and
-`docs/roles/security-scope.txt` are yours after setup: they are never upgraded.
+`README.md`, `docs/design-decisions.md` (the decision log), `.mcp.json` (the
+MCP servers the agents may use) and `docs/roles/security-scope.txt` are yours
+after setup: they are never upgraded ([3. What you get](03-set-up-a-project.md#what-you-get)).
 
 ## A project set up by hand
 
@@ -80,3 +85,9 @@ Code, run it from a clone:
 python3 ~/agent-team/scripts/template_sync.py status --template ~/agent-team/template --project .
 python3 ~/agent-team/scripts/template_sync.py apply  --template ~/agent-team/template --project .
 ```
+
+---
+
+<!-- nav -->
+[← 7. Scenario: custom orchestrator](07-scenario-custom.md) · [Manual index](README.md) · [9. Reference →](09-reference.md)
+<!-- /nav -->

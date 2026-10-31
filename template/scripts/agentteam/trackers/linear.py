@@ -111,6 +111,9 @@ class Adapter(core.Tracker):
     def set_milestone(self, issue, milestone_ref):
         self._update(issue, {"projectMilestoneId": milestone_ref})
 
+    def edit_issue(self, issue, title, body):
+        self._update(issue, {"title": title, "description": body})
+
     def children(self, parent):
         n = self.q("query($id:String!){issue(id:$id){children(first:100){nodes{" + ISSUE + "}}}}",
                    id=parent.ref)["issue"]["children"]["nodes"]

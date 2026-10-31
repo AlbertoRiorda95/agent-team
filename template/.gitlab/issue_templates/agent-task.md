@@ -8,6 +8,3 @@ docs/design/<feature>.md — section: <...>
 
 ## Acceptance criteria
 - [ ] ...
-
-<!-- For a team task (label agent:team), the roles in order: -->
-Roles:

@@ -7,6 +7,9 @@ include:
 # agent-team:if ci_agents
   - local: .gitlab/ci/agents.yml
 # agent-team:end
+# agent-team:if issues and spec_sync
+  - local: .gitlab/ci/spec-sync.yml
+# agent-team:end
 
 # One pipeline per change: MR pipelines, the default branch, explicit triggers.
 workflow:
@@ -21,4 +24,5 @@ stages:
   - build
   - test
   - scan
+  - publish
   - ai
