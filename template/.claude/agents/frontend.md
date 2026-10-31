@@ -11,12 +11,6 @@ skills:
   - tdd
 color: blue
 memory: project
-hooks:
-  PostToolUse:
-    - matcher: "Edit|Write"
-      hooks:
-        - type: command
-          command: "./scripts/hooks/lint-frontend.sh"
 ---
 
 Your full role instructions are in `docs/roles/frontend.md`.

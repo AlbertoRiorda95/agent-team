@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """End-to-end checks of create-issues.py, dispatch.py and split-issue.py on every
 tracker: the local one for real, GitHub (gh CLI), Jira, Linear and Redmine
-against the in-memory fakes in tests/fakes.py.
+against the in-memory fakes in tests/fakes.py, and Redmine for real too, in
+Docker (RedmineLive; REDMINE_LIVE=0 to skip): the fakes are checked against a
+real server.
 
 Run: python3 tests/test_trackers.py
 """
@@ -14,7 +16,9 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import time
 import unittest
+import urllib.request
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 SCRIPTS = os.path.join(ROOT, "template", "scripts")
@@ -88,7 +92,7 @@ class Scenario:
             os.environ[k] = v
         if self.name in ("github", "gitlab"):
             core.sh = self.fake.sh
-        elif self.fake is not None:
+        elif hasattr(self.fake, "http"):                      # a fake; a live server has none
             core.http_json = self.fake.http
 
     def close(self, issue, completed=True):
@@ -533,6 +537,114 @@ class Units(unittest.TestCase):
         self.assertEqual(st.start(issue, "backend"), "ran echo")
         self.assertFalse(os.path.exists("/tmp/pwned"))
 
+
+
+def docker_ok():
+    return shutil.which("docker") and subprocess.run(["docker", "info"], capture_output=True).returncode == 0
+
+
+REDMINE_SETUP = """
+Setting.rest_api_enabled = '1'
+IssueStatus.find_or_create_by!(name: 'On hold') { |s| s.is_closed = false }
+Role.all.each { |r| Tracker.all.each { |t| IssueStatus.all.each { |a| IssueStatus.all.each { |b|
+  WorkflowTransition.find_or_create_by!(role: r, tracker: t, old_status: a, new_status: b) unless a == b } } } }
+puts 'KEY=' + User.find_by_login('admin').api_key
+"""
+
+
+class RealRedmine:
+    """A Redmine server in Docker, with its default data, an "On hold" status and the REST API on."""
+
+    def __init__(self):
+        with socket_free() as port:
+            self.url = f"http://127.0.0.1:{port}"
+        self.id = subprocess.run(["docker", "run", "-d", "--rm", "-p", f"127.0.0.1:{port}:3000", "redmine:6"],
+                                 capture_output=True, text=True, check=True).stdout.strip()
+        end = time.time() + 300
+        while time.time() < end:
+            try:
+                urllib.request.urlopen(self.url + "/", timeout=5).close()
+                break
+            except OSError:
+                time.sleep(3)
+        r = subprocess.run(["docker", "exec", self.id, "bash", "-c",
+                            "cd /usr/src/redmine && REDMINE_LANG=en bundle exec rake redmine:load_default_data "
+                            f">/dev/null && bundle exec rails runner \"$0\"", REDMINE_SETUP],
+                           capture_output=True, text=True, timeout=600)
+        keys = [line[4:] for line in r.stdout.splitlines() if line.startswith("KEY=")]
+        if not keys:
+            self.stop()
+            raise RuntimeError(r.stdout[-2000:] + r.stderr[-2000:])
+        self.key = keys[0]
+        self.n = 0
+
+    def stop(self):
+        subprocess.run(["docker", "rm", "-f", self.id], capture_output=True)
+
+    def api(self, method, path, body=None):
+        req = urllib.request.Request(self.url + path, method=method, data=json.dumps(body).encode() if body else None,
+                                     headers={"X-Redmine-API-Key": self.key, "Content-Type": "application/json"})
+        with urllib.request.urlopen(req, timeout=30) as r:
+            data = r.read()
+        return json.loads(data) if data.strip() else {}
+
+    def project(self):
+        """A new empty project for each test."""
+        self.n += 1
+        ident = f"app{self.n}"
+        self.api("POST", "/projects.json", {"project": {"name": f"App {self.n}", "identifier": ident, "is_public": True,
+                                                        "enabled_module_names": ["issue_tracking"]}})
+        return ident
+
+    def close(self, n, name="Closed"):
+        statuses = {s["name"]: s["id"] for s in self.api("GET", "/issue_statuses.json")["issue_statuses"]}
+        self.api("PUT", f"/issues/{n}.json", {"issue": {"status_id": statuses[name]}})
+
+
+@contextlib.contextmanager
+def socket_free():
+    import socket
+    with socket.socket() as s:
+        s.bind(("127.0.0.1", 0))
+        port = s.getsockname()[1]
+    yield port
+
+
+@unittest.skipUnless(os.environ.get("REDMINE_LIVE", "1") != "0" and docker_ok(), "Docker not available (or REDMINE_LIVE=0)")
+class RedmineLive(TrackerFlow):
+    """The same flows as the fake Redmine, against a real one."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.server = RealRedmine()
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.server.stop()
+
+    def scenario(self):
+        return Scenario("redmine", {"tracker": "redmine", "starter": "label",
+                                    "redmine": {"url": self.server.url, "project": self.server.project()}},
+                        self.server, {"REDMINE_API_KEY": self.server.key})
+
+    def test_flow(self):
+        self.run_flow(self.scenario())
+
+    def test_design_to_tasks(self):
+        self.run_design_to_tasks(self.scenario())
+
+    def test_check(self):
+        sc = self.scenario()
+        json.dump(sc.cfg, open(".agent-team/config.json", "w"))
+        sc.install()
+        r = subprocess.run([sys.executable, os.path.join(SCRIPTS, "tracker.py"), "check"], capture_output=True,
+                           text=True, env=os.environ.copy())
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertIn("as admin", r.stdout)
+
+
+for _name in [n for n in vars(TrackerFlow) if n.startswith("test_")]:   # only the flows above, not the fakes' tests
+    setattr(RedmineLive, _name, None)
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

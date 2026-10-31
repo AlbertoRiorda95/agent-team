@@ -60,6 +60,79 @@ features, the major for changes that break existing projects.
   architecture when it fits, CI with tests and vulnerability checks, human
   review) and where the CI runs in the local scenario, with or without a
   remote.
+- How another project uses a package released with `registry.sh local`, for
+  each package manager (chapter 5).
+- Codex runs the project hooks only after you trust them, and never in CI,
+  where its rules are the guard (chapters 5, 6 and 9).
+
+### Fixes
+- `block-infra-commands.sh` was bypassed by an option before the verb
+  (`kubectl -n prod apply`, `npm --registry x publish`, `docker --context x
+  push`); it now also blocks `poetry`/`uv`/`yarn`/`pnpm publish`, `gem push`,
+  `gh release create`, `git push --follow-tags` and `git push origin tag v1`,
+  and reading the package managers' credential files from Bash (`cat
+  ~/.npmrc`, `pip config list`...), which the `Read(...)` denials did not
+  cover. The same commands are denied in Codex's rules and OpenCode.
+- `security-scope.sh` let through a host written without a scheme (`curl
+  example.com`, `wget 10.0.0.5:8080`).
+- `ci/registry.sh`: the pip login always wrote an `https://` index URL and did
+  not encode the token (an `http` registry, or a token with `@`, `:` or `/`,
+  could not be read); the PyPI publish uploaded old files left in `dist/`;
+  Gradle did not find the credentials when Java's home differs from `$HOME`
+  (now also passed as `ORG_GRADLE_PROJECT_*`); Maven refused the
+  `settings.xml` that `actions/setup-java` writes on a runner.
+- Claude Code hooks were called with a relative path (`./scripts/hooks/...`):
+  after a `cd` in the session the hook was not found and the command ran.
+  They now start from `"$CLAUDE_PROJECT_DIR"`.
+- The role hooks (writer, security, frontend lint) were in the agents'
+  frontmatter, which Claude Code skips in a folder nobody trusted, as in
+  every headless run, and which never applied in CI, where the session itself
+  played the role. They are now in `.claude/settings.json`, through
+  `scripts/hooks/role-hooks.sh`, which applies them to the role's agent only
+  (`agent_type`); the CI starts the role with `--agent <role>` (`agents.yml`,
+  the GitLab `claude` job, the chapter 7 worker). The security agent's write
+  check now covers Edit too: Claude Code gives Write and Edit together.
+- Without `jq` the hooks let everything through; they now block and say so,
+  and the GitLab agent jobs install `jq`.
+- Issues whose text has Windows line ends (`\r\n`: every Redmine issue, a
+  GitHub issue edited on the web) were read wrong: dispatch saw their key as
+  a dependency and started nothing. Line ends are normalized when an issue is
+  read.
+- `ci/reference.sh` rendered an invalid OpenAPI contract without a word: it
+  now lints it first (`redocly lint`, structural rules unless the project has
+  a `redocly.yaml`).
+
+### Tests
+- `test_tools.py`: every hook with the JSON the tools send, Codex's rules with
+  `codex execpolicy`, OpenCode's permissions as `opencode agent list` resolves
+  them, the GitLab pipeline merged from its includes and checked against
+  GitLab's schema (and `registry.sh login` before every install).
+- `test_registry.py`: `ci/registry.sh` offline, and a real publish and read
+  back with Verdaccio, pypiserver, Reposilite (Maven, Gradle) and conan_server.
+- `test_upgrade.py`: install with the released plugin, customize, upgrade
+  with this one.
+- `test_pins.py`: every pinned action SHA is the release its comment names.
+- `test_sessions.py`: real sessions of Claude Code, Codex and OpenCode against
+  a scripted model (`tests/mockllm.py`, no API key): hooks and permissions
+  block and the command never runs, credentials cannot be read, every role
+  starts with its model and tools, the lead is not limited by the roles; the
+  custom scenario end to end (create-issues, dispatch, `start_command`, a
+  headless worker per role).
+- `test_scripts.py`: `create-labels.sh`, the spec-sync Git hook,
+  `install-skills.sh` and `check-skills.sh`, Dependabot and workflow schemas.
+- `test_ci_scripts.py`: `install-scanners.sh`, `scan.sh` and `reference.sh` on
+  sample projects; each check fails on what it looks for (a vulnerable
+  dependency, a committed secret, a finding introduced by a change); every
+  tool version exists.
+- `test_install.py`: the plugin installed from a marketplace and updated.
+- `test_litellm.py`: the gateway with Docker: a role's key, its model only,
+  the spend, OpenCode through it.
+- `test_registry.py`: a project that uses each package released with `local`.
+- `test_trackers.py`: the issue flows against a real Redmine in Docker too;
+  the fake Redmine now stores `\r\n` as the real one does.
+- `test_links.py`: the external links of the documentation.
+- `Validate` installs the tools these tests drive, and runs hooks, registry
+  script, profiles and project scripts on macOS too.
 
 ### Upgrade notes
 - A project whose profile has no `roles` key gets the `writer` role on upgrade
@@ -70,8 +143,11 @@ features, the major for changes that break existing projects.
   `v*` tags. Set the toolchain of `publish.yml` (or the GitLab `publish` job)
   to your stack's.
 - Set the toolchain of the `reference-docs` job in your CI file and check
-  `ci/reference.sh` keeps the generators of your stack. The tool versions
-  were checked against the registries but not run on a real project.
+  `ci/reference.sh` keeps the generators of your stack. An OpenAPI contract
+  that does not lint now fails the job.
+- `.claude/settings.json` and the role agents changed (hooks): the upgrade
+  merges them; if you added hooks to an agent's frontmatter, move them to
+  `role-hooks.sh`. The hooks need `jq` wherever the agents run.
 
 ## 1.5.0 - 2026-10-28
 

@@ -106,6 +106,18 @@ git tag v1.2.0
 ./ci/registry.sh local     # mvn install, gradle publishToMavenLocal, conan create, npm pack...
 ```
 
+The other projects on the same machine use it like this:
+
+| Stack | Where `local` puts it | In the project that uses it |
+|---|---|---|
+| npm | `~/.local/share/packages/<name>-<version>.tgz` | `npm install ~/.local/share/packages/team-lib-1.2.0.tgz` |
+| PyPI | `~/.local/share/packages/` (wheel and sdist) | `pip install --find-links ~/.local/share/packages team-lib` |
+| Maven | `~/.m2/repository` | the `<dependency>` in `pom.xml`: Maven reads `~/.m2` first |
+| Gradle | `~/.m2/repository` | `repositories { mavenLocal() }` and the dependency |
+| Conan | the local cache | `hello/1.2.0` in `[requires]`; `conan install . --no-remote` finds it |
+
+`LOCAL_REPOSITORY` in `ci/registry.env` changes the folder for npm and PyPI.
+
 With a team registry you can upload from your computer too, with your own
 token: `REGISTRY_PUBLISH_TOKEN=... ./ci/registry.sh publish`. The agents
 cannot do either: tags and publishing are blocked for them
@@ -148,7 +160,11 @@ reads `.codex/`. Approve the project hooks once with `/hooks`.
 - The roles are custom agents in `.codex/agents/*.toml`, each with its
   reasoning effort; at most three run at once.
 - Forbidden commands are in `.codex/rules/agent-team.rules`, and the same
-  hook as Claude Code blocks commands on real environments.
+  hook as Claude Code blocks commands on real environments. Codex runs the
+  project hooks only after you trust them: at the start it asks ("Hooks need
+  review"), again whenever a hook changes, and `/hooks` shows them. Without
+  that answer (`codex exec`, a refused review) no hook runs and only the rules
+  apply.
 - Codex has no per-agent hooks: the test gate and the alignment reminder are
   rules in `AGENTS.md` that the main session follows, not checks.
 - Pin the model in `.codex/config.toml` if you do not want Codex's default.

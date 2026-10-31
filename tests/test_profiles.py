@@ -100,10 +100,10 @@ class Rendered(unittest.TestCase):
             if os.path.exists(s):
                 for groups in json.load(open(s))["hooks"].values():
                     for g in groups:
-                        refs |= {h["command"].lstrip("./") for h in g["hooks"]}
+                        refs |= {re.sub(r'^"\$CLAUDE_PROJECT_DIR"/', "", h["command"]).split()[0] for h in g["hooks"]}
             for rel in have:
                 if rel.startswith(".claude/agents/"):
-                    refs |= {m.lstrip("./") for m in re.findall(r'command: "([^"]+)"', open(os.path.join(d, rel)).read())}
+                    refs |= set(re.findall(r'command: \'"\$CLAUDE_PROJECT_DIR"/([^\']+)\'', open(os.path.join(d, rel)).read()))
             h = os.path.join(d, ".codex", "hooks.json")
             if os.path.exists(h):
                 for groups in json.load(open(h))["hooks"].values():

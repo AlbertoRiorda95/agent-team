@@ -131,7 +131,7 @@ back ([8. Change and upgrade](08-change-and-upgrade.md)).
 | `.opencode/`, `opencode.json` | OpenCode: the role agents and their permissions |
 | `.agents/skills/` | the project skills for Codex (and OpenCode without Claude Code) |
 | `.mcp.json` | the MCP servers the agents may use: empty, yours to fill |
-| `scripts/hooks/` | hooks run by Claude Code and Codex at fixed moments: block commands on real environments, point a new session to the latest handoff note, refuse to end a task while the tests fail (the **test gate**) |
+| `scripts/hooks/` | hooks run by Claude Code and Codex at fixed moments: block commands on real environments, point a new session to the latest handoff note, refuse to end a task while the tests fail (the **test gate**); with Claude Code, keep each role's agent within its limits (the writer writes only documentation, the security agent reaches only the hosts in its scope) |
 | `.github/`, `.gitlab/` | the CI of the project and, for remote work, the agent workflows |
 | `ci/` | scripts the CI of both platforms calls: the security scanners and their versions, the merge request of a Codex or OpenCode job |
 | `scripts/` | issues, split, dispatch, tracker check, profile |

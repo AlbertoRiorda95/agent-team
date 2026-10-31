@@ -35,6 +35,12 @@ jobs:
       actions: read
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803  # v6.1.0
+      # the session runs as the role's agent (--agent): its tools, and the role's hooks
+      # (scripts/hooks/role-hooks.sh), which apply only to a named agent
+      - id: role
+        env:
+          LABEL: ${{ github.event.label.name }}
+        run: echo "name=${LABEL#agent:}" >> "$GITHUB_OUTPUT"
       - uses: anthropics/claude-code-action@f27be6b65a4652f08a2ba3cff79114829b588967  # v1.0.252
         env:
           # In CI everything runs in the foreground: background subagents or commands are lost when the run ends.
@@ -80,6 +86,7 @@ jobs:
             Do not start other agents: alignment tasks are created by the user.
           # CUSTOMIZE: the build and test commands of your stack (npm here)
           claude_args: >-
+            --agent ${{ steps.role.outputs.name }}
             --max-turns 40
             --model ${{ contains(fromJSON('["agent:designer","agent:frontend"]'), github.event.label.name) && 'claude-sonnet-5-5' || 'claude-opus-5-5' }}
             --allowedTools "Read,Write,Edit,Glob,Grep,Bash(git:*),Bash(npm:*),Bash(npx:*),Bash(gh pr create:*),Bash(gh pr edit:*),Bash(gh pr view:*),Bash(gh issue view:*),Bash(gh issue comment:*)"

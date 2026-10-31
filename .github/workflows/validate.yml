@@ -12,9 +12,11 @@ permissions:
 jobs:
   validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803  # v6.1.0
+        with:
+          fetch-depth: 0          # the released version, for the upgrade test
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1  # v7.1.0
         with:
           node-version: 24
@@ -22,6 +24,12 @@ jobs:
         run: |
           npm install -g @anthropic-ai/claude-code
           claude plugin validate . --strict
+      - name: Tools the tests drive (Codex, OpenCode, GitLab schema, Conan)
+        run: |
+          npm install -g @openai/codex@0.166.0 opencode-ai@1.19.5
+          python3 -m venv "$HOME/venv"
+          "$HOME/venv/bin/pip" install --quiet pyyaml==6.0.3 check-jsonschema==0.39.0 conan==2.34.0 conan-server==2.34.0
+          echo "$HOME/venv/bin" >> "$GITHUB_PATH"
       - name: Workflows (template and this repository)
         run: |
           ./template/ci/install-scanners.sh actionlint
@@ -36,7 +44,43 @@ jobs:
         run: |
           export PATH="$HOME/.local/bin:$PATH"
           python3 tests/test_profiles.py
-      - name: Issue trackers (GitHub, GitLab, local, Jira, Linear, Redmine against fakes)
+      - name: Issue trackers (GitHub, GitLab, local, Jira, Linear, Redmine against fakes; a real Redmine)
         run: python3 tests/test_trackers.py
       - name: Template install and upgrade
         run: bash tests/test_template_sync.sh
+      - name: Upgrade from the released version
+        run: python3 tests/test_upgrade.py
+      - name: Guardrails (hooks, Codex rules, OpenCode permissions, GitLab pipeline)
+        run: python3 tests/test_tools.py
+      - name: Package registry (offline, and live against Verdaccio, pypiserver, Reposilite, conan_server)
+        run: python3 tests/test_registry.py
+      - name: Pinned actions (each SHA is the release its comment names)
+        run: python3 tests/test_pins.py
+      - name: Project scripts (labels, spec-sync hook, skills, Dependabot and workflow schemas)
+        run: python3 tests/test_scripts.py
+      - name: Sessions (Claude Code, Codex, OpenCode against a scripted model; the custom scenario end to end)
+        run: python3 tests/test_sessions.py
+      - name: Plugin install and update from a marketplace
+        run: python3 tests/test_install.py
+      - name: CI scripts (install-scanners, scan, reference on sample projects; tool versions exist)
+        run: python3 tests/test_ci_scripts.py
+      - name: LiteLLM gateway (keys, budgets, OpenCode through it)
+        run: python3 tests/test_litellm.py
+      - name: External links of the documentation
+        run: python3 tests/test_links.py
+
+  # the hooks and scripts run on the users' computers too: macOS has bash 3.2 and BSD tools
+  portability:
+    runs-on: macos-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803  # v6.1.0
+      - name: Hooks, registry script, profiles, project scripts, template install and upgrade
+        env:
+          REGISTRY_LIVE: "0"
+        run: |
+          python3 tests/test_tools.py Hooks
+          python3 tests/test_registry.py Offline
+          python3 tests/test_profiles.py
+          python3 tests/test_scripts.py
+          bash tests/test_template_sync.sh

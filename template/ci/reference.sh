@@ -15,8 +15,12 @@ OUT=${REFERENCE_DIR:-reports/reference}
 mkdir -p "$OUT"
 built=0
 
-# API contract (OpenAPI) -> one HTML page
+# API contract (OpenAPI) -> one HTML page. build-docs renders even an invalid
+# contract: lint it first, with the project's redocly.yaml if there is one,
+# else only the structural rules (minimal)
 if [ -f docs/api/openapi.yaml ]; then
+  if [ -f redocly.yaml ]; then lint=(); else lint=(--extends=minimal); fi
+  npx --yes "@redocly/cli@$REDOCLY_VERSION" lint "${lint[@]}" docs/api/openapi.yaml
   npx --yes "@redocly/cli@$REDOCLY_VERSION" build-docs docs/api/openapi.yaml -o "$OUT/api/index.html"
   built=1
 fi

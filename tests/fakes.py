@@ -204,7 +204,7 @@ class FakeRedmine:
 
     def add(self, subject, description="", parent=None, version=None):
         self.n += 1
-        self.issues[self.n] = {"id": self.n, "subject": subject, "description": description,
+        self.issues[self.n] = {"id": self.n, "subject": subject, "description": description.replace("\n", "\r\n"),
                                "status": {"id": 1, "name": "New"}, "fixed_version": version,
                                "parent": {"id": parent} if parent else None, "author": {"name": "Alberto"}, "journals": []}
         return self.n
@@ -256,9 +256,9 @@ class FakeRedmine:
                     i["journals"].append({"notes": upd["notes"], "user": {"id": 7, "name": "Alberto"}})
                 if "parent_issue_id" in upd:
                     i["parent"] = {"id": upd["parent_issue_id"]} if upd["parent_issue_id"] else None
-                for k in ("subject", "description"):
+                for k in ("subject", "description"):     # Redmine stores the text with \r\n, as the real one
                     if k in upd:
-                        i[k] = upd[k]
+                        i[k] = upd[k].replace("\n", "\r\n") if k == "description" else upd[k]
                 return None
             issue = dict(self.issues[n])
             if "relations" in q.get("include", ""):

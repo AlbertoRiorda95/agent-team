@@ -74,6 +74,30 @@ prefix_rule(
 )
 
 prefix_rule(
+    pattern = [["poetry", "uv", "flit", "hatch"], "publish"],
+    decision = "forbidden",
+    justification = "Packages are published by the release job on a v* tag.",
+    match = ["poetry publish --build", "uv publish"],
+    not_match = ["uv sync"],
+)
+
+prefix_rule(
+    pattern = ["gem", "push"],
+    decision = "forbidden",
+    justification = "Packages are published by the release job on a v* tag.",
+    match = ["gem push app.gem"],
+    not_match = ["gem build app.gemspec"],
+)
+
+prefix_rule(
+    pattern = [["gh", "glab"], "release", ["create", "upload", "edit"]],
+    decision = "forbidden",
+    justification = "Releases start from a tag the user pushes.",
+    match = ["gh release create v1.0.0"],
+    not_match = ["gh release view"],
+)
+
+prefix_rule(
     pattern = ["conan", "upload"],
     decision = "forbidden",
     justification = "Packages are published by the release job on a v* tag.",

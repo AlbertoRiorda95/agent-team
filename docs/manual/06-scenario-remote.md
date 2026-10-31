@@ -77,7 +77,9 @@ them for you). The workflow `agents.yml` starts the agent of that role:
   and opens the pull request with Codex's summary as the description. Pull
   requests opened with the default token do not trigger other workflows: set
   `AGENT_PR_TOKEN` (a fine-grained token with contents and pull requests
-  write) so the CI checks them.
+  write) so the CI checks them. In CI nobody approves Codex's hooks, so they
+  do not run: the forbidden commands of `.codex/rules/agent-team.rules`, the
+  missing network and the missing secrets are what limit it there.
 - **OpenCode**: its GitHub action runs the role agent and opens the pull request.
 
 Only issues opened by the owner, members, collaborators or the repository's

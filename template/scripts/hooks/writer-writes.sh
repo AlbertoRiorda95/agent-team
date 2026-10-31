@@ -1,6 +1,7 @@
 #!/bin/bash
 # scripts/hooks/writer-writes.sh
 # The writer agent writes only under docs/software/ and the project README.md.
+command -v jq >/dev/null || { echo "Blocked: jq is not installed, so this hook cannot check the call. Install jq." >&2; exit 2; }   # never fail open
 INPUT=$(cat)
 FILE=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty')
 case "$FILE" in

@@ -72,7 +72,7 @@ scripts/            template_sync.py (install and upgrade), build_manual.py (the
 template/           the project template the plugin installs
 docs/manual/        the user manual, one Markdown file per chapter
 docs/manual.html    the same manual as one page, generated
-tests/              template install and upgrade, profiles, trackers
+tests/              template install and upgrade, profiles, trackers, guardrails, registry
 ```
 
 ## Develop
@@ -81,13 +81,27 @@ tests/              template install and upgrade, profiles, trackers
 claude plugin validate . --strict          # manifest, marketplace, skills
 bash tests/test_template_sync.sh           # install and upgrade scenarios
 python3 tests/test_profiles.py             # every sample profile renders, loads and lints; switching profiles
-python3 tests/test_trackers.py             # issue scripts on the six trackers (fakes)
+python3 tests/test_trackers.py             # issue scripts on the six trackers (fakes), and a real Redmine (Docker)
+python3 tests/test_upgrade.py              # upgrade from the released version (main) to this tree
+python3 tests/test_tools.py                # hooks, Codex rules, OpenCode permissions, GitLab pipeline schema
+python3 tests/test_registry.py             # ci/registry.sh offline, and live with Docker (REGISTRY_LIVE=0 to skip)
+python3 tests/test_pins.py                 # every pinned action SHA is the release its comment names (network)
+python3 tests/test_scripts.py              # labels, spec-sync hook, skills scripts, Dependabot and workflow schemas
+python3 tests/test_sessions.py             # Claude Code, Codex, OpenCode sessions against a scripted model; custom scenario
+python3 tests/test_install.py              # the plugin installed from a marketplace and updated (claude CLI)
+python3 tests/test_ci_scripts.py           # install-scanners, scan, reference on sample projects (network, venv)
+python3 tests/test_litellm.py              # the LiteLLM gateway with Docker (LITELLM_LIVE=0 to skip)
+python3 tests/test_links.py                # external links of the documentation (network)
 python3 scripts/build_manual.py            # after editing docs/manual/*.md
 git config core.hooksPath .githooks        # refuse commits with a stale docs/manual.html
 ```
 
 The `Validate` workflow runs these checks on every pull request, plus
-`actionlint` on the template's workflows and `build_manual.py --check`. For
+`actionlint` on the template's workflows and `build_manual.py --check`; it
+installs the Codex and OpenCode CLIs, check-jsonschema and Conan so that no
+test is skipped, and runs the hooks, the registry script and the profiles on
+macOS too. The tests that drive a tool skip when it is missing locally;
+the sessions use `tests/mockllm.py`, a scripted model, so they need no API key. For
 every release, bump `version` in `.claude-plugin/plugin.json` and add a
 `CHANGELOG.md` entry with its upgrade notes: projects stay on the version they
 installed until they upgrade.

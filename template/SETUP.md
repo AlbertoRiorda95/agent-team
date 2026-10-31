@@ -419,11 +419,14 @@ grep -q '^ready: yes' docs/design/project.md && echo "project design ready" || e
 # with the security role:
 echo '{"tool_input":{"command":"curl https://example.com"}}' | ./scripts/hooks/security-scope.sh; echo "exit $? (must be 2)"
 echo '{"tool_input":{"command":"curl http://localhost:3000/api"}}' | ./scripts/hooks/security-scope.sh; echo "exit $? (must be 0)"
+# with Claude Code: the role checks apply to the role's agent only (role-hooks.sh reads agent_type)
+echo '{"agent_type":"security","tool_name":"Bash","tool_input":{"command":"curl https://example.com"}}' | ./scripts/hooks/role-hooks.sh pre; echo "exit $? (must be 2)"
+echo '{"tool_name":"Bash","tool_input":{"command":"curl https://example.com"}}' | ./scripts/hooks/role-hooks.sh pre; echo "exit $? (must be 0: the lead session)"
 # Codex, if in the profile (with the codex CLI installed):
 codex execpolicy check --rules .codex/rules/agent-team.rules -- git push --force   # must match a forbidden rule
 python3 -c "import tomllib,glob; [tomllib.load(open(f,'rb')) for f in ['.codex/config.toml', *glob.glob('.codex/agents/*.toml')]]"
 # OpenCode, if in the profile (with the opencode CLI installed):
-opencode agent list   # the six roles (or those you kept) appear, with mode all
+opencode agent list   # the roles you kept appear, with mode all
 python3 scripts/agent-team.py prune --dry-run   # must say: Nothing to prune
 ```
 

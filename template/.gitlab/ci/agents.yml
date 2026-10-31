@@ -19,7 +19,7 @@ claude:
     CLAUDE_CODE_DISABLE_BACKGROUND_TASKS: "1"  # In CI everything runs in the foreground: background subagents or commands are lost when the run ends.
     CLAUDE_CODE_AUTO_COMPACT_WINDOW: "200000"  # compact at 200K tokens instead of near the 1M window
   before_script:
-    - apk update && apk add --no-cache git curl bash
+    - apk update && apk add --no-cache git curl bash jq
     - curl -fsSL https://claude.ai/install.sh | bash
     - export PATH="$HOME/.local/bin:$PATH"
   script:
@@ -33,6 +33,7 @@ claude:
       --permission-mode acceptEdits
       --allowedTools "Bash Read Edit Write mcp__gitlab"
       --max-turns 30
+      ${AI_FLOW_ROLE:+--agent "$AI_FLOW_ROLE"}
 
 # agent-team:end
 
@@ -54,7 +55,7 @@ claude-team:
     CLAUDE_CODE_DISABLE_BACKGROUND_TASKS: "1"  # In CI everything runs in the foreground: background subagents or commands are lost when the run ends.
     CLAUDE_CODE_AUTO_COMPACT_WINDOW: "200000"  # compact at 200K tokens instead of near the 1M window
   before_script:
-    - apk update && apk add --no-cache git curl bash
+    - apk update && apk add --no-cache git curl bash jq
     - curl -fsSL https://claude.ai/install.sh | bash
     - export PATH="$HOME/.local/bin:$PATH"
   script:
@@ -100,7 +101,7 @@ claude-split:
     GITLAB_TOKEN: $GITLAB_ACCESS_TOKEN
     GITLAB_HOST: $CI_SERVER_URL
   before_script:
-    - apk update && apk add --no-cache git curl bash python3 glab
+    - apk update && apk add --no-cache git curl bash jq python3 glab
     - curl -fsSL https://claude.ai/install.sh | bash
     - export PATH="$HOME/.local/bin:$PATH"
   script:
@@ -161,7 +162,7 @@ codex:
     GITLAB_TOKEN: $GITLAB_ACCESS_TOKEN
     GITLAB_HOST: $CI_SERVER_URL
   before_script:
-    - apk add --no-cache git bash glab
+    - apk add --no-cache git bash jq glab
     - npm install -g @openai/codex  # CUSTOMIZE: pin a version (@openai/codex@<version>)
     - printenv OPENAI_API_KEY | codex login --with-api-key
   script:
@@ -195,7 +196,7 @@ opencode:
     GITLAB_TOKEN: $GITLAB_ACCESS_TOKEN
     GITLAB_HOST: $CI_SERVER_URL
   before_script:
-    - apk add --no-cache git bash glab
+    - apk add --no-cache git bash jq glab
     - npm install -g opencode-ai  # CUSTOMIZE: pin a version (opencode-ai@<version>)
   script:
     - >

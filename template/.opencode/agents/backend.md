@@ -29,6 +29,11 @@ permission:
     "npm publish*": deny
     "twine upload*": deny
     "conan upload*": deny
+    "poetry publish*": deny
+    "uv publish*": deny
+    "pnpm publish*": deny
+    "yarn publish*": deny
+    "gh release create*": deny
     "git push --tags*": deny
 ---
 

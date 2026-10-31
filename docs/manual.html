@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="light dark">
-<meta name="manual-source" content="sha256:b773b9fedf0026f6f60495c7929e16927c15b58553d1b76137a0713c08f88a3f">
+<meta name="manual-source" content="sha256:906d2c65fd6395b03b2ddb03b4173d980d01e83a5c8b0201bfb24a20030d3536">
 <meta name="manual-builder" content="python-markdown 3.11.2">
 <title>Agent team: user manual</title>
 <style>
@@ -855,7 +855,7 @@ back (<a href="#c08">8. Change and upgrade</a>).</p>
 </tr>
 <tr>
 <td><code>scripts/hooks/</code></td>
-<td>hooks run by Claude Code and Codex at fixed moments: block commands on real environments, point a new session to the latest handoff note, refuse to end a task while the tests fail (the <strong>test gate</strong>)</td>
+<td>hooks run by Claude Code and Codex at fixed moments: block commands on real environments, point a new session to the latest handoff note, refuse to end a task while the tests fail (the <strong>test gate</strong>); with Claude Code, keep each role's agent within its limits (the writer writes only documentation, the security agent reaches only the hosts in its scope)</td>
 </tr>
 <tr>
 <td><code>.github/</code>, <code>.gitlab/</code></td>
@@ -1671,6 +1671,44 @@ it in your machine's local repository, where the other projects find it.</p>
 <pre><code class="language-bash">git tag v1.2.0
 ./ci/registry.sh local     # mvn install, gradle publishToMavenLocal, conan create, npm pack...
 </code></pre>
+<p>The other projects on the same machine use it like this:</p>
+<div class="table"><table>
+<thead>
+<tr>
+<th>Stack</th>
+<th>Where <code>local</code> puts it</th>
+<th>In the project that uses it</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>npm</td>
+<td><code>~/.local/share/packages/&lt;name&gt;-&lt;version&gt;.tgz</code></td>
+<td><code>npm install ~/.local/share/packages/team-lib-1.2.0.tgz</code></td>
+</tr>
+<tr>
+<td>PyPI</td>
+<td><code>~/.local/share/packages/</code> (wheel and sdist)</td>
+<td><code>pip install --find-links ~/.local/share/packages team-lib</code></td>
+</tr>
+<tr>
+<td>Maven</td>
+<td><code>~/.m2/repository</code></td>
+<td>the <code>&lt;dependency&gt;</code> in <code>pom.xml</code>: Maven reads <code>~/.m2</code> first</td>
+</tr>
+<tr>
+<td>Gradle</td>
+<td><code>~/.m2/repository</code></td>
+<td><code>repositories { mavenLocal() }</code> and the dependency</td>
+</tr>
+<tr>
+<td>Conan</td>
+<td>the local cache</td>
+<td><code>hello/1.2.0</code> in <code>[requires]</code>; <code>conan install . --no-remote</code> finds it</td>
+</tr>
+</tbody>
+</table></div>
+<p><code>LOCAL_REPOSITORY</code> in <code>ci/registry.env</code> changes the folder for npm and PyPI.</p>
 <p>With a team registry you can upload from your computer too, with your own
 token: <code>REGISTRY_PUBLISH_TOKEN=... ./ci/registry.sh publish</code>. The agents
 cannot do either: tags and publishing are blocked for them
@@ -1706,7 +1744,11 @@ reads <code>.codex/</code>. Approve the project hooks once with <code>/hooks</co
 <li>The roles are custom agents in <code>.codex/agents/*.toml</code>, each with its
   reasoning effort; at most three run at once.</li>
 <li>Forbidden commands are in <code>.codex/rules/agent-team.rules</code>, and the same
-  hook as Claude Code blocks commands on real environments.</li>
+  hook as Claude Code blocks commands on real environments. Codex runs the
+  project hooks only after you trust them: at the start it asks ("Hooks need
+  review"), again whenever a hook changes, and <code>/hooks</code> shows them. Without
+  that answer (<code>codex exec</code>, a refused review) no hook runs and only the rules
+  apply.</li>
 <li>Codex has no per-agent hooks: the test gate and the alignment reminder are
   rules in <code>AGENTS.md</code> that the main session follows, not checks.</li>
 <li>Pin the model in <code>.codex/config.toml</code> if you do not want Codex's default.</li>
@@ -1943,7 +1985,9 @@ them for you). The workflow <code>agents.yml</code> starts the agent of that rol
   and opens the pull request with Codex's summary as the description. Pull
   requests opened with the default token do not trigger other workflows: set
   <code>AGENT_PR_TOKEN</code> (a fine-grained token with contents and pull requests
-  write) so the CI checks them.</li>
+  write) so the CI checks them. In CI nobody approves Codex's hooks, so they
+  do not run: the forbidden commands of <code>.codex/rules/agent-team.rules</code>, the
+  missing network and the missing secrets are what limit it there.</li>
 <li><strong>OpenCode</strong>: its GitHub action runs the role agent and opens the pull request.</li>
 </ul>
 <p>Only issues opened by the owner, members, collaborators or the repository's
@@ -2324,7 +2368,7 @@ could not.
 <tbody>
 <tr>
 <td>Claude Code</td>
-<td><code>claude -p "&lt;task&gt;" --permission-mode acceptEdits --max-turns 40</code></td>
+<td><code>claude -p "&lt;task&gt;" --agent &lt;role&gt; --permission-mode acceptEdits --max-turns 40</code> (<code>--agent</code>: the role's tools and its hooks)</td>
 </tr>
 <tr>
 <td>Codex</td>
@@ -2878,8 +2922,8 @@ it has <code>--to-issues</code>.</p>
 </tr>
 <tr>
 <td>Hooks</td>
-<td><code>.claude/settings.json</code> → <code>scripts/hooks/</code></td>
-<td><code>.codex/hooks.json</code> → <code>scripts/hooks/</code></td>
+<td><code>.claude/settings.json</code> → <code>scripts/hooks/</code> (the roles' own: <code>role-hooks.sh</code>)</td>
+<td><code>.codex/hooks.json</code> → <code>scripts/hooks/</code>, once you trust them</td>
 <td>none</td>
 </tr>
 <tr>

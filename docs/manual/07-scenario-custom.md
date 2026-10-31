@@ -129,7 +129,7 @@ could not.
 
 | Tool | Command |
 |---|---|
-| Claude Code | `claude -p "<task>" --permission-mode acceptEdits --max-turns 40` |
+| Claude Code | `claude -p "<task>" --agent <role> --permission-mode acceptEdits --max-turns 40` (`--agent`: the role's tools and its hooks) |
 | Codex | `codex exec --sandbox workspace-write --output-last-message summary.md "<task>"` |
 | OpenCode | `opencode run --agent <role> --model <provider/model> "<task>"` |
 

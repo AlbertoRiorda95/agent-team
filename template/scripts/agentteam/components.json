@@ -242,6 +242,10 @@
    "harness_claude"
   ],
   [
+   "scripts/hooks/role-hooks.sh",
+   "harness_claude"
+  ],
+  [
    "scripts/hooks/*",
    "harness_claude or harness_codex"
   ],

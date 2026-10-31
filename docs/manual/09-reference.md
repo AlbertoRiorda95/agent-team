@@ -122,7 +122,7 @@ Environment variables `AGENT_TEAM_TRACKER`, `AGENT_TEAM_STARTER` and
 | Roles | `.claude/agents/*.md` | `.codex/agents/*.toml` | `.opencode/agents/*.md` |
 | Skills | `.claude/skills/` | `.agents/skills/` | `.claude/skills/` or `.agents/skills/` |
 | Forbidden commands | `.claude/settings.json` | `.codex/rules/agent-team.rules` | `permission` in `opencode.json` and agents |
-| Hooks | `.claude/settings.json` → `scripts/hooks/` | `.codex/hooks.json` → `scripts/hooks/` | none |
+| Hooks | `.claude/settings.json` → `scripts/hooks/` (the roles' own: `role-hooks.sh`) | `.codex/hooks.json` → `scripts/hooks/`, once you trust them | none |
 | Settings | `.claude/settings.json` | `.codex/config.toml` | `opencode.json` |
 
 ## What a run costs

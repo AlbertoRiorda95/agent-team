@@ -35,7 +35,8 @@ class Issue:
 
     def __init__(self, ref, id, title, body="", open=True, done=False, labels=None,
                  milestone=None, parent=None, url="", author=None, extra=None):
-        self.ref, self.id, self.title, self.body = str(ref), id, title or "", body or ""
+        # Redmine, and GitHub after an edit on the web, store \r\n: the parsers expect \n
+        self.ref, self.id, self.title, self.body = str(ref), id, title or "", (body or "").replace("\r\n", "\n")
         self.open, self.done = open, done
         self.labels = list(labels or [])
         self.milestone, self.parent, self.url, self.author = milestone, parent, url, author

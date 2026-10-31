@@ -85,23 +85,29 @@ case "$kind" in
     [ "$action" = publish ] && npm publish --registry "$REGISTRY_URL"
     ;;
   pypi)
-    url=${REGISTRY_URL#*://}
     if [ "$action" = login ]; then
-      python3 -m pip config --user set global.extra-index-url "https://$USER_:$TOKEN@$url" >/dev/null
+      # the index URL with the credentials in it, percent-encoded, keeping its scheme
+      url=$(U=$USER_ T=$TOKEN python3 -c 'import os, sys, urllib.parse as u
+s, rest = sys.argv[1].split("://", 1)
+print(f"{s}://{u.quote(os.environ['"'"'U'"'"'], safe="")}:{u.quote(os.environ['"'"'T'"'"'], safe="")}@{rest}")' "$REGISTRY_URL")
+      python3 -m pip config --user set global.extra-index-url "$url" >/dev/null
     else
       venv=$(mktemp -d)
       python3 -m venv "$venv"
       "$venv/bin/pip" install --quiet build twine
-      "$venv/bin/python" -m build
+      out=$(mktemp -d)      # only this build: never old files left in dist/
+      "$venv/bin/python" -m build --outdir "$out"
       TWINE_USERNAME=$USER_ TWINE_PASSWORD=$TOKEN \
-        "$venv/bin/python" -m twine upload --repository-url "${REGISTRY_UPLOAD_URL:-$REGISTRY_URL}" dist/*
+        "$venv/bin/python" -m twine upload --repository-url "${REGISTRY_UPLOAD_URL:-$REGISTRY_URL}" "$out"/*
     fi
     ;;
   maven)
     # user-level settings.xml, outside the repository; pom.xml names the same <id>.
-    # One of yours is never overwritten: add the server to it, with the token from the environment.
+    # On a CI runner (CI=true) it replaces the one actions/setup-java writes; on your
+    # computer one of yours is never overwritten: add the server to it, with the
+    # token from the environment.
     f=~/.m2/settings.xml
-    if [ -f "$f" ] && ! grep -q 'written by ci/registry.sh' "$f"; then
+    if [ -f "$f" ] && [ "${CI:-}" != true ] && ! grep -q 'written by ci/registry.sh' "$f"; then
       echo "registry: $f is yours: add <server><id>$ID</id><username>$USER_</username><password>\${env.REGISTRY_TOKEN}</password></server> to it" >&2
       exit 1
     fi
@@ -114,12 +120,15 @@ case "$kind" in
   gradle)
     # the repository named $ID in build.gradle uses credentials(PasswordCredentials):
     # Gradle reads ${ID}Username and ${ID}Password from the user's gradle.properties
-    f=~/.gradle/gradle.properties
-    mkdir -p ~/.gradle; touch "$f"
+    d=${GRADLE_USER_HOME:-$HOME/.gradle}; f=$d/gradle.properties
+    mkdir -p "$d"; touch "$f"
     grep -v -e "^${ID}Username=" -e "^${ID}Password=" "$f" > "$f.new" || true
     printf '%sUsername=%s\n%sPassword=%s\n' "$ID" "$USER_" "$ID" "$TOKEN" >> "$f.new"
     mv "$f.new" "$f"
-    [ "$action" = publish ] && gradle_ publish
+    # publish: also as project properties from the environment, whatever home Gradle uses
+    if [ "$action" = publish ]; then
+      ( export "ORG_GRADLE_PROJECT_${ID}Username=$USER_" "ORG_GRADLE_PROJECT_${ID}Password=$TOKEN"; gradle_ publish )
+    fi
     ;;
   conan)
     # credentials stay in Conan's home (CONAN_HOME, ~/.conan2 by default)

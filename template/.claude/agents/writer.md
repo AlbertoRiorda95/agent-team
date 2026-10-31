@@ -9,12 +9,6 @@ model: sonnet
 effort: medium
 color: cyan
 memory: project
-hooks:
-  PreToolUse:
-    - matcher: "Write|Edit"
-      hooks:
-        - type: command
-          command: "./scripts/hooks/writer-writes.sh"
 ---
 
 Your full role instructions are in `docs/roles/writer.md`.
