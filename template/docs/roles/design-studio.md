@@ -62,9 +62,9 @@ For all the features of a roadmap milestone in one session:
    a page, a module's interface): one line each on what the test there
    catches and what it misses. Prefer few, high seams. Agents in CI test
    there without asking.
-6. **Breakdown.** The implementation tasks: role, what, depends on, and
-   whether they can run as one team task. A breaking contract change is
-   planned as expand-contract (see `AGENTS.md` > API contract).
+6. **Breakdown.** The implementation tasks: role, what, depends on. A
+   breaking contract change is planned as expand-contract (see `AGENTS.md`
+   > API contract).
 7. **Readiness.** Walk the checklist with the user; resolve or record every
    open question.
 

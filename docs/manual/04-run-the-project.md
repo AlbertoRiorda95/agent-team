@@ -299,10 +299,7 @@ A task that is still too big for one merge request is split afterwards
 
 `create-issues` shows the plan first and creates only on your yes. It adds no
 labels, so nothing starts on its own. Running it again creates only what is
-missing, so run it after every design session. With `--team`, a spec whose
-breakdown ends with "Team task possible: yes (roles: ...)", a line the
-designer writes for small, tightly coupled features, becomes one
-[team task](#team-tasks) instead of one issue per task.
+missing, so run it after every design session.
 
 ### When a spec changes after its issues exist
 
@@ -568,19 +565,6 @@ label.
 
 Breaking contract changes are planned as expand-contract: add the new form,
 move the callers, remove the old form last, with `main` green at every step.
-
-## Team tasks
-
-A small, tightly coupled feature can be one task for several roles: one
-issue, one branch, one merge request. A coordinator, a Claude Code agent
-started for the issue, runs the roles in order, each one committing before
-the next starts. Use it when separate merge requests would only wait on each
-other; prefer separate tasks otherwise. Team tasks are a CI feature: they
-need the `team-tasks` profile feature and Claude Code, and start with the
-`agent:team` label on GitHub or `AI_FLOW_ROLES` on GitLab
-([6. Scenario: remote](06-scenario-remote.md#team-tasks)). Locally the main
-session already works this way: ask it to implement the tasks in order on
-one branch.
 
 ## On-demand roles
 

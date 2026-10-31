@@ -59,18 +59,12 @@ class GitLabPipeline(Starter):
     name = "gitlab-pipeline"
 
     def start(self, issue, role):
-        import re
         self.mark(issue, role)
         variables = {"TASK_ID": issue.number,
                      "AI_FLOW_INPUT": f"You are the {role} agent. Carry out issue {issue.id} ({issue.title}): "
                                       f"read it with glab issue view {issue.number} and follow "
-                                      f"docs/roles/{role}.md and AGENTS.md."}
-        if role == "team":
-            m = re.search(r"^Roles:\s*(.+)$", issue.body, re.M)
-            variables["AI_FLOW_ROLES"] = m.group(1).strip() if m else ""
-        else:
-            variables["AI_FLOW_ROLE"] = role
-            variables["AI_FLOW_HARNESS"] = self.harness(role)
+                                      f"docs/roles/{role}.md and AGENTS.md.",
+                     "AI_FLOW_ROLE": role, "AI_FLOW_HARNESS": self.harness(role)}
         self.tracker.run_pipeline(variables)
         return "pipeline started"
 

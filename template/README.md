@@ -100,7 +100,7 @@ role back): edit the profile and run the template upgrade
 removes the template files it no longer includes if you never changed them,
 and merges sections back into your files, keeping your edits.
 
-- **Local:** the tool(s) you use, no tracker or `local`, the project CI. For Claude Code agent teams, `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` to `1` in `.claude/settings.json`.
+- **Local:** the tool(s) you use, no tracker or `local`, the project CI.
 - **Remote repository:** Claude Code: install the app with `/install-github-app`, add `ANTHROPIC_API_KEY` (or `CLAUDE_CODE_OAUTH_TOKEN`, switching the workflows to `claude_code_oauth_token`). Codex: `OPENAI_API_KEY` and, to have its PRs checked by CI, `AGENT_PR_TOKEN`. OpenCode: the provider secrets and `OPENCODE_MODEL`. With several tools, the `AGENT_RUNNERS` repository variable (for example `{"agent:frontend":"opencode","agent:optimizer":"codex"}`). Then `./scripts/create-labels.sh` and branch protection.
 - **Custom orchestrator:** the tracker of its intake and a `start_command` (`docs/general/trackers.md`); `infra/litellm/` next to it if it routes models through LiteLLM.
 
@@ -112,7 +112,7 @@ and merges sections back into your files, keeping your edits.
 - Issues from the roadmap (remote and custom scenarios): `python3 scripts/create-issues.py --dry-run`, then without `--dry-run`, creates one native milestone per roadmap milestone (M0, M1, … on GitHub and GitLab) and, in it, the task issues of every ready spec and a "Design: <feature>" issue for every feature without a spec. No labels: start a task by adding `agent:<role>` to it. It skips existing titles and milestones, so run it again after every design studio session. Repositories set up with the old layout (one "M0 · …" parent issue with the tasks as sub-issues) move to milestones with `--migrate`. Needs the remote and an authenticated `gh` or `glab`, or another tracker (`docs/general/trackers.md`).
 <!-- agent-team:end -->
 <!-- agent-team:if split and harness_claude -->
-- Splitting an issue (remote scenario): add `agent:split` to an issue (GitLab: run the pipeline with `SPLIT_ISSUE`). Claude proposes one task issue per role in a comment and creates nothing; reply `@claude ok` (GitLab: `SPLIT_CONFIRM=ok`) and `scripts/split-issue.py` creates exactly that plan as sub-issues in the parent's milestone, without labels. `@claude <changes>` asks for a new proposal, `@claude ok team` creates one `agent:team` issue instead. See AGENTS.md > Splitting issues.
+- Splitting an issue (remote scenario): add `agent:split` to an issue (GitLab: run the pipeline with `SPLIT_ISSUE`). Claude proposes one task issue per role in a comment and creates nothing; reply `@claude ok` (GitLab: `SPLIT_CONFIRM=ok`) and `scripts/split-issue.py` creates exactly that plan as sub-issues in the parent's milestone, without labels. `@claude <changes>` asks for a new proposal. See AGENTS.md > Splitting issues.
 <!-- agent-team:end -->
 <!-- agent-team:if issues -->
 - Issue trackers: the issue scripts work with GitHub, GitLab, local Markdown files (`docs/tasks/`), Jira, Linear and Redmine through one interface (`scripts/agentteam/`). How a task starts (the *starter*) is separate: a label, a GitLab pipeline, a command of yours such as an orchestrator, or a printed instruction. Configure both in `.agent-team/config.json` and check with `python3 scripts/tracker.py check`. See `docs/general/trackers.md`.
@@ -125,9 +125,6 @@ and merges sections back into your files, keeping your edits.
 <!-- agent-team:end -->
 - Foundations: in a new repository SETUP.md also writes `docs/design/foundations.md`, the spec of a walking skeleton (structure, contract served, database, tests, green CI). Implement it as the first task, before any feature.
 - Design first: SETUP.md does not finish until `docs/design/project.md` exists and is ready. New features start with `/design-studio <feature>` (Claude Code or OpenCode, locally or in a Claude Code cloud session); implementation tasks then point to a spec marked `ready: yes`, and the issue template has a field for it.
-<!-- agent-team:if team_tasks -->
-- Team tasks: to have several roles work on one issue, on one branch, with one PR, use the `agent:team` label and a `Roles: backend, frontend` line in the issue (GitLab: the `claude-team` job with `AI_FLOW_ROLES`). Good for small, tightly coupled features; see AGENTS.md > Team tasks.
-<!-- agent-team:end -->
 - Alignment: when an agent changes something other roles rely on (API contract, data model, shared components, routes, env vars), it writes an entry in `docs/alignment/` and flags the MR. Locally the lead then runs designer and the affected roles automatically; in CI the MR gets the `alignment-needed` label and you create the follow-up tasks.
 - On GitHub, enable branch protection on `main` with "Require branches to be up to date before merging": a PR built on an old contract then fails before the merge, not after. The Claude action does not rebase; use the "Update branch" button.
 <!-- agent-team:if ci_github -->

@@ -320,10 +320,13 @@ class Codex(unittest.TestCase):
 
     def test_rules_block_in_a_session(self):
         cmd = lambda c: {"tool": "exec_command", "input": {"cmd": c}}   # noqa: E731
-        s = self.session(cmd("npm publish"), cmd("git push --tags"), cmd("terraform apply"), cmd("echo allowed"))
-        for r in s.results[:3]:
-            self.assertIn("rejected", r)
-        self.assertIn("allowed", s.results[3])
+        blocked = ["npm publish", "git push --tags", "terraform apply", "./gradlew publish", "cd lib && mvn -B deploy",
+                   "pip config list"]
+        s = self.session(*map(cmd, blocked + ["echo allowed"]))
+        for c, r in zip(blocked, s.results):
+            with self.subTest(cmd=c):
+                self.assertIn("rejected", r)
+        self.assertIn("allowed", s.results[len(blocked)])
         self.assertEqual(s.ran(), [])
 
 

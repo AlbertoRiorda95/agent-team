@@ -142,10 +142,6 @@ Start `claude` in the repository. The roles are subagents in `.claude/agents/`:
   when saved.
 - Denied commands (`git push --force`, push to `main`, merge, `terraform
   apply`...) are in `.claude/settings.json`.
-- **Agent teams** (experimental in Claude Code): several agents work in
-  parallel and message each other. Turn them on with
-  `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` set to `"1"` in `.claude/settings.json`.
-  Good for a feature where frontend and backend must agree as they go.
 
 ## With Codex
 
@@ -164,7 +160,10 @@ reads `.codex/`. Approve the project hooks once with `/hooks`.
   project hooks only after you trust them: at the start it asks ("Hooks need
   review"), again whenever a hook changes, and `/hooks` shows them. Without
   that answer (`codex exec`, a refused review) no hook runs and only the rules
-  apply.
+  apply. They block the same commands as the hook, written in the usual way
+  (`npm publish`, `./gradlew publish`, `git push --tags`); an option with a
+  value before the verb (`npm --registry x publish`) and reading a credential
+  file (`cat ~/.npmrc`) only the hook catches.
 - Codex has no per-agent hooks: the test gate and the alignment reminder are
   rules in `AGENTS.md` that the main session follows, not checks.
 - Pin the model in `.codex/config.toml` if you do not want Codex's default.

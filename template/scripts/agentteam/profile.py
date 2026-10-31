@@ -8,11 +8,11 @@ means "everything", which is how the full template looks):
   "ci": "github",                     github | gitlab | both | none
   "tracker": "github",                see config.py; "none" for no issue tracker
   "roles": ["designer", "frontend", "backend", "devops", "optimizer", "security", "writer"],
-  "features": ["ci-agents", "team-tasks", "split", "dispatch", "spec-sync", "litellm"]
+  "features": ["ci-agents", "split", "dispatch", "spec-sync", "litellm"]
 
 scripts/agentteam/components.json maps template paths to expressions over tags
 (harness_codex, lead_claude, ci_github, tracker_jira, issues, role_security,
-team_tasks, ...). A file is installed when its expression is true. Inside a
+split, ...). A file is installed when its expression is true. Inside a
 file, a block between a comment line "agent-team:if <expr>" (after #, <!-- or
 //) and a comment line "agent-team:end" is kept only when <expr> is true. JSON files can
 drop keys (components.json "json_keys"). __AGENT_TEAM_LEAD__ becomes the
@@ -33,8 +33,8 @@ HARNESSES = ("claude", "opencode", "codex")
 CIS = ("github", "gitlab")
 TRACKERS = ("github", "gitlab", "local", "jira", "linear", "redmine")
 ROLES = ("designer", "frontend", "backend", "devops", "optimizer", "security", "writer")
-FEATURES = ("ci-agents", "team-tasks", "split", "dispatch", "spec-sync", "litellm")
-RETIRED = {"guide"}   # features of older templates: accepted and ignored
+FEATURES = ("ci-agents", "split", "dispatch", "spec-sync", "litellm")
+RETIRED = {"guide", "team-tasks"}   # features of older templates: accepted and ignored
 LEAD = "__AGENT_TEAM_LEAD__"
 BEGIN = re.compile(r"^\s*(?:#|<!--|//)\s*agent-team:if\s+(.+?)\s*(?:-->)?\s*$")
 END = re.compile(r"^\s*(?:#|<!--|//)\s*agent-team:end\b")

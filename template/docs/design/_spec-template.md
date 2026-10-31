@@ -64,7 +64,6 @@ Breaking for existing clients: no
 |---|---|---|---|---|
 | 1 | backend | ... | — | - |
 | 2 | frontend | ... | 1 | - |
-Team task possible: yes / no (roles: ...)
 
 ## Readiness checklist
 - [ ] goal, users and out of scope agreed

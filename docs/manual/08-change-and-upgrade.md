@@ -29,7 +29,7 @@ template for the new profile and shows a plan:
 | `out-of-profile` | a file the profile no longer includes, changed by you: kept, you decide |
 | `removed-by-you` | a file you deleted: not added back |
 
-Sections follow the same rule: drop team tasks and their section leaves
+Sections follow the same rule: drop `split` and its section leaves
 `AGENTS.md`; add Codex back and its lines return, merged with your edits.
 Conflicts, if any, are left marked and resolved with you. The upgrade works
 on a branch and ends with a commit for you to review.

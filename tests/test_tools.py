@@ -195,13 +195,18 @@ class CodexRules(unittest.TestCase):
         self.assertEqual(r.returncode, 0, r.stderr)
         return json.loads(r.stdout).get("decision")
 
+    # rules match the start of a command: these forms, and reading a credential file, only the hook catches
+    HOOK_ONLY = {"terraform -chdir=infra apply", "kubectl -n prod apply -f x.yaml", "docker --context x push r/app",
+                 "npm --registry https://r publish", "git push origin v1.2.0", "git push origin HEAD:refs/tags/v1",
+                 "echo ok && npm publish"}
+
     def test_rules(self):
-        for c in ["git push --force", "git push origin main", "gh pr merge 3", "terraform apply", "npm publish",
-                  "twine upload dist/*", "poetry publish", "uv publish", "conan upload hello/1.0 -r team",
-                  "dotnet nuget push a.nupkg", "gh release create v1.0.0", "git push --tags", "docker push r/app:1"]:
+        """Everything the hook blocks, except HOOK_ONLY, and what .claude/settings.json denies."""
+        for c in [x for x in FORBIDDEN if x not in self.HOOK_ONLY] + [x for x in SECRET_READS if " config " in x] + [
+                "git push --force", "git push origin main", "gh pr merge 3", "glab mr merge 3"]:
             with self.subTest(forbidden=c):
                 self.assertEqual(self.decide(c), "forbidden")
-        for c in ["npm ci", "npm test", "git status", "conan create .", "uv sync", "gh release view"]:
+        for c in ALLOWED + ["./gradlew publishToMavenLocal", "git push origin feat/tag-list"]:
             with self.subTest(allowed=c):
                 self.assertNotEqual(self.decide(c), "forbidden")
 
@@ -285,7 +290,7 @@ class GitLabPipeline(unittest.TestCase):
     def setUpClass(cls):
         cls.tmp = tempfile.mkdtemp()
         profile.render_tree(TEMPLATE, cls.tmp, {"ci": "gitlab", "tracker": "gitlab",
-                                                "features": ["ci-agents", "split", "spec-sync", "team-tasks"]})
+                                                "features": ["ci-agents", "split", "spec-sync"]})
         def load(rel):
             with open(os.path.join(cls.tmp, rel)) as f:
                 return YAML.safe_load(f) or {}

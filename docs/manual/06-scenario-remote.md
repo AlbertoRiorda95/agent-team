@@ -27,7 +27,7 @@ while you are away, or when several people review the team's work.
 
 ```json
 {"harnesses": ["claude"], "ci": "github", "tracker": "github",
- "features": ["ci-agents", "split", "team-tasks", "dispatch"]}
+ "features": ["ci-agents", "split", "dispatch"]}
 ```
 
 With several tools, list them and assign roles to the others:
@@ -54,7 +54,7 @@ workflows cannot read this file, so on GitHub the same routing goes in the
    each, comment out the `anthropic_api_key:` line and uncomment the
    `claude_code_oauth_token:` line next to it.
 2. **Labels**: `./scripts/create-labels.sh` creates `agent:<role>` for your
-   roles, `agent:team`, `agent:split`, `hold`, `alignment-needed`, `ai-review`.
+   roles, `agent:split`, `hold`, `alignment-needed`, `ai-review`.
 3. **Branch protection** on `main`: pull requests only, the CI checks
    required, "Require branches to be up to date before merging".
 4. **Routing**, with more than one tool: the `AGENT_RUNNERS` repository
@@ -78,8 +78,9 @@ them for you). The workflow `agents.yml` starts the agent of that role:
   requests opened with the default token do not trigger other workflows: set
   `AGENT_PR_TOKEN` (a fine-grained token with contents and pull requests
   write) so the CI checks them. In CI nobody approves Codex's hooks, so they
-  do not run: the forbidden commands of `.codex/rules/agent-team.rules`, the
-  missing network and the missing secrets are what limit it there.
+  do not run: the forbidden commands of `.codex/rules/agent-team.rules` (the
+  same as the hook's, in their usual form), the missing network and the
+  missing secrets are what limit it there.
 - **OpenCode**: its GitHub action runs the role agent and opens the pull request.
 
 Only issues opened by the owner, members, collaborators or the repository's
@@ -119,16 +120,9 @@ proposed split as a comment; nothing is created. Then reply on the issue:
 | Reply | Result |
 |---|---|
 | `@claude ok` | the proposed issues are created as sub-issues, without labels |
-| `@claude ok team` | one team issue instead, when the proposal suggests it |
 | `@claude <your changes>` | a new proposal |
 
 A script creates exactly the plan you approved; the model creates nothing.
-
-### Team tasks
-
-Add `agent:team` to an issue with a line `Roles: backend, frontend`. A
-coordinator runs the listed roles in order on one branch and opens one pull
-request with a section per role. Needs Claude Code.
 
 ### Ask and review
 
@@ -140,7 +134,7 @@ request with a section per role. Needs Claude Code.
   the project's rules (inline comments), one against the issue and the spec.
   They never approve or block. Remove and re-add the label to review again.
 
-Mentions, reviews, splits and team tasks use Claude Code. With only Codex or
+Mentions, reviews and splits use Claude Code. With only Codex or
 OpenCode, split locally with `/agent-team:split-issue` and review in your tool.
 
 ## GitLab
@@ -173,7 +167,6 @@ pipeline with variables, never on pushes:
 | `TASK_ID` | the issue number: jobs for the same task queue instead of running together |
 | `AI_FLOW_ROLE` | the role (needed by Codex and OpenCode) |
 | `AI_FLOW_HARNESS` | `claude`, `codex` or `opencode`; default: the first tool of the profile |
-| `AI_FLOW_ROLES` | a team task: the roles in order, for example `backend, frontend` |
 | `SPLIT_ISSUE`, `SPLIT_CONFIRM`, `SPLIT_FEEDBACK` | the split (below) |
 
 Run them from Build → Pipelines → Run pipeline, or let dispatch do it: on
@@ -188,7 +181,7 @@ GitLab its starter adds the label and runs the pipeline with these variables.
 - **Split from the issue**, in three runs: first `SPLIT_ISSUE=<n>` alone, and
   Claude posts the proposal as a note on the issue; then, to change it,
   `SPLIT_ISSUE=<n>` with `SPLIT_FEEDBACK` saying what to change, which posts a
-  new proposal; finally `SPLIT_ISSUE=<n>` with `SPLIT_CONFIRM=ok` (or `team`),
+  new proposal; finally `SPLIT_ISSUE=<n>` with `SPLIT_CONFIRM=ok`,
   which creates the issues.
 - **Not on GitLab**: dispatch at every merge (run `/agent-team:dispatch`
   yourself after merging) and the `ai-review` reviews.
@@ -288,8 +281,7 @@ changes on a branch:
 
 ## Costs and safety
 
-- Each task is one agent run; a team task is several, and each `@claude`
-  mention one more. The CI minutes are those of your plan. What a run costs:
+- Each task is one agent run, and each `@claude` mention one more. The CI minutes are those of your plan. What a run costs:
   [9. What a run costs](09-reference.md#what-a-run-costs).
 - Agents in CI use `--max-turns` limits, compact at 200,000 tokens and never
   run in the background, so a run ends with a merge request or a comment

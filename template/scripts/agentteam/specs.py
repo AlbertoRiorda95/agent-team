@@ -1,7 +1,7 @@
 """Roadmap and specs in docs/design/ -> the milestones and task issues to create.
 
 Every planned issue carries a stable key ("key: docs/design/x.md#3", or
-"design:M1:login", or "docs/design/x.md#team") in a marker, so it is found again
+"design:M1:login") in a marker, so it is found again
 even if its title changes (for example when rows are added to the breakdown).
 
 Task issues also carry "spec-row: <hash>" of the row(s) they come from. When a
@@ -101,12 +101,10 @@ def load_spec(path, text=None):
     title = re.sub(r"\s+[—-]\s+.*$", "", title.group(1)).strip() if title else os.path.basename(path)
     block = md_section(text, "Task breakdown")
     rows = [r for r in table(block) if len(r) >= 3 and r[0].strip().isdigit() and r[2] not in ("", "...")]
-    team = re.search(r"Team task possible:\s*yes\b.*?roles?:\s*([^)]+)\)", block, re.I | re.S)
     return {"path": path, "title": title, "rows": rows,
             "slug": slug(os.path.splitext(os.path.basename(path))[0]),
             "milestone": meta.get("milestone", ""), "features": items(meta.get("features", "")),
-            "needs": {s for r in rows if len(r) > 3 for s, _ in OTHER_ROW.findall(r[3])},
-            "team_roles": [x for x in items(team.group(1).replace("\n", " ")) if x.lower() in core.ROLES] if team else None}
+            "needs": {s for r in rows if len(r) > 3 for s, _ in OTHER_ROW.findall(r[3])}}
 
 
 def load_roadmap():
@@ -154,7 +152,7 @@ def task_now(path, text, key, trk):
     spec = load_spec(path, text)
     if spec is None:
         return None, set()
-    tasks = task_issues(spec, key.endswith("#team"), trk)
+    tasks = task_issues(spec, trk)
     done = {t["key"] for t in tasks if t["ref"] == "done"}
     return next((t for t in tasks if t["key"] == key and t["ref"] is None), None), done
 
@@ -163,7 +161,7 @@ def _task(key, title, body, deps=(), ref=None, legacy=None):
     return {"key": key, "title": title, "body": body, "deps": list(deps), "ref": ref, "legacy": legacy}
 
 
-def task_issues(spec, team, trk):
+def task_issues(spec, trk):
     out = []
     mark = trk.marker(core.MARK_CREATED)
     for r in spec["rows"]:
@@ -172,17 +170,6 @@ def task_issues(spec, team, trk):
             out.append(_task(f"{spec['path']}#{r[0].strip()}", None, None, ref=ref))
     rows = [r for r in spec["rows"] if tracked(r) is None]
     if not rows:
-        return out
-    if team and spec["team_roles"]:
-        key = f"{spec['path']}#team"
-        lines = "\n".join(f"| {r[0]} | {r[1]} | {r[2]} | {r[3] if len(r) > 3 else '-'} |" for r in rows)
-        nums = ", ".join(r[0] for r in rows)
-        out.append(_task(key, f"{spec['title']} · team task (tasks {nums})",
-                         f"## Spec\n{spec['path']} - section: Task breakdown, rows {nums}\n\n"
-                         f"## Task\nImplement these tasks of the breakdown on one branch, one PR:\n\n"
-                         f"| # | Role | Task | Depends on |\n|---|---|---|---|\n{lines}\n\n"
-                         f"Roles: {', '.join(spec['team_roles'])}\n\n{start_line(trk, 'team')}\n\n"
-                         f"{mark}\n{trk.marker('key: ' + key)}\n{trk.marker('spec-row: ' + row_hash(rows))}"))
         return out
     total = len(spec["rows"])
     for r in rows:
@@ -232,7 +219,7 @@ def adopting(spec, tasks, designs, milestone, mark, trk):
     return [feature] + tasks
 
 
-def build_plan(team, trk):
+def build_plan(trk):
     """[(milestone or None, [task])]; milestone = (code, title, description)."""
     specs = [s for s in (load_spec(p) for p in sorted(glob.glob(os.path.join(DESIGN, "*.md")))
                          if not os.path.basename(p).startswith("_")
@@ -252,7 +239,7 @@ def build_plan(team, trk):
                     used.add(spec["path"])
                     designs = [(f"design:{milestone}:{slug(f)}", [f"Design: {f} ({milestone})", f"Design: {d} ({milestone})"])
                                for f, d in entries if found[f] is spec]
-                    children += adopting(spec, task_issues(spec, team, trk), designs, milestone, mark, trk)
+                    children += adopting(spec, task_issues(spec, trk), designs, milestone, mark, trk)
                 continue
             key = f"design:{milestone}:{slug(feat)}"
             children.append(_task(key, f"Design: {feat} ({milestone})",
@@ -268,5 +255,5 @@ def build_plan(team, trk):
         groups.append((ms, children))
     for s in specs:
         if s["path"] not in used:
-            groups.append((None, task_issues(s, team, trk)))
+            groups.append((None, task_issues(s, trk)))
     return groups

@@ -164,8 +164,6 @@ def role_of(issue):
     m = re.search(r"\(the ([a-z]+) task\)", body)
     if m:
         return m.group(1)
-    if re.search(r"(?:`|\{\{)claude-team(?:`|\}\}) job", body):
-        return "team"
     m = re.search(r"^Role:\s*([a-z]+)\s*$", body, re.M)
     if m:
         return m.group(1)

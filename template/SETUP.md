@@ -257,9 +257,7 @@ How will the team work? Explain the three scenarios in a few lines and ask:
 For the remote scenario also ask: Claude Code with an API key or a
 subscription token (`ANTHROPIC_API_KEY` or `CLAUDE_CODE_OAUTH_TOKEN`), Codex
 (`OPENAI_API_KEY`), OpenCode (which providers and models: the exact model IDs
-as the provider documents them, or LiteLLM)? And whether they want team tasks
-in CI (one issue, several roles in sequence on one branch, one MR:
-`AGENTS.md` > Team tasks).
+as the provider documents them, or LiteLLM)?
 
 For the remote and custom scenarios also ask where the issues live. GitHub or
 GitLab need nothing more. For local files, Jira, Linear or Redmine read
@@ -287,7 +285,7 @@ lost: a later profile change plus the template upgrade brings it back.
 - **Roles**: the seven by default; drop those the project does not need
   (designer without a UI, security with nothing to attack yet).
 - **Features**: `ci-agents` (agents started from issues in CI: the remote
-  scenario), `team-tasks`, `split` (split proposals in CI, with Claude Code),
+  scenario), `split` (split proposals in CI, with Claude Code),
   `dispatch` (start ready tasks at every merge), `spec-sync` (update the
   issues when a spec change reaches the main branch: a CI job on GitHub or
   GitLab, a Git hook locally), `litellm` (the gateway in `infra/litellm/`).
@@ -371,7 +369,6 @@ skill adds its description to every session.
 | Publishing | `ci/registry.env` (`REGISTRY_KIND`, `PUBLISH_PACKAGE`, the `custom` commands); the toolchain and commands of `.github/workflows/publish.yml` and of the `publish` job in `.gitlab/ci/ci.yml`; `REGISTRY_PUBLISH_TOKEN` in the `release` environment and the protected `v*` tags; for `custom`, the publish command in the blocked lists and its credential file in the `Read(...)` denials |
 | Security scope and tools | `docs/roles/security-scope.txt` (one host per line, never production); the dependency-audit command in `docs/roles/security.md` → `## What you check` item 6 |
 | Scenario | see "Profiles by scenario" below |
-| Team tasks in CI | keep the `team` job in `.github/workflows/agents.yml` and `agent:team` in `scripts/create-labels.sh`, or the `claude-team` job in `.gitlab-ci.yml.example`; if not wanted, remove them and the `## Team tasks` section of `AGENTS.md` and `docs/agents/team-tasks.md` |
 | Automatic start of ready tasks | optional: keep `.github/workflows/dispatch.yml` and `scripts/dispatch.py`; to turn it on set the `AGENT_AUTODISPATCH` variable and the `AGENT_DISPATCH_TOKEN` secret (see the workflow header); otherwise remove the workflow and start tasks by hand or with `python3 scripts/dispatch.py` |
 | Issue tracker, starter | `.agent-team/config.json` (`tracker`, `starter`, `start_command`, the tracker's section; see `docs/general/trackers.md`); nothing for GitHub and GitLab, which are detected. With another tracker and no GitHub/GitLab agents, remove `.github/workflows/split.yml`, `dispatch.yml` and the split jobs of `.gitlab/ci/agents.yml` |
 | Issue split in CI | keep `.github/workflows/split.yml`, `scripts/split-issue.py` and `agent:split` in `scripts/create-labels.sh`, or the `claude-split` and `split-create` jobs in `.gitlab/ci/agents.yml` (they need the `GITLAB_ACCESS_TOKEN` variable); if not wanted, remove them and the `## Splitting issues` section of `AGENTS.md` and `docs/agents/splitting.md` |
@@ -394,8 +391,8 @@ then removes the files, so there is nothing to delete by hand.
 
 | Scenario | Profile |
 |---|---|
-| Local | the tool(s) used locally; `ci` of the project CI; `tracker` `none` or `local`; `spec-sync` with a tracker if wanted (then link `scripts/git-hooks/spec-sync.sh` as the `post-merge` and `post-commit` hooks, after checking `.git/hooks/` has none of the user's). For Claude Code agent teams, set `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` to `"1"` in `.claude/settings.json` |
-| Remote repository | one or more tools (the first leads, `runners` for the others); `ci` and `tracker` the same platform; `ci-agents` plus `split`, `team-tasks`, `dispatch`, `spec-sync` as wanted; `litellm` for OpenCode through a gateway |
+| Local | the tool(s) used locally; `ci` of the project CI; `tracker` `none` or `local`; `spec-sync` with a tracker if wanted (then link `scripts/git-hooks/spec-sync.sh` as the `post-merge` and `post-commit` hooks, after checking `.git/hooks/` has none of the user's). |
+| Remote repository | one or more tools (the first leads, `runners` for the others); `ci` and `tracker` the same platform; `ci-agents` plus `split`, `dispatch`, `spec-sync` as wanted; `litellm` for OpenCode through a gateway |
 | Custom orchestrator | the tools the orchestrator runs; the tracker of its intake; `starter: command` with `start_command` (`docs/general/trackers.md`); the orchestrator runs `scripts/create-issues.py` after merging a change to `docs/design/`; `litellm` if it routes models through the gateway |
 
 After pruning, by hand: on GitLab rename `.gitlab-ci.yml.example` to
@@ -541,13 +538,10 @@ the interview and `docs/design/project.md`.
      them to put the foundations tasks in that milestone instead of
      creating "Design:" issues for the same work;
    - Task breakdown: backend, then frontend, then devops (CI and compose).
-     Mark "Team task possible: yes": the pieces are small and tightly
-     coupled. The user may prefer three separate tasks instead.
 2. Ask only what is still open (at most one round), then set `ready: yes`
    when the user confirms.
 3. Commit the spec on its own. Do not write the skeleton code here: it is
-   the first implementation task, run locally or as an `agent:team` issue
-   (GitLab: `AI_FLOW_ROLES`).
+   the first implementation task.
 
 ## Issues from the roadmap (remote and custom scenarios)
 
@@ -564,9 +558,7 @@ starts until the user adds `agent:<role>` to a task.
    the others the configuration and the environment variables of
    `docs/general/trackers.md`.
 2. **If both work:** run `python3 scripts/create-issues.py --dry-run` and show
-   the plan. If the foundations spec says "Team task possible: yes", ask
-   whether the user prefers one team issue (`--team`: one PR) or one issue
-   per task (separate PRs). On the user's yes, run it without `--dry-run`.
+   the plan. On the user's yes, run it without `--dry-run`.
 3. **Otherwise** (no remote yet, no CLI, not authenticated): create nothing
    and add to the open items, in this order: create the repository and push,
    authenticate `gh`/`glab` (or set the tracker's variables), then `python3 scripts/create-issues.py --dry-run`

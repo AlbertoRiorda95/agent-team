@@ -55,6 +55,14 @@ features, the major for changes that break existing projects.
   agent suggests `/handoff` and then `/clear`; it never runs it, and does not
   suggest it after a short session.
 
+### Removed
+- Team tasks: the `team-tasks` profile feature, the `agent:team` label and its
+  job, the GitLab `claude-team` job and `AI_FLOW_ROLES`, `create-issues.py
+  --team`, `@claude ok team` (`SPLIT_CONFIRM=team`) in a split, and "Team task
+  possible" in the spec template. Work for several roles is several tasks
+  with dependencies; locally the lead runs them in order. A profile that
+  still lists `team-tasks` loads: the feature is ignored.
+
 ### Documentation
 - The manual explains the development approach (design first, TDD, clean
   architecture when it fits, CI with tests and vulnerability checks, human
@@ -64,6 +72,8 @@ features, the major for changes that break existing projects.
   each package manager (chapter 5).
 - Codex runs the project hooks only after you trust them, and never in CI,
   where its rules are the guard (chapters 5, 6 and 9).
+- Chapter 10 lists the integrations that exist but have not yet been
+  validated against a real system: Jira, Linear, Multica and GitLab.
 
 ### Fixes
 - `block-infra-commands.sh` was bypassed by an option before the verb
@@ -72,7 +82,11 @@ features, the major for changes that break existing projects.
   `gh release create`, `git push --follow-tags` and `git push origin tag v1`,
   and reading the package managers' credential files from Bash (`cat
   ~/.npmrc`, `pip config list`...), which the `Read(...)` denials did not
-  cover. The same commands are denied in Codex's rules and OpenCode.
+  cover. OpenCode denies the same commands. Codex's rules, the only guard
+  where its hooks do not run (`codex exec`, CI), now cover them too in their
+  usual form: `npm unpublish`, `bun publish`, `mvn deploy`, `./gradlew
+  publish`, `helm push`, `kubectl scale`, `gcloud run deploy`, `registry.sh
+  publish`, `git push --follow-tags`, `pip config list`...
 - `security-scope.sh` let through a host written without a scheme (`curl
   example.com`, `wget 10.0.0.5:8080`).
 - `ci/registry.sh`: the pip login always wrote an `https://` index URL and did
@@ -148,6 +162,13 @@ features, the major for changes that break existing projects.
 - `.claude/settings.json` and the role agents changed (hooks): the upgrade
   merges them; if you added hooks to an agent's frontmatter, move them to
   `role-hooks.sh`. The hooks need `jq` wherever the agents run.
+- Team tasks are gone: the upgrade takes the `team` job (GitLab:
+  `claude-team`) and the `AGENTS.md` section out of your files, merging with
+  your edits; if you customized the job, the conflict shows it. It keeps
+  `docs/agents/team-tasks.md` and reports it as no longer in the template:
+  delete it, and the `Roles:` line of the issue template. On GitHub delete
+  the label (`gh label delete agent:team`); turn open `agent:team` issues
+  into separate tasks (`/agent-team:split-issue`).
 
 ## 1.5.0 - 2026-10-28
 

@@ -23,6 +23,4 @@ the plan:
   into features first.
 - Every task has acceptance criteria someone can check without reading the
   code, and lists the files or folders it touches.
-- Suggest a team task (`team` in the plan) when the work is small and tightly
-  coupled (see "Team tasks").
 - Never add labels: the user starts each task.

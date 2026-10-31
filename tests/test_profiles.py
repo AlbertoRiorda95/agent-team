@@ -23,7 +23,7 @@ from agentteam import profile  # noqa: E402
 
 PROFILES = {
     "full": {},
-    "claude-github": {"harnesses": ["claude"], "ci": "github", "tracker": "github",
+    "claude-github": {"harnesses": ["claude"], "ci": "github", "tracker": "github",   # team-tasks: retired, ignored
                       "features": ["ci-agents", "team-tasks", "split", "dispatch"]},
     "codex-jira": {"harnesses": ["codex"], "ci": "github", "tracker": "jira", "features": ["ci-agents", "spec-sync"]},
     "opencode-claude-gitlab": {"harnesses": ["opencode", "claude"], "ci": "gitlab", "tracker": "gitlab",
@@ -134,13 +134,11 @@ class Rendered(unittest.TestCase):
         oc = json.load(open(os.path.join(d["no-tracker"], "opencode.json")))
         self.assertNotIn("litellm", oc.get("provider", {}))
         agents = open(os.path.join(d["codex-jira"], "AGENTS.md")).read()
-        self.assertNotIn("## Team tasks", agents)
         self.assertNotIn("Claude Code:", agents)
         self.assertIn("Codex:", agents)
         wf = open(os.path.join(d["codex-claude-github"], ".github/workflows/agents.yml")).read()
         self.assertIn("vars.AGENT_DEFAULT_RUNNER || 'codex'", wf)
         self.assertIn("  claude:\n", wf)
-        self.assertNotIn("\n  team:\n", wf)
         self.assertNotIn("\n  opencode:\n", wf)
         # spec-sync: the workflow with the tracker's secrets only, the GitLab job, the local hook
         wf = open(os.path.join(d["codex-jira"], ".github/workflows/spec-sync.yml")).read()
@@ -242,7 +240,6 @@ class Sync(unittest.TestCase):
         self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
         self.assertFalse(self.exists(".claude") or self.exists(".github") or self.exists("infra"))
         self.assertTrue(self.exists(".codex/agents/backend.toml") and self.exists("scripts/agentteam/trackers/local.py"))
-        self.assertNotIn("## Team tasks", open(os.path.join(self.p, "AGENTS.md")).read())
         r = run(cli + ["prune", "--dry-run"], cwd=self.p)
         self.assertIn("Nothing to prune", r.stdout)
 

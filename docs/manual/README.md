@@ -21,6 +21,7 @@ it uses are defined at the end of chapter 1
 | [7. Scenario: custom orchestrator](07-scenario-custom.md) | your own tracker and runner: Multica (a self-hosted board for agents), an orchestrator you write |
 | [8. Change and upgrade](08-change-and-upgrade.md) | another tracker or tool, roles back, new plugin versions |
 | [9. Reference](09-reference.md) | commands, configuration, labels, CI variables, files, costs |
+| [10. Integrations not yet validated](10-integrations-not-yet-validated.md) | Jira, Linear, GitLab and Multica: built and tested against simulated services, not yet with a real one |
 
 The HTML version of this manual, `docs/manual.html`, is generated from these
 files (see [9. Reference](09-reference.md#this-manual)).

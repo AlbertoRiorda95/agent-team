@@ -9,7 +9,7 @@ The roadmap in docs/design/project.md drives the structure:
     (GitHub/GitLab milestone, Jira/Redmine version, Linear project milestone);
   - in it, for every feature of that milestone:
       * the tasks of its spec, if the spec is ready (one issue per row of the
-        "Task breakdown", or one agent:team issue with --team);
+        "Task breakdown");
       * otherwise one "Design: <feature>" issue (design happens with you).
 Specs that no milestone covers get their task issues without a milestone.
 Sub-issues are left for scripts/split-issue.py: the parts of one task.
@@ -44,7 +44,6 @@ into the feature or the task, as above.
 Usage:
   python3 scripts/create-issues.py --dry-run      # show the plan
   python3 scripts/create-issues.py                # create what is missing
-  python3 scripts/create-issues.py --team         # one agent:team issue per spec that allows it
   python3 scripts/create-issues.py --migrate      # GitHub/GitLab: from the old "M0 · ..." parent issues
 
 Exit code 2 when the tracker cannot be reached or is not configured.
@@ -60,7 +59,6 @@ from agentteam import config, core, specs  # noqa: E402
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--dry-run", action="store_true")
-    ap.add_argument("--team", action="store_true")
     ap.add_argument("--migrate", action="store_true")
     ap.add_argument("--tracker", "--platform", dest="tracker", choices=config.TRACKERS)
     a = ap.parse_args()
@@ -91,7 +89,7 @@ def main():
     for i in existing:
         by_id[i.ref] = by_id[i.number] = i
 
-    groups = specs.build_plan(a.team, trk)
+    groups = specs.build_plan(trk)
     if not groups and not a.migrate:
         print("Nothing to do: no roadmap in docs/design/project.md and no ready spec with a Task breakdown.")
         return 0

@@ -119,12 +119,6 @@ deployment interface. When you make one, read and follow
 `docs/agents/alignment.md` before opening the MR. Never adapt other
 roles' code yourself.
 
-<!-- agent-team:if team_tasks -->
-## Team tasks
-Only when the user asks for one (`agent:team` on GitHub, `AI_FLOW_ROLES`
-on GitLab, or in a local session): read `docs/agents/team-tasks.md`.
-
-<!-- agent-team:end -->
 <!-- agent-team:if split -->
 ## Splitting issues
 When you are asked to propose how to split an issue into task issues

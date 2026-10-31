@@ -6,9 +6,6 @@ reads a file in this folder only when its situation applies.
 
 - `workflow.md`: planning or leading a feature with several roles
 - `alignment.md`: your change affects something another role relies on
-<!-- agent-team:if team_tasks -->
-- `team-tasks.md`: you coordinate a team task
-<!-- agent-team:end -->
 <!-- agent-team:if split -->
 - `splitting.md`: you propose how to split an issue
 <!-- agent-team:end -->

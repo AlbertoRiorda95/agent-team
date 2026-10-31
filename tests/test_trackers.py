@@ -221,8 +221,6 @@ class TrackerFlow(unittest.TestCase):
         self.assertIn(api.ref, [str(b) for b in trk().blockers(ui)])
         rc, out = call("split-issue.py", "create", parent.number)
         self.assertIn("0 issue(s) created", out)
-        with self.assertRaises(SystemExit):
-            call("split-issue.py", "create", parent.number, "--team")
 
     def run_cross_issue(self, sc):
         """Two hand-written issues: the frontend task of the second waits for the backend task of the first."""

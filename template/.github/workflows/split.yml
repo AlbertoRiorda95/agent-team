@@ -4,7 +4,6 @@
 #    specs, and posts the proposed split as a comment. It creates nothing.
 # 2. Reply on the issue:
 #      @claude ok          creates the proposed issues as sub-issues, no labels
-#      @claude ok team     creates one agent:team issue instead (if suggested)
 #      @claude <changes>   asks for a new proposal
 #    The creation is done by scripts/split-issue.py, not by the model: what is
 #    created is exactly the plan in the proposal you approved.
@@ -44,7 +43,6 @@ jobs:
           first=$(printf '%s\n' "$BODY" | head -n1 | tr -d '\r' | tr '[:upper:]' '[:lower:]' | sed 's/[[:space:].!]*$//')
           case "$GITHUB_EVENT_NAME:$first" in
             "issue_comment:@claude ok")      echo "mode=create" >> "$GITHUB_OUTPUT" ;;
-            "issue_comment:@claude ok team") echo "mode=create-team" >> "$GITHUB_OUTPUT" ;;
             *)                               echo "mode=propose" >> "$GITHUB_OUTPUT" ;;
           esac
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803  # v6.1.0
@@ -94,8 +92,8 @@ jobs:
             --model claude-sonnet-5-5
             --allowedTools "Read,Write,Glob,Grep,Bash(gh issue view:*),Bash(gh issue comment:*),Bash(gh api repos/${{ github.repository }}/issues/${{ github.event.issue.number }}/sub_issues),Bash(python3 scripts/split-issue.py check:*),Bash(python3 scripts/split-issue.py propose:*)"
       - name: Create the approved issues
-        if: startsWith(steps.mode.outputs.mode, 'create')
+        if: steps.mode.outputs.mode == 'create'
         env:
           GH_TOKEN: ${{ github.token }}
           SPLIT_APPROVER: ${{ github.event.comment.user.login }}
-        run: python3 scripts/split-issue.py create ${{ github.event.issue.number }} ${{ steps.mode.outputs.mode == 'create-team' && '--team' || '' }}
+        run: python3 scripts/split-issue.py create ${{ github.event.issue.number }}

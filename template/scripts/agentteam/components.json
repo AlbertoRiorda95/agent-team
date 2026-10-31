@@ -82,10 +82,6 @@
    "split"
   ],
   [
-   "docs/agents/team-tasks.md",
-   "team_tasks"
-  ],
-  [
    ".claude/agents/designer.md",
    "harness_claude and role_designer"
   ],
