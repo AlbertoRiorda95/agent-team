@@ -87,6 +87,9 @@ features, the major for changes that break existing projects.
   validated against a real system: Jira, Linear, Multica and GitLab.
 
 ### Fixes
+- OpenCode on GitHub: the manual did not say to install the OpenCode Agent
+  app, which its action needs to open the pull request; and the action shared
+  every session on opencode.ai in a public repository (`share: false` now).
 - `block-infra-commands.sh` was bypassed by an option before the verb
   (`kubectl -n prod apply`, `npm --registry x publish`, `docker --context x
   push`); it now also blocks `poetry`/`uv`/`yarn`/`pnpm publish`, `gem push`,

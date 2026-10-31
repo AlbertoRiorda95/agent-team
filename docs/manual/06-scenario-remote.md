@@ -46,13 +46,15 @@ workflows cannot read this file, so on GitHub the same routing goes in the
    |---|---|---|
    | Claude Code | `ANTHROPIC_API_KEY`, or `CLAUDE_CODE_OAUTH_TOKEN` for a subscription (`claude setup-token`) | |
    | Codex | `OPENAI_API_KEY`; `AGENT_PR_TOKEN` (optional, see below) | `CODEX_MODEL` (optional) |
-   | OpenCode | the keys of your providers, or the LiteLLM key | `OPENCODE_MODEL` (`provider/model`) |
+   | OpenCode | the keys of your providers, or the LiteLLM key; none for OpenCode's free models (`opencode/...`) | `OPENCODE_MODEL` (`provider/model`) |
 
    For Claude Code, also install the GitHub app: `/install-github-app` in a
    Claude Code session. With a subscription token, edit the workflows that run
    Claude (`agents.yml`, `claude.yml`, `claude-review.yml`, `split.yml`): in
    each, comment out the `anthropic_api_key:` line and uncomment the
-   `claude_code_oauth_token:` line next to it.
+   `claude_code_oauth_token:` line next to it. For OpenCode, install the
+   [OpenCode Agent](https://github.com/apps/opencode-agent) app on the
+   repository: its action gets the token that opens the pull request from it.
 2. **Labels**: `./scripts/create-labels.sh` creates `agent:<role>` for your
    roles, `agent:team`, `agent:split`, `hold`, `alignment-needed`, `ai-review`.
 3. **Branch protection** on `main`: pull requests only, the CI checks

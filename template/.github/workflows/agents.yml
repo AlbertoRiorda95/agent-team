@@ -140,6 +140,8 @@ jobs:
         with:
           model: ${{ vars.OPENCODE_MODEL }}
           agent: ${{ steps.role.outputs.name }}
+          # the action shares the session on opencode.ai by default in a public repository
+          share: false
           prompt: |
             You are the "${{ steps.role.outputs.name }}" agent. Carry out issue
             #${{ github.event.issue.number }} following docs/roles/ and AGENTS.md.

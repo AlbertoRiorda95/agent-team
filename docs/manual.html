@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="light dark">
-<meta name="manual-source" content="sha256:a45a382e9c4c9a75264f5471e39c5d5ca6dc33b3e0f55acbb008901ff15066b4">
+<meta name="manual-source" content="sha256:ef50304547f7488908ee7e3c3a5ffba34ef639b564b0318ed0f41f16efbc183a">
 <meta name="manual-builder" content="python-markdown 3.11.2">
 <title>Agent team: user manual</title>
 <style>
@@ -1956,7 +1956,7 @@ workflows cannot read this file, so on GitHub the same routing goes in the
 </tr>
 <tr>
 <td>OpenCode</td>
-<td>the keys of your providers, or the LiteLLM key</td>
+<td>the keys of your providers, or the LiteLLM key; none for OpenCode's free models (<code>opencode/...</code>)</td>
 <td><code>OPENCODE_MODEL</code> (<code>provider/model</code>)</td>
 </tr>
 </tbody>
@@ -1965,7 +1965,9 @@ workflows cannot read this file, so on GitHub the same routing goes in the
    Claude Code session. With a subscription token, edit the workflows that run
    Claude (<code>agents.yml</code>, <code>claude.yml</code>, <code>claude-review.yml</code>, <code>split.yml</code>): in
    each, comment out the <code>anthropic_api_key:</code> line and uncomment the
-   <code>claude_code_oauth_token:</code> line next to it.
+   <code>claude_code_oauth_token:</code> line next to it. For OpenCode, install the
+   <a href="https://github.com/apps/opencode-agent">OpenCode Agent</a> app on the
+   repository: its action gets the token that opens the pull request from it.
 2. <strong>Labels</strong>: <code>./scripts/create-labels.sh</code> creates <code>agent:&lt;role&gt;</code> for your
    roles, <code>agent:team</code>, <code>agent:split</code>, <code>hold</code>, <code>alignment-needed</code>, <code>ai-review</code>.
 3. <strong>Branch protection</strong> on <code>main</code>: pull requests only, the CI checks
