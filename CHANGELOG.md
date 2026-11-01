@@ -30,6 +30,9 @@ features, the major for changes that break existing projects.
   `.env`, `.env.local`... and `secrets/` through the shell. `.env.example`
   (placeholders) is readable and writable in Claude Code and OpenCode: the
   broad `.env.*` read rule stopped an agent from updating it.
+- The task job also allows `gh pr checks`, `gh run view` and `gh run list`: an
+  `/agent` asking why a check failed was refused `gh pr checks` and stopped
+  without an answer.
 - Manual: with a matrix `build-test` (monorepo), branch protection requires
   the summary job (`ci-ok`), not `build-test`.
 - `clean-architecture` skill for the backend, preloaded by `backend`. `setup`
