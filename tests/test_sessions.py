@@ -215,6 +215,21 @@ class Claude(unittest.TestCase):
                 self.assertGreater(rows[0]["cost_usd"], 0)
         self.assertIn("| claude |", open(os.path.join(s.tmp, "sum.md")).read())
 
+    def test_usage_lists_permission_denials(self):
+        """A run that stops short says which commands it was refused: each one cost a turn."""
+        d = tempfile.mkdtemp()
+        res = os.path.join(d, "result.json")
+        put(res, json.dumps([{"type": "result", "session_id": "s", "num_turns": 41, "usage": {},
+                              "permission_denials": [{"tool_name": "Bash", "tool_input": {"command": "mkdir -p a\nls"}},
+                                                     {"tool_name": "Write", "tool_input": {"file_path": "/x/y"}}]}]))
+        out = os.path.join(d, "sum.md")
+        r = subprocess.run(["python3", os.path.join(ROOT, "template", "scripts", "usage.py"), "claude-result", res,
+                            "--summary", out], capture_output=True, text=True)
+        self.assertEqual(r.returncode, 0, r.stderr)
+        text = open(out).read()
+        self.assertIn("Permission denied (2)", text)
+        self.assertIn("`Bash: mkdir -p a ls`", text)
+
     def test_team_task_is_one_session(self):
         """agent:team in CI (claude -p --agent team): no subagents, every role's checks, the common limits."""
         def setup(s):                                      # the frontend's lint runs npx eslint

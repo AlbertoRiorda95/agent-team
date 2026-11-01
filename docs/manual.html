@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="light dark">
-<meta name="manual-source" content="sha256:6ab5aa0c0b2ccb1ffd5fca8beb8ec0433f05af50ebfce23bc3a8147d3fcf7b32">
+<meta name="manual-source" content="sha256:6b287705170b4c14228629cba2b00da75f97fd07b837bd45fca78c7fdd19e8f1">
 <meta name="manual-builder" content="python-markdown 3.11.2">
 <title>Agent team: user manual</title>
 <style>
@@ -2981,6 +2981,9 @@ list price. On GitHub the table is in the run's summary page and in the
 <code>usage-&lt;job&gt;</code> artifact; on GitLab it is at the end of the job log and in the
 <code>usage.jsonl</code> artifact. With a subscription the tokens count against your
 plan's limits, and the cost is what they would cost through the API.</p>
+<p>When a run stops short, the same table lists the commands the agent was
+refused (<code>Permission denied</code>): each one cost a turn, and a command that is
+right for the task goes into <code>--allowedTools</code> of the workflow.</p>
 <p>For the work you do locally (setup, a design session, <code>create-issues</code>, a
 split, a task run by hand), run <code>python3 scripts/usage.py</code>. It reads what
 Claude Code, Codex and OpenCode record on your computer and shows one row per

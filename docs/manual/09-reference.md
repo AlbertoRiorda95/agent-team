@@ -153,6 +153,10 @@ list price. On GitHub the table is in the run's summary page and in the
 `usage.jsonl` artifact. With a subscription the tokens count against your
 plan's limits, and the cost is what they would cost through the API.
 
+When a run stops short, the same table lists the commands the agent was
+refused (`Permission denied`): each one cost a turn, and a command that is
+right for the task goes into `--allowedTools` of the workflow.
+
 For the work you do locally (setup, a design session, `create-issues`, a
 split, a task run by hand), run `python3 scripts/usage.py`. It reads what
 Claude Code, Codex and OpenCode record on your computer and shows one row per

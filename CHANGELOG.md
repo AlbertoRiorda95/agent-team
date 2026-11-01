@@ -65,6 +65,8 @@ features, the major for changes that break existing projects.
   of the GitLab job log and a `usage.jsonl` artifact. `scripts/usage.py`
   gives the same for the local sessions of the project (Claude Code, Codex,
   OpenCode), so the cost of an operation is measured, not guessed.
+  A Claude Code run also lists the commands it was refused, so a run that
+  stops short shows what to allow.
 
 ### Changed
 - Team tasks run as one agent, `team` (`docs/roles/team.md`, with an agent
