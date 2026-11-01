@@ -537,7 +537,10 @@ ships `playwright.config.ts.example`: rename it when the app has a page to
 test). On GitHub, turn on branch protection for `main` with the CI jobs as
 required checks (`build-test`, `static-analysis`, `sbom-licenses`,
 `vulnerabilities`, and `ui` once the UI tests run) and "Require branches to be
-up to date before merging"; on GitLab, protect `main` and require the
+up to date before merging". In a monorepo whose `build-test` is a matrix (one
+job per package, `build-test (money)`...), require the job that sums them up
+(`ci-ok`) instead: a check named after one package would block every PR that
+does not touch it, and the plain `build-test` GitHub suggests never runs. On GitLab, protect `main` and require the
 pipeline to pass.
 
 You merge. The merge closes the task's issue on GitHub and GitLab (close it

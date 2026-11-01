@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="light dark">
-<meta name="manual-source" content="sha256:ef50304547f7488908ee7e3c3a5ffba34ef639b564b0318ed0f41f16efbc183a">
+<meta name="manual-source" content="sha256:6ab5aa0c0b2ccb1ffd5fca8beb8ec0433f05af50ebfce23bc3a8147d3fcf7b32">
 <meta name="manual-builder" content="python-markdown 3.11.2">
 <title>Agent team: user manual</title>
 <style>
@@ -1489,7 +1489,10 @@ ships <code>playwright.config.ts.example</code>: rename it when the app has a pa
 test). On GitHub, turn on branch protection for <code>main</code> with the CI jobs as
 required checks (<code>build-test</code>, <code>static-analysis</code>, <code>sbom-licenses</code>,
 <code>vulnerabilities</code>, and <code>ui</code> once the UI tests run) and "Require branches to be
-up to date before merging"; on GitLab, protect <code>main</code> and require the
+up to date before merging". In a monorepo whose <code>build-test</code> is a matrix (one
+job per package, <code>build-test (money)</code>...), require the job that sums them up
+(<code>ci-ok</code>) instead: a check named after one package would block every PR that
+does not touch it, and the plain <code>build-test</code> GitHub suggests never runs. On GitLab, protect <code>main</code> and require the
 pipeline to pass.</p>
 <p>You merge. The merge closes the task's issue on GitHub and GitLab (close it
 yourself on the other trackers): that frees the role's slot, and the tasks
@@ -2367,7 +2370,7 @@ could not.
 <tbody>
 <tr>
 <td>Claude Code</td>
-<td><code>claude -p "&lt;task&gt;" --agent &lt;role&gt; --permission-mode acceptEdits --max-turns 40</code> (<code>--agent</code>: the role's tools and its hooks)</td>
+<td><code>claude -p "&lt;task&gt;" --agent &lt;role&gt; --permission-mode acceptEdits --max-turns 60</code> (<code>--agent</code>: the role's tools and its hooks)</td>
 </tr>
 <tr>
 <td>Codex</td>
@@ -2952,7 +2955,7 @@ reads, so the template bounds each run instead:</p>
 <tbody>
 <tr>
 <td>a task, Claude Code on GitHub</td>
-<td>40 turns, 60 minutes</td>
+<td>60 turns, 60 minutes</td>
 </tr>
 <tr>
 <td>a task, Claude Code on GitLab</td>

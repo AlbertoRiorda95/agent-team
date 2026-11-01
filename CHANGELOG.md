@@ -9,6 +9,11 @@ features, the major for changes that break existing projects.
 ## Unreleased
 
 ### Template
+- The agent job on GitHub allows 60 turns (was 40): claude-code-action marks
+  a run that goes past `--max-turns` as failed even when it opened its PR, and
+  a first task took 47.
+- Manual: with a matrix `build-test` (monorepo), branch protection requires
+  the summary job (`ci-ok`), not `build-test`.
 - `clean-architecture` skill for the backend, preloaded by `backend`. `setup`
   keeps it when the stack and the project allow layering and removes it for a
   script or a thin CRUD.

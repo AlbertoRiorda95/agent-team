@@ -135,7 +135,7 @@ reads, so the template bounds each run instead:
 
 | Run | Limit |
 |---|---|
-| a task, Claude Code on GitHub | 40 turns, 60 minutes |
+| a task, Claude Code on GitHub | 60 turns, 60 minutes |
 | a task, Claude Code on GitLab | 30 turns |
 | an `@claude` mention, an `ai-review` review | 15 turns each |
 | Codex or OpenCode jobs | 60 minutes |
