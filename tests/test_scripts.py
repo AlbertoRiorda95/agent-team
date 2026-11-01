@@ -94,7 +94,8 @@ class CreateLabels(unittest.TestCase):
         got = self.labels({"ci": "github", "tracker": "github",
                            "features": ["ci-agents", "dispatch", "split", "team-tasks"]})
         roles = {f"agent:{r}" for r in ("designer", "frontend", "backend", "optimizer", "devops", "security", "writer")}
-        self.assertEqual(got, roles | {"agent:team", "agent:split", "hold", "alignment-needed", "ai-review"})
+        self.assertEqual(got, roles | {"agent:team", "agent:split", "hold", "alignment-needed", "ai-review",
+                                       "runner:claude", "runner:opencode", "runner:codex"})
 
     def test_only_the_roles_of_the_project(self):
         got = self.labels({"ci": "github", "tracker": "github", "features": ["ci-agents"],
@@ -189,6 +190,92 @@ class Skills(unittest.TestCase):
 
 
 SCHEMA = shutil.which(os.environ.get("CHECK_JSONSCHEMA_BIN") or "check-jsonschema")
+
+
+FAKE_FORGE = r"""#!/usr/bin/env python3
+# gh and glab, answering from $STATE and recording every call in $RECORD
+import json, os, re, sys
+a = sys.argv[1:]
+st = json.load(open(os.environ["STATE"]))
+open(os.environ["RECORD"], "a").write(os.path.basename(sys.argv[0]) + " " + " ".join(a) + "\n")
+def labels(n):
+    return st["issues"].get(str(n), [])
+if a[:2] == ["pr", "view"]:
+    print(json.dumps(st["prs"][a[2]]))
+elif a[:2] == ["pr", "list"]:
+    n = int(re.search(r"\.number == (\d+)", a[a.index("--jq") + 1]).group(1))
+    for num, p in st["prs"].items():
+        if any(c["number"] == n for c in p["closingIssuesReferences"]):
+            print(num, p["headRefName"]); break
+elif a[:2] == ["issue", "view"] and "--output" in a:
+    print(json.dumps({"labels": labels(a[2])}))
+elif a[:2] == ["issue", "view"]:
+    print("\n".join(labels(a[2])))
+"""
+
+
+class AgentOwner(unittest.TestCase):
+    """ci/agent-owner.sh: the agent that starts a task is the only one that works on it."""
+
+    def owner(self, state, *args, **env):
+        p = Project(self, {"ci": "github", "tracker": "github", "features": ["ci-agents"]})
+        for name in ("gh", "glab"):
+            put(os.path.join(p.bin, name), FAKE_FORGE, 0o755)
+        put(p.path(".state.json"), json.dumps(state))
+        e = dict(p.env, STATE=p.path(".state.json"), DEFAULT_RUNNER="claude", **env)
+        r = subprocess.run(["bash", "ci/agent-owner.sh", *args], cwd=p.dir, env=e, capture_output=True, text=True)
+        out = dict(line.split("=", 1) for line in r.stdout.splitlines() if "=" in line)
+        return r.returncode, out, r.stdout + r.stderr, p.calls()
+
+    def test_a_task_records_its_tool(self):
+        rc, out, log, calls = self.owner({"issues": {"5": ["agent:writer"]}, "prs": {}}, "github",
+                                         EVENT="issues", NUMBER="5", LABEL="agent:writer", RECORD_RUNNER="1",
+                                         RUNNERS='{"agent:writer":"opencode"}')
+        self.assertEqual(rc, 0, log)
+        self.assertEqual((out["role"], out["runner"], out["issue"], out["mode"]), ("writer", "opencode", "5", "task"))
+        self.assertIn("gh issue edit 5 --add-label runner:opencode", calls)
+
+    def test_the_recorded_tool_wins(self):
+        """Changing AGENT_RUNNERS does not move a task that has started."""
+        rc, out, log, calls = self.owner({"issues": {"5": ["agent:writer", "runner:claude"]}, "prs": {}}, "github",
+                                         EVENT="issues", NUMBER="5", LABEL="agent:writer", RECORD_RUNNER="1",
+                                         RUNNERS='{"agent:writer":"opencode"}')
+        self.assertEqual(out["runner"], "claude", log)
+        self.assertFalse([c for c in calls if "edit" in c], calls)
+
+    def test_a_comment_on_the_pull_request_reaches_its_owner(self):
+        state = {"issues": {"5": ["agent:writer", "runner:opencode"]},
+                 "prs": {"9": {"headRefName": "feat/5-guide", "isCrossRepository": False,
+                               "closingIssuesReferences": [{"number": 5}]}}}
+        rc, out, log, _ = self.owner(state, "github", EVENT="issue_comment", NUMBER="9", IS_PR="true")
+        self.assertEqual(rc, 0, log)
+        self.assertEqual((out["role"], out["runner"], out["issue"], out["pr"], out["branch"], out["mode"]),
+                         ("writer", "opencode", "5", "9", "feat/5-guide", "iterate"))
+        rc, out, log, _ = self.owner(state, "github", EVENT="issue_comment", NUMBER="5", IS_PR="false")
+        self.assertEqual((out["pr"], out["branch"]), ("9", "feat/5-guide"), log)
+
+    def test_nobody_owns_it(self):
+        prs = {"9": {"headRefName": "fix", "isCrossRepository": False, "closingIssuesReferences": []},
+               "10": {"headRefName": "x", "isCrossRepository": True, "closingIssuesReferences": [{"number": 5}]}}
+        state = {"issues": {"5": ["agent:backend"], "6": ["bug"]}, "prs": prs}
+        for number, is_pr, why in (("9", "true", "closes no issue"), ("10", "true", "fork"),
+                                   ("6", "false", "no agent:<role> label")):
+            with self.subTest(number=number):
+                rc, out, log, _ = self.owner(state, "github", EVENT="issue_comment", NUMBER=number, IS_PR=is_pr)
+                self.assertEqual(rc, 0, log)
+                self.assertNotIn("role", out)
+                self.assertIn(why, out["why"])
+
+    def test_gitlab_stops_another_tool_or_role(self):
+        state = {"issues": {"5": ["agent:writer", "runner:opencode"], "6": ["agent:backend"]}, "prs": {}}
+        rc, _, log, _ = self.owner(state, "gitlab", "claude", TASK_ID="5")
+        self.assertEqual(rc, 1, log)
+        self.assertIn("AI_FLOW_HARNESS=opencode", log)
+        rc, _, log, _ = self.owner(state, "gitlab", "opencode", TASK_ID="5", AI_FLOW_ROLE="backend")
+        self.assertEqual(rc, 1, log)
+        rc, _, log, calls = self.owner(state, "gitlab", "codex", TASK_ID="6")
+        self.assertEqual((rc, log.strip()), (0, "backend"))
+        self.assertIn("glab issue update 6 --label runner:codex", calls)
 
 
 @unittest.skipUnless(SCHEMA, "check-jsonschema not installed")

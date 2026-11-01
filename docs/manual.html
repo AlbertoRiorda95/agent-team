@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="light dark">
-<meta name="manual-source" content="sha256:c9be9f201dc8a94243cd06474c81e4a72314cf7276874a436ba0612823600843">
+<meta name="manual-source" content="sha256:e71de43aefb27cc8fe99e7a417bb57ce2944ad2cb4f2f87ecffecaf0b294bc89">
 <meta name="manual-builder" content="python-markdown 3.11.2">
 <title>Agent team: user manual</title>
 <style>
@@ -1420,14 +1420,14 @@ dispatch does not start it twice.</p>
 </tr>
 <tr>
 <td>iterate on its merge request</td>
-<td>ask the session, on the task's branch</td>
-<td>a comment <code>@claude &lt;what to change&gt;</code> on the pull request (or on a line of its diff): Claude changes that branch</td>
-<td>run the agent pipeline again on the merge request's branch, with <code>AI_FLOW_INPUT</code> saying what to change</td>
+<td>the role's agent on the task's branch (<code>claude --agent &lt;role&gt;</code>, <code>opencode --agent &lt;role&gt;</code>), not the lead session</td>
+<td>a comment that starts with <code>/agent &lt;what to change&gt;</code> on the pull request, on a line of its diff or on the issue: the agent that opened it changes that branch</td>
+<td>run the agent pipeline again on the merge request's branch, with <code>AI_FLOW_INPUT</code> saying what to change and the same <code>TASK_ID</code></td>
 </tr>
 <tr>
 <td>fix a red CI or an outdated branch</td>
-<td>ask the session</td>
-<td><code>@claude fix the failing checks</code> or <code>@claude update the branch from main</code>, or GitHub's "Update branch" button</td>
+<td>as for iterating</td>
+<td><code>/agent fix the failing checks</code> or <code>/agent update the branch from main</code>, or GitHub's "Update branch" button</td>
 <td>as for iterating</td>
 </tr>
 <tr>
@@ -1450,12 +1450,22 @@ dispatch does not start it twice.</p>
 </tr>
 </tbody>
 </table></div>
-<p>Each <code>@claude</code> comment is one more agent run (20 minutes at most). Plain review
-comments and "request changes" do not start anything: the comment must
-mention <code>@claude</code>. On a pull request opened by Codex or OpenCode, <code>@claude</code>
-works if Claude Code is one of the project's tools; otherwise check out the
-branch and iterate in your local session. In the custom scenario these
-actions are your orchestrator's.</p>
+<p>The agent that starts a task is the only one that works on it until the merge:
+the same role, with its folders, skills and hooks, the same tool and the same
+model. Another agent would not have the role's boundaries.
+- <strong>The owner</strong> is the issue's <code>agent:&lt;role&gt;</code> label and its <code>runner:&lt;tool&gt;</code>
+  label, which the first run adds (<code>ci/agent-owner.sh</code>). Changing
+  <code>AGENT_RUNNERS</code> later does not move a task that has started; to move it,
+  remove the <code>runner:</code> label and start the task again.
+- <strong><code>/agent</code></strong> must open the comment. A pull request reaches its owner through
+  the issue it closes (<code>Closes #12</code>), so a pull request that closes no issue,
+  or comes from a fork, has no owner. Each <code>/agent</code> comment is one more run of
+  the owner's job, with its limits.
+- <strong><code>@claude</code></strong> is for what no agent owns: your pull requests, Dependabot's,
+  an issue without an <code>agent:</code> label (20 minutes at most). On a task, it only
+  answers to use <code>/agent</code>.
+- Plain review comments and "request changes" start nothing.</p>
+<p>In the custom scenario these actions are your orchestrator's.</p>
 <p>After a rejected or stopped run, the issue is still marked as started: remove
 <code>agent:&lt;role&gt;</code> before starting it again or letting dispatch pick it up.</p>
 <h2 id="c04-change-the-plan">Change the plan</h2>
@@ -1980,7 +1990,8 @@ workflows cannot read this file, so on GitHub the same routing goes in the
    <code>{"agent:frontend":"opencode","agent:optimizer":"codex"}</code>. Keep it in line
    with <code>runners</code> in the profile: the workflows read only the variable. The
    other roles run on the first tool of the profile (<code>AGENT_DEFAULT_RUNNER</code>
-   changes it).</p>
+   changes it). The first run of a task records its tool as a <code>runner:&lt;tool&gt;</code>
+   label on the issue: the task stays there until you remove the label.</p>
 <h3 id="c06-start-a-task">Start a task</h3>
 <p>Add the label <code>agent:&lt;role&gt;</code> to a task issue (or run dispatch, which adds
 them for you). The workflow <code>agents.yml</code> starts the agent of that role:</p>
@@ -2051,10 +2062,15 @@ role. It runs on any tool, routed like a role (<code>AGENT_RUNNERS</code>:
 <code>{"agent:team":"codex"}</code>), with the same limits as any task.</p>
 <h3 id="c06-ask-and-review">Ask and review</h3>
 <ul>
-<li><code>@claude &lt;request&gt;</code> in a comment on an issue or a pull request, or on a
-  line of its diff: Claude answers or makes the change on that branch. This
-  is how you iterate with the agent on its pull request; comments without
-  <code>@claude</code> start nothing. Each mention is one run (20 minutes at most).</li>
+<li><code>/agent &lt;request&gt;</code> at the start of a comment on a task's pull request, on a
+  line of its diff or on its issue: the agent that opened the task (same role,
+  tool and model) makes the change on its branch. This is how you iterate on
+  an agent's pull request; on GitHub with OpenCode it needs the OpenCode Agent
+  app, as the task does.</li>
+<li><code>@claude &lt;request&gt;</code> on what no agent owns (your pull requests,
+  Dependabot's, an issue without an <code>agent:</code> label): Claude answers or makes
+  the change. On a task it only answers to use <code>/agent</code>. Each comment is one
+  run (20 minutes at most); comments without either start nothing.</li>
 <li>Label a pull request <code>ai-review</code> for two reviews in parallel: one against
   the project's rules (inline comments), one against the issue and the spec.
   They never approve or block. Remove and re-add the label to review again.</li>
@@ -2116,10 +2132,13 @@ pipeline with variables, never on pushes:</p>
 GitLab its starter adds the label and runs the pipeline with these variables.</p>
 <h3 id="c06-iterate-split-and-what-gitlab-does-not-have">Iterate, split, and what GitLab does not have</h3>
 <ul>
-<li><strong>Iterate on a merge request</strong>: GitLab has no <code>@claude</code> mentions. Run the
+<li><strong>Iterate on a merge request</strong>: GitLab has no <code>/agent</code> comments. Run the
   agent pipeline on the merge request's branch (choose it in "Run pipeline"),
   with <code>AI_FLOW_INPUT</code> saying what to change ("apply the review comments of
-  !12") and the same <code>TASK_ID</code>.</li>
+  !12") and the same <code>TASK_ID</code>. The job reads the role from the issue and
+  stops if you chose another tool (<code>AI_FLOW_HARNESS</code>) or role than the one
+  that owns the task; Codex and OpenCode push to the branch and add a note to
+  the merge request.</li>
 <li><strong>Split from the issue</strong>, in three runs: first <code>SPLIT_ISSUE=&lt;n&gt;</code> alone, and
   Claude posts the proposal as a note on the issue; then, to change it,
   <code>SPLIT_ISSUE=&lt;n&gt;</code> with <code>SPLIT_FEEDBACK</code> saying what to change, which posts a
@@ -2788,6 +2807,10 @@ it has <code>--to-issues</code>.</p>
 <td>the task runs on that role; on GitHub adding it starts the agent</td>
 </tr>
 <tr>
+<td><code>runner:&lt;tool&gt;</code></td>
+<td>the tool that owns the task, added by its first run; remove it to move the task to another tool</td>
+</tr>
+<tr>
 <td><code>agent:team</code></td>
 <td>the whole task by one agent, every role it touches, without subagents (GitLab: <code>AI_FLOW_ROLE=team</code>)</td>
 </tr>
@@ -2966,6 +2989,10 @@ than <code>--max-turns</code>, even if the run opened its pull request.</p>
 <tr>
 <td>an <code>@claude</code> mention, an <code>ai-review</code> review, a split</td>
 <td>20 minutes each</td>
+</tr>
+<tr>
+<td>a <code>/agent</code> request</td>
+<td>as the owner's task job</td>
 </tr>
 <tr>
 <td>Codex or OpenCode jobs</td>

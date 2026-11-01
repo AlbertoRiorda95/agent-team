@@ -364,7 +364,7 @@ skill adds its description to every session.
 | Username | `.github/CODEOWNERS` |
 | CI | `.github/workflows/ci.yml` and `.gitlab/ci/ci.yml` (toolchain, commands, cache key, build output); `ci/scanners.env` (policies); `trivy.yaml` only if license categories change |
 | API contract | `AGENTS.md` → `## API contract` (path and generator); `docs/api/README.md`; `docs/roles/frontend.md` and `docs/roles/backend.md` if the wording differs; `.github/CODEOWNERS` (add the contract path) |
-| Commands allowed in CI | `--allowedTools` in `.github/workflows/agents.yml` and `claude.yml` (replace `Bash(npm:*)`, `Bash(npx:*)` with the stack's tools), `.gitlab-ci.yml.example` |
+| Commands allowed in CI | the `TOOLS` line of the `claude` job in `.github/workflows/agents.yml` and `--allowedTools` in `claude.yml` (replace `Bash(npm:*)`, `Bash(npx:*)` with the stack's tools), `.gitlab-ci.yml.example` |
 | Reference generators | `ci/reference.sh` (keep the generators of the stack, add the missing one) and `ci/scanners.env` (versions, `PYTHON_PACKAGE`); the `reference-docs` job of `.github/workflows/ci.yml` and `.gitlab/ci/ci.yml` (toolchain, dependency install); the dev dependency the generator needs (typedoc, for example) |
 | Wanted documents | `docs/software/README.md` (the list the writer writes) |
 | Services (monorepo) | `AGENTS.md` → `## Services` and the routing lines; `docs/roles/*.md` → `## Boundaries`; `.github/CODEOWNERS`; the CI jobs (path filters per service) |
@@ -378,7 +378,7 @@ skill adds its description to every session.
 | Subscription token | `.github/workflows/*.yml`: replace `anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}` with `claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}` |
 | Non-Claude roles, providers | `.github/workflows/agents.yml` (secrets in `env`, `model:` expression), `opencode.json`, `.opencode/agents/` (one file per non-Claude role, permissions as in the existing ones), `infra/litellm/litellm-config.yaml`, `infra/litellm/docker-compose.yml`, `infra/litellm/.env.example` |
 | LiteLLM domain | `infra/litellm/Caddyfile`, `infra/litellm/create-key.sh`, `opencode.json` (`baseURL`) |
-| Models and effort | Claude Code: `model:` and `effort:` in `.claude/agents/*.md` and the `--model` expression in `.github/workflows/agents.yml`; Codex: `model_reasoning_effort` in `.codex/agents/*.toml`, `model` in `.codex/config.toml`, the `CODEX_MODEL` variable in CI; OpenCode: `model:` in `.opencode/agents/*.md` or `OPENCODE_MODEL` in CI |
+| Models and effort | Claude Code: `model:` and `effort:` in `.claude/agents/*.md` and the `MODEL` line of the `claude` job in `.github/workflows/agents.yml`; Codex: `model_reasoning_effort` in `.codex/agents/*.toml`, `model` in `.codex/config.toml`, the `CODEX_MODEL` variable in CI; OpenCode: `model:` in `.opencode/agents/*.md` or `OPENCODE_MODEL` in CI |
 | Skills | `scripts/install-skills.sh`; the `skills:` list and the closing note of each `.claude/agents/*.md`; the skill names in `CLAUDE.md` |
 | No web UI | remove the `playwright` MCP server from `.claude/agents/designer.md` (or the designer role) and the frontend lint hook if there is no frontend |
 

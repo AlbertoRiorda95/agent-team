@@ -9,6 +9,17 @@ features, the major for changes that break existing projects.
 ## Unreleased
 
 ### Template
+- The agent that starts a task is the only one that works on it until the
+  merge: same role (folders, skills, hooks), same tool, same model. On GitHub
+  a comment that starts with `/agent <request>` on the task's pull request, a
+  line of its diff or its issue runs the owner's job (Claude Code, OpenCode or
+  Codex) on its branch; `agents.yml` has a `route` job that finds the owner
+  (`ci/agent-owner.sh`) from the issue's `agent:<role>` label and its
+  `runner:<tool>` label, which the first run adds so that changing
+  `AGENT_RUNNERS` does not move a started task. `@claude` stays for what no
+  agent owns and, on a task, answers to use `/agent`. On GitLab the agent jobs
+  check the owner of `TASK_ID` and stop on another tool or role; Codex and
+  OpenCode push to the merge request's branch when run on it.
 - The GitHub agent jobs (task, `@claude`, review, split) have no `--max-turns`:
   claude-code-action marks a run as failed when it counts more turns than the
   limit, even when the run opened its PR (a task of 86 turns under a limit of
@@ -177,6 +188,14 @@ features, the major for changes that break existing projects.
   script, profiles and project scripts on macOS too.
 
 ### Upgrade notes
+- `/agent` replaces `@claude` for iterating on an agent's pull request, and
+  `@claude` no longer changes a task's pull request. Run
+  `./scripts/create-labels.sh` for the `runner:` labels (the first run creates
+  them anyway). Tasks started before the upgrade get their `runner:` label at
+  the next `/agent` or run, from `AGENT_RUNNERS`. In `agents.yml` the model
+  of each role is now the `MODEL` line of the `claude` job and the allowed
+  commands its `TOOLS` line: carry your edits there. On GitLab the Claude job
+  needs `GITLAB_ACCESS_TOKEN` too.
 - A project whose profile has no `roles` key gets the `writer` role on upgrade
   (it only acts when asked); list `roles` without it to opt out.
 - With a private registry: fill in `ci/registry.env`, add `REGISTRY_TOKEN`

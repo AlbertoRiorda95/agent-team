@@ -489,18 +489,29 @@ dispatch does not start it twice.
 |---|---|---|---|
 | follow it | watch the session | the plan the agent comments on the issue, then the Actions run | the job log |
 | correct it while it works | tell the session | not possible: the run is unattended; let it finish, then iterate on the merge request | same as GitHub |
-| iterate on its merge request | ask the session, on the task's branch | a comment `@claude <what to change>` on the pull request (or on a line of its diff): Claude changes that branch | run the agent pipeline again on the merge request's branch, with `AI_FLOW_INPUT` saying what to change |
-| fix a red CI or an outdated branch | ask the session | `@claude fix the failing checks` or `@claude update the branch from main`, or GitHub's "Update branch" button | as for iterating |
+| iterate on its merge request | the role's agent on the task's branch (`claude --agent <role>`, `opencode --agent <role>`), not the lead session | a comment that starts with `/agent <what to change>` on the pull request, on a line of its diff or on the issue: the agent that opened it changes that branch | run the agent pipeline again on the merge request's branch, with `AI_FLOW_INPUT` saying what to change and the same `TASK_ID` |
+| fix a red CI or an outdated branch | as for iterating | `/agent fix the failing checks` or `/agent update the branch from main`, or GitHub's "Update branch" button | as for iterating |
 | stop it | interrupt the session (Esc in Claude Code) | cancel the run in the Actions tab | cancel the job |
 | retry it | ask again | remove the `agent:<role>` label and add it again | run the pipeline again |
 | reject the work | discard the branch | close the pull request without merging; the issue stays open | close the merge request |
 
-Each `@claude` comment is one more agent run (20 minutes at most). Plain review
-comments and "request changes" do not start anything: the comment must
-mention `@claude`. On a pull request opened by Codex or OpenCode, `@claude`
-works if Claude Code is one of the project's tools; otherwise check out the
-branch and iterate in your local session. In the custom scenario these
-actions are your orchestrator's.
+The agent that starts a task is the only one that works on it until the merge:
+the same role, with its folders, skills and hooks, the same tool and the same
+model. Another agent would not have the role's boundaries.
+- **The owner** is the issue's `agent:<role>` label and its `runner:<tool>`
+  label, which the first run adds (`ci/agent-owner.sh`). Changing
+  `AGENT_RUNNERS` later does not move a task that has started; to move it,
+  remove the `runner:` label and start the task again.
+- **`/agent`** must open the comment. A pull request reaches its owner through
+  the issue it closes (`Closes #12`), so a pull request that closes no issue,
+  or comes from a fork, has no owner. Each `/agent` comment is one more run of
+  the owner's job, with its limits.
+- **`@claude`** is for what no agent owns: your pull requests, Dependabot's,
+  an issue without an `agent:` label (20 minutes at most). On a task, it only
+  answers to use `/agent`.
+- Plain review comments and "request changes" start nothing.
+
+In the custom scenario these actions are your orchestrator's.
 
 After a rejected or stopped run, the issue is still marked as started: remove
 `agent:<role>` before starting it again or letting dispatch pick it up.

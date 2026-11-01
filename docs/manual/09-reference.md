@@ -90,6 +90,7 @@ Environment variables `AGENT_TEAM_TRACKER`, `AGENT_TEAM_STARTER` and
 | Label | Meaning |
 |---|---|
 | `agent:<role>` | the task runs on that role; on GitHub adding it starts the agent |
+| `runner:<tool>` | the tool that owns the task, added by its first run; remove it to move the task to another tool |
 | `agent:team` | the whole task by one agent, every role it touches, without subagents (GitLab: `AI_FLOW_ROLE=team`) |
 | `agent:split` | GitHub: Claude proposes a split in a comment (GitLab: `SPLIT_ISSUE`) |
 | `hold` | dispatch never starts this task |
@@ -141,6 +142,7 @@ than `--max-turns`, even if the run opened its pull request.
 | a task, Claude Code on GitHub | 60 minutes |
 | a task, Claude Code on GitLab | 30 turns |
 | an `@claude` mention, an `ai-review` review, a split | 20 minutes each |
+| a `/agent` request | as the owner's task job |
 | Codex or OpenCode jobs | 60 minutes |
 
 A turn is one model response, with its tool calls. Every run compacts its

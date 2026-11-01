@@ -64,7 +64,8 @@ workflows cannot read this file, so on GitHub the same routing goes in the
    `{"agent:frontend":"opencode","agent:optimizer":"codex"}`. Keep it in line
    with `runners` in the profile: the workflows read only the variable. The
    other roles run on the first tool of the profile (`AGENT_DEFAULT_RUNNER`
-   changes it).
+   changes it). The first run of a task records its tool as a `runner:<tool>`
+   label on the issue: the task stays there until you remove the label.
 
 ### Start a task
 
@@ -135,10 +136,15 @@ role. It runs on any tool, routed like a role (`AGENT_RUNNERS`:
 
 ### Ask and review
 
-- `@claude <request>` in a comment on an issue or a pull request, or on a
-  line of its diff: Claude answers or makes the change on that branch. This
-  is how you iterate with the agent on its pull request; comments without
-  `@claude` start nothing. Each mention is one run (20 minutes at most).
+- `/agent <request>` at the start of a comment on a task's pull request, on a
+  line of its diff or on its issue: the agent that opened the task (same role,
+  tool and model) makes the change on its branch. This is how you iterate on
+  an agent's pull request; on GitHub with OpenCode it needs the OpenCode Agent
+  app, as the task does.
+- `@claude <request>` on what no agent owns (your pull requests,
+  Dependabot's, an issue without an `agent:` label): Claude answers or makes
+  the change. On a task it only answers to use `/agent`. Each comment is one
+  run (20 minutes at most); comments without either start nothing.
 - Label a pull request `ai-review` for two reviews in parallel: one against
   the project's rules (inline comments), one against the issue and the spec.
   They never approve or block. Remove and re-add the label to review again.
@@ -183,10 +189,13 @@ GitLab its starter adds the label and runs the pipeline with these variables.
 
 ### Iterate, split, and what GitLab does not have
 
-- **Iterate on a merge request**: GitLab has no `@claude` mentions. Run the
+- **Iterate on a merge request**: GitLab has no `/agent` comments. Run the
   agent pipeline on the merge request's branch (choose it in "Run pipeline"),
   with `AI_FLOW_INPUT` saying what to change ("apply the review comments of
-  !12") and the same `TASK_ID`.
+  !12") and the same `TASK_ID`. The job reads the role from the issue and
+  stops if you chose another tool (`AI_FLOW_HARNESS`) or role than the one
+  that owns the task; Codex and OpenCode push to the branch and add a note to
+  the merge request.
 - **Split from the issue**, in three runs: first `SPLIT_ISSUE=<n>` alone, and
   Claude posts the proposal as a note on the issue; then, to change it,
   `SPLIT_ISSUE=<n>` with `SPLIT_FEEDBACK` saying what to change, which posts a
