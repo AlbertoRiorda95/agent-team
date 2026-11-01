@@ -33,6 +33,9 @@ features, the major for changes that break existing projects.
 - The task job also allows `gh pr checks`, `gh run view` and `gh run list`: an
   `/agent` asking why a check failed was refused `gh pr checks` and stopped
   without an answer.
+- `/agent` replies with `gh issue comment`: the role's `tools:` list leaves out
+  the action's comment tool, so the run ended with the "I'll analyze this"
+  placeholder and no answer.
 - Manual: with a matrix `build-test` (monorepo), branch protection requires
   the summary job (`ci-ok`), not `build-test`.
 - `clean-architecture` skill for the backend, preloaded by `backend`. `setup`

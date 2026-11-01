@@ -167,7 +167,7 @@ jobs:
             --agent ${{ needs.route.outputs.role }}
             --model ${{ env.MODEL }}
             --allowedTools "${{ env.TOOLS }}"
-            --append-system-prompt "You are running unattended in CI and the tool that updates the tracking comment is not available to you. Whatever the request, end by posting your answer or a summary of what you did with gh issue comment ${{ needs.route.outputs.issue }} --body-file <file> (this also works for a pull request). Never end without that comment."
+            --append-system-prompt "You are running unattended in CI and the tool that updates the tracking comment is not available to you. Whatever the request, end by posting your answer or a summary of what you did with gh issue comment ${{ needs.route.outputs.pr || needs.route.outputs.issue }} --body-file <file> (this also works for a pull request). Never end without that comment."
       # Tokens and cost of this run: in the job summary, and as the usage artifact (scripts/usage.py).
       - name: Usage
         if: always()
