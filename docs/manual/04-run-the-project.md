@@ -495,7 +495,7 @@ dispatch does not start it twice.
 | retry it | ask again | remove the `agent:<role>` label and add it again | run the pipeline again |
 | reject the work | discard the branch | close the pull request without merging; the issue stays open | close the merge request |
 
-Each `@claude` comment is one more agent run (up to 15 turns). Plain review
+Each `@claude` comment is one more agent run (20 minutes at most). Plain review
 comments and "request changes" do not start anything: the comment must
 mention `@claude`. On a pull request opened by Codex or OpenCode, `@claude`
 works if Claude Code is one of the project's tools; otherwise check out the

@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="light dark">
-<meta name="manual-source" content="sha256:6b287705170b4c14228629cba2b00da75f97fd07b837bd45fca78c7fdd19e8f1">
+<meta name="manual-source" content="sha256:c9be9f201dc8a94243cd06474c81e4a72314cf7276874a436ba0612823600843">
 <meta name="manual-builder" content="python-markdown 3.11.2">
 <title>Agent team: user manual</title>
 <style>
@@ -1450,7 +1450,7 @@ dispatch does not start it twice.</p>
 </tr>
 </tbody>
 </table></div>
-<p>Each <code>@claude</code> comment is one more agent run (up to 15 turns). Plain review
+<p>Each <code>@claude</code> comment is one more agent run (20 minutes at most). Plain review
 comments and "request changes" do not start anything: the comment must
 mention <code>@claude</code>. On a pull request opened by Codex or OpenCode, <code>@claude</code>
 works if Claude Code is one of the project's tools; otherwise check out the
@@ -2054,7 +2054,7 @@ role. It runs on any tool, routed like a role (<code>AGENT_RUNNERS</code>:
 <li><code>@claude &lt;request&gt;</code> in a comment on an issue or a pull request, or on a
   line of its diff: Claude answers or makes the change on that branch. This
   is how you iterate with the agent on its pull request; comments without
-  <code>@claude</code> start nothing. Each mention is one run (up to 15 turns).</li>
+  <code>@claude</code> start nothing. Each mention is one run (20 minutes at most).</li>
 <li>Label a pull request <code>ai-review</code> for two reviews in parallel: one against
   the project's rules (inline comments), one against the issue and the spec.
   They never approve or block. Remove and re-add the label to review again.</li>
@@ -2197,7 +2197,7 @@ changes on a branch:</p>
 <li>Each task is one agent run, and each <code>@claude</code> mention one more. The CI
   minutes are those of your plan. Each run's summary page shows the tokens
   and the cost it used (<a href="#c09-measure-it">9. Measure it</a>).</li>
-<li>Agents in CI use <code>--max-turns</code> limits, compact at 200,000 tokens and never
+<li>Agents in CI are bounded by the job timeout, compact at 200,000 tokens and never
   run in the background, so a run ends with a merge request or a comment
   saying why it could not.</li>
 <li>Agents never merge, never push to <code>main</code>, never apply infrastructure. The
@@ -2370,7 +2370,7 @@ could not.
 <tbody>
 <tr>
 <td>Claude Code</td>
-<td><code>claude -p "&lt;task&gt;" --agent &lt;role&gt; --permission-mode acceptEdits --max-turns 60</code> (<code>--agent</code>: the role's tools and its hooks)</td>
+<td><code>claude -p "&lt;task&gt;" --agent &lt;role&gt; --permission-mode acceptEdits</code> (<code>--agent</code>: the role's tools and its hooks)</td>
 </tr>
 <tr>
 <td>Codex</td>
@@ -2944,7 +2944,9 @@ it has <code>--to-issues</code>.</p>
 <p>Agent team adds no fees: you pay the model provider (an API key, billed per
 token) or use your subscription's quota, plus CI minutes for runs in CI. A
 run's cost depends on the model, the size of the task and of the code it
-reads, so the template bounds each run instead:</p>
+reads, so the template bounds each run instead. On GitHub the bound is time,
+not turns: claude-code-action marks a run as failed when it counts more turns
+than <code>--max-turns</code>, even if the run opened its pull request.</p>
 <div class="table"><table>
 <thead>
 <tr>
@@ -2955,15 +2957,15 @@ reads, so the template bounds each run instead:</p>
 <tbody>
 <tr>
 <td>a task, Claude Code on GitHub</td>
-<td>60 turns, 60 minutes</td>
+<td>60 minutes</td>
 </tr>
 <tr>
 <td>a task, Claude Code on GitLab</td>
 <td>30 turns</td>
 </tr>
 <tr>
-<td>an <code>@claude</code> mention, an <code>ai-review</code> review</td>
-<td>15 turns each</td>
+<td>an <code>@claude</code> mention, an <code>ai-review</code> review, a split</td>
+<td>20 minutes each</td>
 </tr>
 <tr>
 <td>Codex or OpenCode jobs</td>

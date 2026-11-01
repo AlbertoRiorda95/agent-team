@@ -39,12 +39,14 @@ ALLOWED = [
     "mvn -B verify", "mvn install", "./gradlew build", "conan create .", "conan install .", "cargo build",
     "terraform plan", "kubectl get pods", "helm template .", "docker build .", "gh release view",
     "git push -u origin feat/v2-ui", "git status", "./ci/registry.sh login", "./ci/registry.sh local",
-    "cat .npmrc",
+    "cat .npmrc", "cat .env.example", "sed -i s/a/b/ .env.example", "ls services/orders/secrets-docs",
 ]
 SECRET_READS = [
     "cat ~/.npmrc", "cat $HOME/.m2/settings.xml", "grep token /home/me/.gradle/gradle.properties",
     "ls ~/.conan2", "cat ~/.cargo/credentials.toml", "cat ~/.pypirc", "pip config list",
     "python3 -m pip config list", "cat ~/.docker/config.json",
+    "cat .env", "cat ./.env.production", "sed -n 1,5p .env.local", "head secrets/key.pem", "cat ./secrets/key.pem",
+    "cp .env /tmp/x",
 ]
 
 
@@ -270,6 +272,11 @@ class OpenCodePermissions(unittest.TestCase):
         for f in [".env", ".env.local", "secrets/key.pem"]:
             with self.subTest(file=f):
                 self.assertNotEqual(self.action("backend", "read", f), "allow")
+
+    def test_env_example_is_not_a_secret(self):
+        """.env.example holds placeholders: an agent reads it and updates it (a write needs a read first)."""
+        self.assertEqual(self.action("backend", "read", ".env.example"), "allow")
+        self.assertNotEqual(self.action("backend", "read", ".env.production"), "allow")
 
 
 def load_yaml():

@@ -9,9 +9,16 @@ features, the major for changes that break existing projects.
 ## Unreleased
 
 ### Template
-- The agent job on GitHub allows 60 turns (was 40): claude-code-action marks
-  a run that goes past `--max-turns` as failed even when it opened its PR, and
-  a first task took 47.
+- The GitHub agent jobs (task, `@claude`, review, split) have no `--max-turns`:
+  claude-code-action marks a run as failed when it counts more turns than the
+  limit, even when the run opened its PR (a task of 86 turns under a limit of
+  60). They are bounded by `timeout-minutes` (`claude.yml` gets 20). GitLab
+  keeps its `--max-turns`.
+- The task job allows `node`, `ls`, `cat`, `sed` and `mkdir`: refused commands
+  cost a turn each. The hook `block-infra-commands.sh` now also blocks reading
+  `.env`, `.env.local`... and `secrets/` through the shell. `.env.example`
+  (placeholders) is readable and writable in Claude Code and OpenCode: the
+  broad `.env.*` read rule stopped an agent from updating it.
 - Manual: with a matrix `build-test` (monorepo), branch protection requires
   the summary job (`ci-ok`), not `build-test`.
 - `clean-architecture` skill for the backend, preloaded by `backend`. `setup`

@@ -131,13 +131,16 @@ Environment variables `AGENT_TEAM_TRACKER`, `AGENT_TEAM_STARTER` and
 Agent team adds no fees: you pay the model provider (an API key, billed per
 token) or use your subscription's quota, plus CI minutes for runs in CI. A
 run's cost depends on the model, the size of the task and of the code it
-reads, so the template bounds each run instead:
+reads, so the template bounds each run instead. On GitHub the bound is time,
+not turns: claude-code-action marks a run as failed when it counts more turns
+than `--max-turns`, even if the run opened its pull request.
+
 
 | Run | Limit |
 |---|---|
-| a task, Claude Code on GitHub | 60 turns, 60 minutes |
+| a task, Claude Code on GitHub | 60 minutes |
 | a task, Claude Code on GitLab | 30 turns |
-| an `@claude` mention, an `ai-review` review | 15 turns each |
+| an `@claude` mention, an `ai-review` review, a split | 20 minutes each |
 | Codex or OpenCode jobs | 60 minutes |
 
 A turn is one model response, with its tool calls. Every run compacts its

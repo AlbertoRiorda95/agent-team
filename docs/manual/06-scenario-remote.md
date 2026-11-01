@@ -138,7 +138,7 @@ role. It runs on any tool, routed like a role (`AGENT_RUNNERS`:
 - `@claude <request>` in a comment on an issue or a pull request, or on a
   line of its diff: Claude answers or makes the change on that branch. This
   is how you iterate with the agent on its pull request; comments without
-  `@claude` start nothing. Each mention is one run (up to 15 turns).
+  `@claude` start nothing. Each mention is one run (20 minutes at most).
 - Label a pull request `ai-review` for two reviews in parallel: one against
   the project's rules (inline comments), one against the issue and the spec.
   They never approve or block. Remove and re-add the label to review again.
@@ -293,7 +293,7 @@ changes on a branch:
 - Each task is one agent run, and each `@claude` mention one more. The CI
   minutes are those of your plan. Each run's summary page shows the tokens
   and the cost it used ([9. Measure it](09-reference.md#measure-it)).
-- Agents in CI use `--max-turns` limits, compact at 200,000 tokens and never
+- Agents in CI are bounded by the job timeout, compact at 200,000 tokens and never
   run in the background, so a run ends with a merge request or a comment
   saying why it could not.
 - Agents never merge, never push to `main`, never apply infrastructure. The

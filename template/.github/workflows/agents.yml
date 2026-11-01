@@ -88,9 +88,8 @@ jobs:
           # CUSTOMIZE: the build and test commands of your stack (npm here)
           claude_args: >-
             --agent ${{ steps.role.outputs.name }}
-            --max-turns 60
             --model ${{ contains(fromJSON('["agent:designer","agent:frontend"]'), github.event.label.name) && 'claude-sonnet-5-5' || 'claude-opus-5-5' }}
-            --allowedTools "Read,Write,Edit,Glob,Grep,Bash(git:*),Bash(npm:*),Bash(npx:*),Bash(gh pr create:*),Bash(gh pr edit:*),Bash(gh pr view:*),Bash(gh issue view:*),Bash(gh issue comment:*)"
+            --allowedTools "Read,Write,Edit,Glob,Grep,Bash(git:*),Bash(npm:*),Bash(npx:*),Bash(node:*),Bash(ls:*),Bash(cat:*),Bash(sed:*),Bash(mkdir:*),Bash(gh pr create:*),Bash(gh pr edit:*),Bash(gh pr view:*),Bash(gh issue view:*),Bash(gh issue comment:*)"
       # Tokens and cost of this run: in the job summary, and as the usage artifact (scripts/usage.py).
       - name: Usage
         if: always()
