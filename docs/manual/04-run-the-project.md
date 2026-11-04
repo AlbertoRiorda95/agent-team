@@ -58,6 +58,16 @@ merge request: the issues are created from its branch, and dispatch keeps a
 task waiting, with "spec ... not merged", until its spec is ready on the main
 branch, where the agents read it.
 
+**Issues can also appear without `--to-issues`.** With the `spec-sync` feature
+the merge of the design pull request is enough: the sync creates the issues of
+the new rows by itself, without asking ([When a spec
+changes](#when-a-spec-changes-after-its-issues-exist)). They are the rows of the
+spec's task breakdown, one per role (`Feature · 1/4 · backend: ...`): the
+designer wrote that division, it is not a split. Nobody has started: the issues
+have no `agent:<role>` label until you add it or run dispatch. `--to-issues`
+only brings the issues forward, to before the merge. If you do not want issues
+created on merge, leave `spec-sync` out of the profile and use `create-issues`.
+
 ### Example: milestone M1, from Design: issues to running tasks
 
 Milestone M1 (named "Studio") has two "Design:" issues, #82 `projects` and
@@ -326,8 +336,10 @@ Who applies it:
 - **create-issues**, whenever you run it: new rows, and the same rewrites.
 - **The `spec-sync` feature**, if you want it automatic: create-issues runs by
   itself, without asking, every time a change to `docs/design/` reaches the
-  main branch. It only creates and rewrites issues of tasks not started; it
-  never closes or starts one.
+  main branch, so the merge of a design pull request is enough to get the
+  issues of its new rows, with or without `--to-issues`. It only creates and
+  rewrites issues of tasks not started; it never closes or starts one, and the
+  issues it creates have no `agent:<role>` label.
 
 ```mermaid
 flowchart TD

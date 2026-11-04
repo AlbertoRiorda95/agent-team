@@ -48,6 +48,9 @@ features, the major for changes that break existing projects.
   `ci/agent-owner.sh` that the GitHub prompts (Claude, OpenCode, Codex) and the
   GitLab prompts use, and `ci/agent-mr.sh` posting a no-change answer as a note
   on the issue. "Specs before code" in `AGENTS.md` and `team.md` point to it.
+- Manual: the issues also appear without `--to-issues` when `spec-sync` is on
+  (the merge of the design pull request creates them, with no agent label);
+  the task breakdown rows are not a split.
 - Manual: with a matrix `build-test` (monorepo), branch protection requires
   the summary job (`ci-ok`), not `build-test`.
 - `clean-architecture` skill for the backend, preloaded by `backend`. `setup`

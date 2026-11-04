@@ -97,7 +97,7 @@ CI*. They do not gate the commands: `/agent-team:split-issue`,
 | `team-tasks` | [team tasks](04-run-the-project.md#team-tasks): one agent does a whole issue across several roles, without subagents |
 | `split` | the split proposed on the issue itself in CI, when you add the `agent:split` label |
 | `dispatch` | GitHub: dispatch runs by itself every time an issue closes |
-| `spec-sync` | the issues are updated by themselves every time a spec change is merged ([4. When a spec changes](04-run-the-project.md#when-a-spec-changes-after-its-issues-exist)) |
+| `spec-sync` | the issues are created and updated by themselves every time a spec change is merged, without asking ([4. When a spec changes](04-run-the-project.md#when-a-spec-changes-after-its-issues-exist)) |
 | `litellm` | a LiteLLM gateway, to reach many model providers with a budget per role ([7. LiteLLM](07-scenario-custom.md#litellm-one-gateway-for-many-providers)) |
 
 Every template file and section belongs to some part of the profile.

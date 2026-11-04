@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="light dark">
-<meta name="manual-source" content="sha256:79c30cebd448bc68d3400ffefa87786154e82def0b147121f43e62b843bfab0a">
+<meta name="manual-source" content="sha256:c485b195e76462e7ab28db4dec5577a6219066c04c635e5d0a45327055ad1955">
 <meta name="manual-builder" content="python-markdown 3.11.2">
 <title>Agent team: user manual</title>
 <style>
@@ -760,7 +760,7 @@ CI</em>. They do not gate the commands: <code>/agent-team:split-issue</code>,
 </tr>
 <tr>
 <td><code>spec-sync</code></td>
-<td>the issues are updated by themselves every time a spec change is merged (<a href="#c04-when-a-spec-changes-after-its-issues-exist">4. When a spec changes</a>)</td>
+<td>the issues are created and updated by themselves every time a spec change is merged, without asking (<a href="#c04-when-a-spec-changes-after-its-issues-exist">4. When a spec changes</a>)</td>
 </tr>
 <tr>
 <td><code>litellm</code></td>
@@ -942,6 +942,15 @@ per issue. They do not wait for the merge of the design (or setup)
 merge request: the issues are created from its branch, and dispatch keeps a
 task waiting, with "spec ... not merged", until its spec is ready on the main
 branch, where the agents read it.</p>
+<p><strong>Issues can also appear without <code>--to-issues</code>.</strong> With the <code>spec-sync</code> feature
+the merge of the design pull request is enough: the sync creates the issues of
+the new rows by itself, without asking (<a href="#c04-when-a-spec-changes-after-its-issues-exist">When a spec
+changes</a>). They are the rows of the
+spec's task breakdown, one per role (<code>Feature · 1/4 · backend: ...</code>): the
+designer wrote that division, it is not a split. Nobody has started: the issues
+have no <code>agent:&lt;role&gt;</code> label until you add it or run dispatch. <code>--to-issues</code>
+only brings the issues forward, to before the merge. If you do not want issues
+created on merge, leave <code>spec-sync</code> out of the profile and use <code>create-issues</code>.</p>
 <h3 id="c04-example-milestone-m1-from-design-issues-to-running-tasks">Example: milestone M1, from Design: issues to running tasks</h3>
 <p>Milestone M1 (named "Studio") has two "Design:" issues, #82 <code>projects</code> and</p>
 <h1 id="c04-83-providers-and-models">83 <code>providers-and-models</code>:</h1>
@@ -1253,8 +1262,10 @@ and correct a row. Every task issue carries a fingerprint of its row
 <li><strong>create-issues</strong>, whenever you run it: new rows, and the same rewrites.</li>
 <li><strong>The <code>spec-sync</code> feature</strong>, if you want it automatic: create-issues runs by
   itself, without asking, every time a change to <code>docs/design/</code> reaches the
-  main branch. It only creates and rewrites issues of tasks not started; it
-  never closes or starts one.</li>
+  main branch, so the merge of a design pull request is enough to get the
+  issues of its new rows, with or without <code>--to-issues</code>. It only creates and
+  rewrites issues of tasks not started; it never closes or starts one, and the
+  issues it creates have no <code>agent:&lt;role&gt;</code> label.</li>
 </ul>
 <pre class="mermaid">flowchart TD
   R[&quot;review changes the spec&quot;] --&gt; M[&quot;merge into main&quot;]
