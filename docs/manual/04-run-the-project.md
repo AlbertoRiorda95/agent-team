@@ -597,6 +597,31 @@ label on GitHub or `AI_FLOW_ROLE=team` on GitLab
 asking the lead for a team task. `create-issues --team` creates one such
 issue per ready spec.
 
+## Requests without a spec
+
+Not everything is a task with a spec: "check that this was done as the design
+says", "check that this case is tested, and add the test". Open an issue with
+the **Request to an agent** template (it adds the `request` label), say what to
+check and where, and start it like any task: `agent:team` for a request that
+spans roles, or `agent:<role>` to keep it in one role's folders. On GitLab the
+template adds `~request` (create the label first) and you start it with
+`TASK_ID` as usual.
+
+The agent does not stop for the missing spec. It reads the spec or the code
+the request is about and decides (`docs/agents/requests.md`):
+
+- **a check**: it changes nothing and comments on the issue with what it
+  looked at and found, with files and lines. You close the issue.
+- **a check and a change**: it makes the smallest change, test first, and
+  opens a pull request that closes the issue.
+- it stops, and says so, when the request would change behavior a spec
+  describes otherwise, needs files outside the role's folders, or is large
+  enough to need a spec or a split.
+
+`dispatch` never starts requests: the label of the role does. The agent that
+starts it owns it, as with any task (`/agent` on its pull request reaches the
+same agent).
+
 ## On-demand roles
 
 Dispatch never starts these: you ask for them.

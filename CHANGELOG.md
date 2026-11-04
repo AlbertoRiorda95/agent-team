@@ -36,6 +36,18 @@ features, the major for changes that break existing projects.
 - `/agent` replies with `gh issue comment`: the role's `tools:` list leaves out
   the action's comment tool, so the run ended with the "I'll analyze this"
   placeholder and no answer.
+- Requests without a spec: an issue with the `request` label ("check that X
+  was done this way", "check this case is tested and add it") is carried out
+  by `agent:team` or any `agent:<role>` without stopping for a missing spec,
+  following the new `docs/agents/requests.md`. A check ends with a comment on
+  the issue (a note on GitLab) and no pull request, and the person who asked
+  closes it; a check with a change opens a pull request. The agent stops when
+  the request contradicts a spec, needs another role's files or needs a spec.
+  New: the "Request to an agent" issue template (GitHub and GitLab), the
+  `request` label in `create-labels.sh`, a `request` output of
+  `ci/agent-owner.sh` that the GitHub prompts (Claude, OpenCode, Codex) and the
+  GitLab prompts use, and `ci/agent-mr.sh` posting a no-change answer as a note
+  on the issue. "Specs before code" in `AGENTS.md` and `team.md` point to it.
 - Manual: with a matrix `build-test` (monorepo), branch protection requires
   the summary job (`ci-ok`), not `build-test`.
 - `clean-architecture` skill for the backend, preloaded by `backend`. `setup`

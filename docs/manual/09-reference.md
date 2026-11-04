@@ -95,6 +95,7 @@ Environment variables `AGENT_TEAM_TRACKER`, `AGENT_TEAM_STARTER` and
 | `agent:split` | GitHub: Claude proposes a split in a comment (GitLab: `SPLIT_ISSUE`) |
 | `hold` | dispatch never starts this task |
 | `alignment-needed` | the merge request changes something other roles rely on |
+| `request` | a check or small change with no spec: the agent follows `docs/agents/requests.md` |
 | `ai-review` | two reviews of the pull request, rules and spec |
 
 ## CI secrets and variables

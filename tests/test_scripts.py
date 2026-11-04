@@ -94,7 +94,7 @@ class CreateLabels(unittest.TestCase):
         got = self.labels({"ci": "github", "tracker": "github",
                            "features": ["ci-agents", "dispatch", "split", "team-tasks"]})
         roles = {f"agent:{r}" for r in ("designer", "frontend", "backend", "optimizer", "devops", "security", "writer")}
-        self.assertEqual(got, roles | {"agent:team", "agent:split", "hold", "alignment-needed", "ai-review",
+        self.assertEqual(got, roles | {"agent:team", "agent:split", "hold", "alignment-needed", "request", "ai-review",
                                        "runner:claude", "runner:opencode", "runner:codex"})
 
     def test_only_the_roles_of_the_project(self):
@@ -234,6 +234,14 @@ class AgentOwner(unittest.TestCase):
         self.assertEqual(rc, 0, log)
         self.assertEqual((out["role"], out["runner"], out["issue"], out["mode"]), ("writer", "opencode", "5", "task"))
         self.assertIn("gh issue edit 5 --add-label runner:opencode", calls)
+
+    def test_a_request_is_flagged(self):
+        """An issue with the request label has no spec: the prompts follow docs/agents/requests.md."""
+        for labels, want in ((["agent:team", "request"], "true"), (["agent:team"], "false")):
+            with self.subTest(labels=labels):
+                rc, out, log, _ = self.owner({"issues": {"5": labels}, "prs": {}}, "github",
+                                             EVENT="issues", NUMBER="5", LABEL="agent:team")
+                self.assertEqual((rc, out["role"], out["request"]), (0, "team", want), log)
 
     def test_the_recorded_tool_wins(self):
         """Changing AGENT_RUNNERS does not move a task that has started."""

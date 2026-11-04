@@ -11,6 +11,8 @@ SUMMARY=/tmp/agent-summary.md
 if [ -z "$(git status --porcelain)" ]; then
   echo "The $H agent changed nothing."
   [ -s "$SUMMARY" ] && cat "$SUMMARY"
+  # a request that was only a check: the answer goes to the issue
+  [ -n "${TASK_ID:-}" ] && [ -s "$SUMMARY" ] && glab issue note "$TASK_ID" --message "$(cat "$SUMMARY")"
   exit 0
 fi
 ROLE="${AI_FLOW_ROLE:-agent}"
