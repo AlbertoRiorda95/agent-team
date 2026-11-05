@@ -56,6 +56,9 @@ features, the major for changes that break existing projects.
   runs, and all agent jobs, `codex` included, have `packages: read`. Without
   them an agent could not `npm view` or `npm ci` a team library on GitHub
   Packages (`E401 ... authentication token not provided`).
+- Manual: "When another agent has to fix it" (chapter 4): a new task for the
+  other role, handing the pull request to another role by changing the
+  `agent:` label of its issue, or `agent:team`.
 - Manual: with a matrix `build-test` (monorepo), branch protection requires
   the summary job (`ci-ok`), not `build-test`.
 - `clean-architecture` skill for the backend, preloaded by `backend`. `setup`

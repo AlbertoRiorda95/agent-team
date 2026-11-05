@@ -525,6 +525,36 @@ model. Another agent would not have the role's boundaries.
 
 In the custom scenario these actions are your orchestrator's.
 
+### When another agent has to fix it
+
+An agent tells you, in its pull request, that the problem is for another role.
+`/agent` always reaches the owner, so asking the owner to "let the frontend do
+it" changes nothing. Three ways, from the cleanest:
+
+- **Another task for the other role** (usually right). The problem is a
+  consequence on another role's code. The agent flags it with an
+  `alignment-needed` label and an entry in `docs/alignment/`
+  ([Alignment](#alignment)). After the merge, open an issue for that role and
+  start it with its `agent:<role>` label. With no spec, use the **Request to an
+  agent** template ([Requests without a spec](#requests-without-a-spec)) and put
+  the pull request's link in it. Each role keeps its own branch, folders and
+  review.
+- **Hand the pull request to another role.** The owner is read from the issue
+  the pull request closes: on that issue, remove `agent:<old role>` and add
+  `agent:<new role>` (two `agent:` labels make `/agent` refuse), remove
+  `runner:<tool>` too if the new agent should use another tool, then comment
+  `/agent <what to do>` on the pull request. The new role works on the same
+  branch, within its own folders and hooks, so it cannot fix what lies in a
+  third role's folders.
+- **One agent for every role the task touches.** Hand it to `agent:team` the
+  same way: one session with the rules of each role, no subagents. For a small
+  pull request whose roles are tightly coupled; prefer separate tasks
+  otherwise.
+
+On GitLab the owner is read from `TASK_ID`: change the labels of that issue the
+same way and run the pipeline again on the merge request's branch with
+`AI_FLOW_ROLE` set to the new role if needed (not yet run on GitLab).
+
 After a rejected or stopped run, the issue is still marked as started: remove
 `agent:<role>` before starting it again or letting dispatch pick it up.
 

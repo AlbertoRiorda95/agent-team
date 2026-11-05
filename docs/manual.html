@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="light dark">
-<meta name="manual-source" content="sha256:c485b195e76462e7ab28db4dec5577a6219066c04c635e5d0a45327055ad1955">
+<meta name="manual-source" content="sha256:2f3cc669192be78a83530e64a96ec4c1fe1c0e0585baa7066ed6e41f97ee5da7">
 <meta name="manual-builder" content="python-markdown 3.11.2">
 <title>Agent team: user manual</title>
 <style>
@@ -1477,6 +1477,34 @@ model. Another agent would not have the role's boundaries.
   answers to use <code>/agent</code>.
 - Plain review comments and "request changes" start nothing.</p>
 <p>In the custom scenario these actions are your orchestrator's.</p>
+<h3 id="c04-when-another-agent-has-to-fix-it">When another agent has to fix it</h3>
+<p>An agent tells you, in its pull request, that the problem is for another role.
+<code>/agent</code> always reaches the owner, so asking the owner to "let the frontend do
+it" changes nothing. Three ways, from the cleanest:</p>
+<ul>
+<li><strong>Another task for the other role</strong> (usually right). The problem is a
+  consequence on another role's code. The agent flags it with an
+  <code>alignment-needed</code> label and an entry in <code>docs/alignment/</code>
+  (<a href="#c04-alignment">Alignment</a>). After the merge, open an issue for that role and
+  start it with its <code>agent:&lt;role&gt;</code> label. With no spec, use the <strong>Request to an
+  agent</strong> template (<a href="#c04-requests-without-a-spec">Requests without a spec</a>) and put
+  the pull request's link in it. Each role keeps its own branch, folders and
+  review.</li>
+<li><strong>Hand the pull request to another role.</strong> The owner is read from the issue
+  the pull request closes: on that issue, remove <code>agent:&lt;old role&gt;</code> and add
+  <code>agent:&lt;new role&gt;</code> (two <code>agent:</code> labels make <code>/agent</code> refuse), remove
+  <code>runner:&lt;tool&gt;</code> too if the new agent should use another tool, then comment
+  <code>/agent &lt;what to do&gt;</code> on the pull request. The new role works on the same
+  branch, within its own folders and hooks, so it cannot fix what lies in a
+  third role's folders.</li>
+<li><strong>One agent for every role the task touches.</strong> Hand it to <code>agent:team</code> the
+  same way: one session with the rules of each role, no subagents. For a small
+  pull request whose roles are tightly coupled; prefer separate tasks
+  otherwise.</li>
+</ul>
+<p>On GitLab the owner is read from <code>TASK_ID</code>: change the labels of that issue the
+same way and run the pipeline again on the merge request's branch with
+<code>AI_FLOW_ROLE</code> set to the new role if needed (not yet run on GitLab).</p>
 <p>After a rejected or stopped run, the issue is still marked as started: remove
 <code>agent:&lt;role&gt;</code> before starting it again or letting dispatch pick it up.</p>
 <h2 id="c04-change-the-plan">Change the plan</h2>
