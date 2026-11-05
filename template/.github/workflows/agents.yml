@@ -94,6 +94,7 @@ jobs:
       pull-requests: write
       id-token: write
       actions: read
+      packages: read     # the team's packages on GitHub Packages (ci/registry.sh)
     env:
       # The model of each role, for the task and for every /agent request on it.
       MODEL: ${{ contains(fromJSON('["agent:designer","agent:frontend"]'), needs.route.outputs.label) && 'claude-sonnet-5-5' || 'claude-opus-5-5' }}
@@ -105,6 +106,12 @@ jobs:
       CLAUDE_CODE_AUTO_COMPACT_WINDOW: "200000"
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803  # v6.1.0
+      # The team's registry (ci/registry.env): read token from the secret, else the job token
+      - name: Registry login (read only)
+        run: ./ci/registry.sh login
+        env:
+          REGISTRY_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
+          GITHUB_TOKEN: ${{ github.token }}
       # The session runs as the role's agent (--agent): its tools, and the role's hooks
       # (scripts/hooks/role-hooks.sh), which apply only to a named agent.
       - if: needs.route.outputs.mode == 'task'
@@ -206,10 +213,17 @@ jobs:
       issues: write
       pull-requests: write
       id-token: write
+      packages: read     # the team's packages on GitHub Packages (ci/registry.sh)
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803  # v6.1.0
         with:
           ref: ${{ needs.route.outputs.branch }}
+      # The team's registry (ci/registry.env): read token from the secret, else the job token
+      - name: Registry login (read only)
+        run: ./ci/registry.sh login
+        env:
+          REGISTRY_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
+          GITHUB_TOKEN: ${{ github.token }}
       - name: Prompt
         id: prompt
         env:
@@ -315,6 +329,7 @@ jobs:
       contents: read
       issues: read
       pull-requests: read
+      packages: read     # the team's packages on GitHub Packages (ci/registry.sh)
     outputs:
       summary: ${{ steps.codex.outputs.final-message }}
     steps:

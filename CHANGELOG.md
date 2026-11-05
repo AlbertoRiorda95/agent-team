@@ -51,6 +51,11 @@ features, the major for changes that break existing projects.
 - Manual: the issues also appear without `--to-issues` when `spec-sync` is on
   (the merge of the design pull request creates them, with no agent label);
   the task breakdown rows are not a split.
+- The GitHub agent jobs (`claude` and `opencode` in `agents.yml`, `claude.yml`)
+  log in to the team's registry (`./ci/registry.sh login`) before the agent
+  runs, and all agent jobs, `codex` included, have `packages: read`. Without
+  them an agent could not `npm view` or `npm ci` a team library on GitHub
+  Packages (`E401 ... authentication token not provided`).
 - Manual: with a matrix `build-test` (monorepo), branch protection requires
   the summary job (`ci-ok`), not `build-test`.
 - `clean-architecture` skill for the backend, preloaded by `backend`. `setup`

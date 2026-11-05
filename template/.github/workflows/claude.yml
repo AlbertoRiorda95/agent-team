@@ -66,10 +66,17 @@ jobs:
       issues: write
       id-token: write
       actions: read
+      packages: read     # the team's packages on GitHub Packages (ci/registry.sh)
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803  # v6.1.0
         with:
           fetch-depth: 1
+      # The team's registry (ci/registry.env): read token from the secret, else the job token
+      - name: Registry login (read only)
+        run: ./ci/registry.sh login
+        env:
+          REGISTRY_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
+          GITHUB_TOKEN: ${{ github.token }}
       - uses: anthropics/claude-code-action@f27be6b65a4652f08a2ba3cff79114829b588967  # v1.0.252
         id: claude
         env:
