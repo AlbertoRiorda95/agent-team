@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="light dark">
-<meta name="manual-source" content="sha256:49793898ba28b19562fd387864c5f52e9b17b195ab84ff87b903942eb5ffcc6f">
+<meta name="manual-source" content="sha256:f4a9e6ec28d8d00df77186773cac9de27cf2241f5f68fc61748f0a2bb9f277b1">
 <meta name="manual-builder" content="python-markdown 3.11.2">
 <title>Agent team: user manual</title>
 <style>
@@ -288,7 +288,7 @@ agents' work as for yours.</p>
 </tr>
 <tr>
 <td><strong>Security in the loop</strong></td>
-<td>the agent runs a security review on its diff before opening the merge request; the CI scanners run on every change; the security role, when you add it, attacks the running application within a scope you set</td>
+<td>the backend agent runs a security review on its diff before opening the merge request when it touches requests, authentication, permissions, secrets or data access; the CI scanners run on every change; the security role, when you add it, attacks the running application within a scope you set</td>
 </tr>
 <tr>
 <td><strong>Humans decide</strong></td>

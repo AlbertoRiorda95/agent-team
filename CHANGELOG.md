@@ -126,6 +126,11 @@ features, the major for changes that break existing projects.
   stops short shows what to allow.
 
 ### Changed
+- The security-review skill no longer runs before every merge request. The
+  backend agent runs it only when its diff touches requests, authentication,
+  permissions, secrets or data access, and the team agent not at all: on
+  documentation-only pull requests it cost tokens for nothing. The CI scanners,
+  `ai-review` and the security role on demand cover the rest.
 - Team tasks run as one agent, `team` (`docs/roles/team.md`, with an agent
   for Claude Code, Codex and OpenCode), instead of a coordinator that
   delegated each role to a subagent: the coordination cost tokens and gave

@@ -82,7 +82,7 @@ agents' work as for yours.
 | **Small, reviewable changes** | one task per role, one branch and one merge request each, with a description that says what changed, the evidence, how dangerous the merge is and what was not done |
 | **Contracts and alignment** | the API contract changes before or with the code, and a change other roles rely on is recorded and reviewed ([4. Alignment](04-run-the-project.md#alignment)) |
 | **Continuous integration** | every merge request, yours or an agent's, goes through the same CI: build, type check, tests, static analysis, SBOM and licenses, vulnerabilities, secrets, misconfigurations, UI tests. A red CI is part of the task: the agent fixes the cause and never weakens the check. The `/local-ci` skill runs the same checks on your computer and fixes the failures, for convenience or when there is no real CI |
-| **Security in the loop** | the agent runs a security review on its diff before opening the merge request; the CI scanners run on every change; the security role, when you add it, attacks the running application within a scope you set |
+| **Security in the loop** | the backend agent runs a security review on its diff before opening the merge request when it touches requests, authentication, permissions, secrets or data access; the CI scanners run on every change; the security role, when you add it, attacks the running application within a scope you set |
 | **Humans decide** | agents never push to `main` and never merge; you review and merge, and branch protection makes the CI result binding |
 
 These are defaults, not walls: the rules are in `AGENTS.md` and

@@ -333,7 +333,7 @@ GitHub Actions. Show the list and ask which ones fit the stack:
 | supabase-postgres-best-practices | Postgres | backend, optimizer |
 | api-design-principles | there is an HTTP API | backend |
 | clean-architecture (shipped in the template, nothing to install) | the backend is in a language and framework that let you layer the code (TypeScript, Java, Kotlin, C#, Python, Go, PHP...) and has real business rules, not only CRUD over a database | backend (preloaded) |
-| security-review | always | security (preloaded), backend (on demand) |
+| security-review | always | security (preloaded), backend (when its diff touches requests, auth, permissions, secrets or data access) |
 | code-simplifier | always | optimizer |
 | gha-security-review, github-actions-templates | GitHub Actions | devops |
 
