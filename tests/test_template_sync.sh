@@ -7,6 +7,7 @@ SYNC="$ROOT/scripts/template_sync.py"
 TMP=$(mktemp -d)
 trap 'rm -rf "$TMP"' EXIT
 fail() { echo "FAIL: $*" >&2; exit 1; }
+sedi() { sed -i.bak "$1" "$2" && rm "$2.bak"; }   # GNU and BSD (macOS) sed
 
 cp -rL "$ROOT/template" "$TMP/t1"
 mkdir "$TMP/proj" && git -C "$TMP/proj" init -q
@@ -19,9 +20,9 @@ python3 "$SYNC" install --template "$TMP/t1" --project "$TMP/proj" >/dev/null 2>
 
 # a new template version, and changes on the project side
 cp -r "$TMP/t1" "$TMP/t2"
-sed -i 's/^- Test: `npm test`/- Test: `pnpm test`/' "$TMP/proj/AGENTS.md"             # both change this line
-sed -i 's/^- Test: `npm test`/- Test: `npm run test:all`/' "$TMP/t2/AGENTS.md"
-sed -i 's/^## Rules for everyone/## Rules for everyone (v2)/' "$TMP/t2/AGENTS.md"        # template only
+sedi 's/^- Test: `npm test`/- Test: `pnpm test`/' "$TMP/proj/AGENTS.md"             # both change this line
+sedi 's/^- Test: `npm test`/- Test: `npm run test:all`/' "$TMP/t2/AGENTS.md"
+sedi 's/^## Rules for everyone/## Rules for everyone (v2)/' "$TMP/t2/AGENTS.md"        # template only
 printf '\n- project rule\n' >> "$TMP/proj/AGENTS.md"                                       # project only
 echo "# upstream" >> "$TMP/t2/docs/roles/backend.md"                                       # untouched by project
 echo "new" > "$TMP/t2/docs/agents/new.md"                                                  # new file

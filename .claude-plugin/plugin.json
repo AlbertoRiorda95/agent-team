@@ -1,7 +1,7 @@
 {
   "name": "agent-team",
   "displayName": "Agent team",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "description": "A development team of AI agents for Claude Code, OpenCode and Codex (designer, frontend, backend, devops) with merge requests under your control: project template, design studio, issues from specs, issue split and safe template upgrades.",
   "author": {
     "name": "Alberto Riorda"

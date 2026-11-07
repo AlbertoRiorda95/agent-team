@@ -18,7 +18,7 @@ Split issue 12 first; create on this issue refuses while that task does not exis
 Usage:
   python3 scripts/split-issue.py check   <plan.json>
   python3 scripts/split-issue.py propose <issue> <plan.json>
-  python3 scripts/split-issue.py create  <issue> [--team]
+  python3 scripts/split-issue.py create  <issue>
 
 The plan format is described in scripts/agentteam/plans.py. The created issues
 get no labels: start each task with agent:<role> or scripts/dispatch.py. Running
@@ -89,13 +89,11 @@ def resolve_external(trk, issue, tasks, done):
     return found
 
 
-def create(trk, issue, team):
+def create(trk, issue):
     body = latest_plan(trk, issue)
     plan = plans.parse(body) if body else None
     if not plan or plans.validate(plan, issue.number):
         sys.exit(f"No valid proposal on {issue.id}: propose a split first.")
-    if team and not plan.get("team"):
-        sys.exit("The proposal does not suggest a team task: confirm without --team, or ask for a new proposal.")
     approver = os.environ.get("SPLIT_APPROVER", "")
     by = f" (approved by @{approver})" if approver else ""
     done = {}
@@ -103,10 +101,6 @@ def create(trk, issue, team):
         done = keyed_children(trk, issue)
     except core.Unsupported:
         pass
-    if team and set(done) - {"team"}:
-        sys.exit(f"{issue.id} already has task issues from this split: it cannot also become a team task.")
-    if not team and "team" in done:
-        sys.exit(f"{issue.id} already has a team-task issue from this split ({done['team'].id}).")
     ms_ref = None
     if issue.milestone:
         try:
@@ -116,7 +110,7 @@ def create(trk, issue, team):
     short = issue.title if len(issue.title) <= 60 else issue.title[:57].rstrip() + "..."
     spec = f"\n\nSpec: `{plan['spec']}`" if plan.get("spec") else ""
     tasks, made, notes = plan["tasks"], [], []
-    external = {} if team else resolve_external(trk, issue, tasks, done)
+    external = resolve_external(trk, issue, tasks, done)
 
     def new(title, body, key):
         child = trk.create_issue(title, body + "\n\n" + trk.marker(f"split-of: {issue.id} key: {key}"), ms_ref, parent=issue)
@@ -125,40 +119,29 @@ def create(trk, issue, team):
         print(f"created {child.id}  {title}")
         return child
 
-    if team:
-        if "team" in done:
-            print(f"exists  {done['team'].id}  team task")
-        else:
-            rows = "\n".join(f"| {i} | {t['role']} | {t['title']} |" for i, t in enumerate(tasks, 1))
-            acc = "\n".join(f"- [ ] {a}" for t in tasks for a in t["acceptance"])
-            new(f"{short} · team task",
-                f"## Parent\n{issue.id}{by}{spec}\n\n## Task\n{plan['summary']}\n\n| # | Role | Task |\n|---|---|---|\n{rows}\n\n"
-                f"## Acceptance criteria\n{acc}\n\nRoles: {', '.join(plan['team']['roles'])}\n\n"
-                f"{specs.start_line(trk, 'team')}", "team")
-    else:
-        for i, t in enumerate(tasks, 1):
-            if t["key"] in done:
-                print(f"exists  {done[t['key']].id}  {t['title']}")
-                continue
-            deps = [external[d] if d in external else done[d] for d in t.get("depends_on", [])
-                    if d in external or d in done]
-            acc = "\n".join(f"- [ ] {a}" for a in t["acceptance"])
-            files = "\n".join(f"- `{f}`" for f in t.get("files", [])) or "-"
-            child = new(f"{short} · {i}/{len(tasks)} · {t['role']}: {t['title']}"[:250],
-                        f"## Parent\n{issue.id}{by}{spec}\n\n## Task\n{t['task']}\n\n## Acceptance criteria\n{acc}\n\n"
-                        f"## Files\n{files}\n\n## Depends on\n{', '.join(d.id for d in deps) or 'none'}\n\n"
-                        f"{specs.start_line(trk, t['role'])}", t["key"])
-            for d in deps:
-                if not trk.add_dependency(child, d):
-                    notes.append(f"{child.id} depends on {d.id}: written in the issue, not as a native relation")
+    for i, t in enumerate(tasks, 1):
+        if t["key"] in done:
+            print(f"exists  {done[t['key']].id}  {t['title']}")
+            continue
+        deps = [external[d] if d in external else done[d] for d in t.get("depends_on", [])
+                if d in external or d in done]
+        acc = "\n".join(f"- [ ] {a}" for a in t["acceptance"])
+        files = "\n".join(f"- `{f}`" for f in t.get("files", [])) or "-"
+        child = new(f"{short} · {i}/{len(tasks)} · {t['role']}: {t['title']}"[:250],
+                    f"## Parent\n{issue.id}{by}{spec}\n\n## Task\n{t['task']}\n\n## Acceptance criteria\n{acc}\n\n"
+                    f"## Files\n{files}\n\n## Depends on\n{', '.join(d.id for d in deps) or 'none'}\n\n"
+                    f"{specs.start_line(trk, t['role'])}", t["key"])
+        for d in deps:
+            if not trk.add_dependency(child, d):
+                notes.append(f"{child.id} depends on {d.id}: written in the issue, not as a native relation")
     try:
         trk.remove_label(issue, plans.LABEL)
     except core.Unsupported:
         pass
     if made:
-        lst = "\n".join(f"- {c.id} ({core.role_of(c) or 'team'})" for c in made)
+        lst = "\n".join(f"- {c.id} ({core.role_of(c)})" for c in made)
         msg = (f"Created {len(made)} issue(s) from the approved split{by}:\n\n{lst}\n\n"
-               f"Start with {made[0].id}: `agent:{core.role_of(made[0]) or 'team'}`, or scripts/dispatch.py. "
+               f"Start with {made[0].id}: `agent:{core.role_of(made[0])}`, or scripts/dispatch.py. "
                f"No labels were added.")
         if notes:
             msg += "\n\n" + "\n".join(f"- {x}" for x in notes)
@@ -182,7 +165,7 @@ def main(argv):
             trk.comment(issue, plans.render(plan, trk, issue.id))
             print(f"Proposal posted on {issue.id}.")
             return 0
-        create(trk, issue, "--team" in argv[2:])
+        create(trk, issue)
         return 0
     print(__doc__)
     return 2

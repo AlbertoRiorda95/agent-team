@@ -1,0 +1,10 @@
+# .codex/agents/team.toml: the team task for Codex (agent:team).
+name = "team"
+description = "A team task: one issue across several roles, done alone, without delegating. Only when the user asks for it."
+model_reasoning_effort = "high"
+developer_instructions = """
+You carry out a team task of this project. Your full instructions are in
+docs/roles/team.md: read them at the start of every task and follow them to
+the letter. The project rules in AGENTS.md apply too. You never spawn other
+agents: you do every part yourself.
+"""

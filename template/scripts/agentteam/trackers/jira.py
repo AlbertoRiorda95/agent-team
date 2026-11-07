@@ -5,7 +5,10 @@ Configuration: "jira": {"url": "https://you.atlassian.net", "project": "KEY",
 Authentication: JIRA_EMAIL and JIRA_API_TOKEN (Cloud), or JIRA_PAT (Data Center).
 
 Mapping: milestones are versions (Fix Version), sub-issues are sub-tasks,
-dependencies are "Blocks" links, labels are labels. Texts are converted from
+dependencies are "Blocks" links, labels are labels. Jira has one level of
+sub-tasks, so the tasks of a feature issue (key "...#feature") and the parts of
+a sub-task are Tasks with a "Relates" link to their parent instead; children()
+returns both kinds. Texts are converted from
 Markdown to Jira wiki markup; markers are a plain last line "[agent-team] ...".
 """
 import base64
@@ -87,7 +90,8 @@ class Adapter(core.Tracker):
                           labels=f.get("labels") or [], milestone=fv[0]["name"] if fv else None,
                           parent=(f.get("parent") or {}).get("key"), url=f"{self.base}/browse/{i['key']}",
                           author=(f.get("creator") or {}).get("displayName"),
-                          extra={"links": f.get("issuelinks") or []})
+                          extra={"links": f.get("issuelinks") or [],
+                                 "subtask": bool((f.get("issuetype") or {}).get("subtask"))})
 
     def search(self, jql):
         out, token = [], None
@@ -131,21 +135,32 @@ class Adapter(core.Tracker):
                         {"name": title, "description": description, "projectId": int(self.pid())})["id"]
 
     def create_issue(self, title, body, milestone=None, parent=None):
+        linked = parent is not None and (parent.extra.get("subtask") or (core.key_of(parent) or "").endswith("#feature"))
+        sub = parent is not None and not linked
         fields = {"project": {"key": self.project}, "summary": title[:250], "description": md_to_jira(body),
-                  "issuetype": {"name": self.subtask_type if parent is not None else self.issue_type}}
+                  "issuetype": {"name": self.subtask_type if sub else self.issue_type}}
         if milestone:
             fields["fixVersions"] = [{"id": str(milestone)}]
-        if parent is not None:
+        if sub:
             fields["parent"] = {"key": parent.ref}
         r = self.req("POST", "/rest/api/2/issue", {"fields": fields})
-        return core.Issue(r["key"], r["key"], title, body, url=f"{self.base}/browse/{r['key']}",
-                          parent=parent.ref if parent is not None else None)
+        issue = core.Issue(r["key"], r["key"], title, body, url=f"{self.base}/browse/{r['key']}",
+                           parent=parent.ref if sub else None, extra={"links": [], "subtask": sub})
+        if linked:
+            self.link_child(parent, issue)
+        return issue
+
+    def edit_issue(self, issue, title, body):
+        self.req("PUT", f"/rest/api/2/issue/{issue.ref}", {"fields": {"summary": title[:250], "description": md_to_jira(body)}})
 
     def set_milestone(self, issue, milestone_ref):
         self.req("PUT", f"/rest/api/2/issue/{issue.ref}", {"update": {"fixVersions": [{"add": {"id": str(milestone_ref)}}]}})
 
     def children(self, parent):
-        return self.search(f'parent = "{parent.ref}" ORDER BY key ASC')
+        subs = self.search(f'parent = "{parent.ref}" ORDER BY key ASC')
+        linked = [l["inwardIssue"]["key"] for l in self.get(parent.ref).extra.get("links", [])
+                  if (l.get("type") or {}).get("name") == "Relates" and l.get("inwardIssue")]
+        return subs + [self.get(k) for k in linked if k not in {s.ref for s in subs}]
 
     def link_child(self, parent, child):
         self.req("POST", "/rest/api/2/issueLink",

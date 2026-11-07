@@ -42,6 +42,12 @@ Breaking for existing clients: no
 - API: `<METHOD /path>`, integration test on the test database: ...
 - UI: the <screen> page at the spec's viewports, API mocked: ...
 
+## Reuse
+<!-- For each non-trivial part: what is reused and why, or why it is written.
+     Check docs/general/libraries.md (the team's libraries) and what the project
+     already has first; a new third-party dependency is decided here, with the user. -->
+- <part>: <existing module | team library `name` | third-party `name` (license, why) | written here (why)>
+
 ## Decisions
 - YYYY-MM-DD — <decision> — <one-line reason>
 
@@ -50,12 +56,14 @@ Breaking for existing clients: no
 
 ## Task breakdown
 <!-- Issue: leave "-" for scripts/create-issues.py to create the issue; "#12" when an
-     existing issue already tracks the row; "done" when it is finished. -->
+     existing issue already tracks the row; "done" when it is finished.
+     Depends on: row numbers of this spec, or <feature>#<n> for a row of another spec.
+     Monorepo: start the Task with the service it touches, "[orders] Add the endpoint";
+     dispatch then runs one task per role and per service. -->
 | # | Role | Task | Depends on | Issue |
 |---|---|---|---|---|
 | 1 | backend | ... | — | - |
 | 2 | frontend | ... | 1 | - |
-Team task possible: yes / no (roles: ...)
 
 ## Readiness checklist
 - [ ] goal, users and out of scope agreed
@@ -64,5 +72,6 @@ Team task possible: yes / no (roles: ...)
 - [ ] contract changes written, breaking changes approved by the user
 - [ ] acceptance criteria are observable
 - [ ] test seams agreed
+- [ ] reuse decided: team libraries and new dependencies named, or "none"
 - [ ] task breakdown with roles and dependencies
 - [ ] no open questions

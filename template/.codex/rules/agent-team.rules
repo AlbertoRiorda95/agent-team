@@ -1,5 +1,9 @@
 # .codex/rules/agent-team.rules: commands Codex never runs in this project, the
 # same list as .claude/settings.json and scripts/hooks/block-infra-commands.sh.
+# The rules apply even where the hooks do not run (codex exec, CI). They match
+# the start of a command, so an option with a value before the verb
+# (npm --registry x publish) and the reads of credential files (cat ~/.npmrc)
+# are left to the hook.
 # Check a command: codex execpolicy check --pretty --rules .codex/rules/agent-team.rules -- git push --force
 
 prefix_rule(
@@ -34,7 +38,7 @@ prefix_rule(
 )
 
 prefix_rule(
-    pattern = ["kubectl", ["apply", "delete", "patch", "rollout"]],
+    pattern = ["kubectl", ["apply", "delete", "patch", "rollout", "replace", "scale"]],
     decision = "forbidden",
     justification = "Changes to real environments go through a merge request and the pipeline.",
     match = ["kubectl apply -f deploy.yaml"],
@@ -42,7 +46,7 @@ prefix_rule(
 )
 
 prefix_rule(
-    pattern = ["helm", ["install", "upgrade", "uninstall", "rollback"]],
+    pattern = ["helm", ["install", "upgrade", "uninstall", "rollback", "push"]],
     decision = "forbidden",
     justification = "Changes to real environments go through a merge request and the pipeline.",
     match = ["helm upgrade app ./chart"],
@@ -55,4 +59,161 @@ prefix_rule(
     justification = "Images are published by the pipeline.",
     match = ["docker push registry/app:1"],
     not_match = ["docker build ."],
+)
+
+prefix_rule(
+    pattern = [["npm", "pnpm", "yarn", "bun", "cargo"], "publish"],
+    decision = "forbidden",
+    justification = "Packages are published by the release job on a v* tag.",
+    match = ["npm publish", "cargo publish", "bun publish"],
+    not_match = ["npm pack"],
+)
+
+prefix_rule(
+    pattern = ["twine", "upload"],
+    decision = "forbidden",
+    justification = "Packages are published by the release job on a v* tag.",
+    match = ["twine upload dist/*"],
+    not_match = ["twine check dist/*"],
+)
+
+prefix_rule(
+    pattern = [["python", "python3"], "-m", "twine", "upload"],
+    decision = "forbidden",
+    justification = "Packages are published by the release job on a v* tag.",
+    match = ["python3 -m twine upload dist/*"],
+    not_match = ["python3 -m twine check dist/*"],
+)
+
+prefix_rule(
+    pattern = [["poetry", "uv", "flit", "hatch"], "publish"],
+    decision = "forbidden",
+    justification = "Packages are published by the release job on a v* tag.",
+    match = ["poetry publish --build", "uv publish"],
+    not_match = ["uv sync"],
+)
+
+prefix_rule(
+    pattern = ["gem", "push"],
+    decision = "forbidden",
+    justification = "Packages are published by the release job on a v* tag.",
+    match = ["gem push app.gem"],
+    not_match = ["gem build app.gemspec"],
+)
+
+prefix_rule(
+    pattern = [["gh", "glab"], "release", ["create", "upload", "edit"]],
+    decision = "forbidden",
+    justification = "Releases start from a tag the user pushes.",
+    match = ["gh release create v1.0.0"],
+    not_match = ["gh release view"],
+)
+
+prefix_rule(
+    pattern = ["conan", "upload"],
+    decision = "forbidden",
+    justification = "Packages are published by the release job on a v* tag.",
+    match = ["conan upload hello/1.0 -r team"],
+    not_match = ["conan create ."],
+)
+
+prefix_rule(
+    pattern = ["dotnet", "nuget", "push"],
+    decision = "forbidden",
+    justification = "Packages are published by the release job on a v* tag.",
+    match = ["dotnet nuget push app.nupkg"],
+    not_match = ["dotnet nuget list source"],
+)
+
+prefix_rule(
+    pattern = ["npm", "unpublish"],
+    decision = "forbidden",
+    justification = "Packages are published by the release job on a v* tag.",
+    match = ["npm unpublish @team/lib@1.0.0"],
+)
+
+prefix_rule(
+    pattern = [["mvn", "mvnw", "./mvnw"], "deploy"],
+    decision = "forbidden",
+    justification = "Packages are published by the release job on a v* tag.",
+    match = ["mvn deploy", "./mvnw deploy -DskipTests"],
+    not_match = ["mvn verify"],
+)
+
+prefix_rule(
+    pattern = [["mvn", "mvnw", "./mvnw"], ["-B", "--batch-mode", "clean", "-DskipTests"], "deploy"],
+    decision = "forbidden",
+    justification = "Packages are published by the release job on a v* tag.",
+    match = ["mvn -B deploy", "mvn clean deploy"],
+    not_match = ["mvn -B verify"],
+)
+
+prefix_rule(
+    pattern = [["gradle", "gradlew", "./gradlew"], ["publish", "publishToMavenCentral", "publishPlugins"]],
+    decision = "forbidden",
+    justification = "Packages are published by the release job on a v* tag.",
+    match = ["./gradlew publish", "gradle publish"],
+    not_match = ["./gradlew build", "./gradlew publishToMavenLocal"],
+)
+
+prefix_rule(
+    pattern = [["gradle", "gradlew", "./gradlew"], ["clean", "build", "--no-daemon"], ["publish", "publishToMavenCentral", "publishPlugins"]],
+    decision = "forbidden",
+    justification = "Packages are published by the release job on a v* tag.",
+    match = ["./gradlew clean publish"],
+    not_match = ["./gradlew clean build"],
+)
+
+prefix_rule(
+    pattern = [["./ci/registry.sh", "ci/registry.sh"], "publish"],
+    decision = "forbidden",
+    justification = "Packages are published by the release job on a v* tag.",
+    match = ["./ci/registry.sh publish"],
+    not_match = ["./ci/registry.sh login", "./ci/registry.sh local"],
+)
+
+prefix_rule(
+    pattern = [["bash", "sh"], ["./ci/registry.sh", "ci/registry.sh"], "publish"],
+    decision = "forbidden",
+    justification = "Packages are published by the release job on a v* tag.",
+    match = ["bash ci/registry.sh publish"],
+)
+
+prefix_rule(
+    pattern = ["gcloud", ["run", "app", "functions"], "deploy"],
+    decision = "forbidden",
+    justification = "Changes to real environments go through a merge request and the pipeline.",
+    match = ["gcloud run deploy api"],
+    not_match = ["gcloud run services list"],
+)
+
+prefix_rule(
+    pattern = ["git", "push", ["--tags", "--follow-tags"]],
+    decision = "forbidden",
+    justification = "Tags start a release: the user pushes them.",
+    match = ["git push --tags", "git push --follow-tags"],
+    not_match = ["git push origin feat/x"],
+)
+
+prefix_rule(
+    pattern = ["git", "push", "origin", ["--tags", "--follow-tags", "tag"]],
+    decision = "forbidden",
+    justification = "Tags start a release: the user pushes them.",
+    match = ["git push origin --tags", "git push origin tag v1"],
+    not_match = ["git push origin feat/tag-list"],
+)
+
+prefix_rule(
+    pattern = [["pip", "pip3"], "config", ["list", "get", "debug"]],
+    decision = "forbidden",
+    justification = "pip config prints the index credentials.",
+    match = ["pip config list"],
+    not_match = ["pip install -r requirements.txt"],
+)
+
+prefix_rule(
+    pattern = [["python", "python3"], "-m", "pip", "config", ["list", "get", "debug"]],
+    decision = "forbidden",
+    justification = "pip config prints the index credentials.",
+    match = ["python3 -m pip config list"],
 )

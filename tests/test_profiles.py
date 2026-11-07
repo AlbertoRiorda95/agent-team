@@ -25,13 +25,14 @@ PROFILES = {
     "full": {},
     "claude-github": {"harnesses": ["claude"], "ci": "github", "tracker": "github",
                       "features": ["ci-agents", "team-tasks", "split", "dispatch"]},
-    "codex-jira": {"harnesses": ["codex"], "ci": "github", "tracker": "jira", "features": ["ci-agents"]},
+    "codex-jira": {"harnesses": ["codex"], "ci": "github", "tracker": "jira", "features": ["ci-agents", "spec-sync"]},
     "opencode-claude-gitlab": {"harnesses": ["opencode", "claude"], "ci": "gitlab", "tracker": "gitlab",
-                               "features": ["ci-agents", "litellm", "split"],
+                               "features": ["ci-agents", "litellm", "split", "spec-sync"],
                                "roles": ["frontend", "backend", "devops"]},
     "codex-claude-github": {"harnesses": ["codex", "claude"], "ci": "github", "tracker": "github",
                             "features": ["ci-agents", "dispatch"]},
-    "local-only": {"harnesses": ["claude", "codex", "opencode"], "ci": "none", "tracker": "local", "features": []},
+    "local-only": {"harnesses": ["claude", "codex", "opencode"], "ci": "none", "tracker": "local",
+                   "features": ["spec-sync"]},
     "no-tracker": {"harnesses": ["opencode"], "ci": "none", "tracker": "none", "features": []},
 }
 
@@ -99,10 +100,10 @@ class Rendered(unittest.TestCase):
             if os.path.exists(s):
                 for groups in json.load(open(s))["hooks"].values():
                     for g in groups:
-                        refs |= {h["command"].lstrip("./") for h in g["hooks"]}
+                        refs |= {re.sub(r'^"\$CLAUDE_PROJECT_DIR"/', "", h["command"]).split()[0] for h in g["hooks"]}
             for rel in have:
                 if rel.startswith(".claude/agents/"):
-                    refs |= {m.lstrip("./") for m in re.findall(r'command: "([^"]+)"', open(os.path.join(d, rel)).read())}
+                    refs |= set(re.findall(r'command: \'"\$CLAUDE_PROJECT_DIR"/([^\']+)\'', open(os.path.join(d, rel)).read()))
             h = os.path.join(d, ".codex", "hooks.json")
             if os.path.exists(h):
                 for groups in json.load(open(h))["hooks"].values():
@@ -134,13 +135,25 @@ class Rendered(unittest.TestCase):
         self.assertNotIn("litellm", oc.get("provider", {}))
         agents = open(os.path.join(d["codex-jira"], "AGENTS.md")).read()
         self.assertNotIn("## Team tasks", agents)
+        self.assertFalse(os.path.exists(os.path.join(d["codex-jira"], ".codex/agents/team.toml")))
+        self.assertIn("## Team tasks", open(os.path.join(d["claude-github"], "AGENTS.md")).read())
+        for f in (".claude/agents/team.md", "docs/roles/team.md"):
+            self.assertTrue(os.path.exists(os.path.join(d["claude-github"], f)), f)
         self.assertNotIn("Claude Code:", agents)
         self.assertIn("Codex:", agents)
         wf = open(os.path.join(d["codex-claude-github"], ".github/workflows/agents.yml")).read()
         self.assertIn("vars.AGENT_DEFAULT_RUNNER || 'codex'", wf)
         self.assertIn("  claude:\n", wf)
-        self.assertNotIn("\n  team:\n", wf)
         self.assertNotIn("\n  opencode:\n", wf)
+        # spec-sync: the workflow with the tracker's secrets only, the GitLab job, the local hook
+        wf = open(os.path.join(d["codex-jira"], ".github/workflows/spec-sync.yml")).read()
+        self.assertIn("JIRA_API_TOKEN", wf)
+        self.assertNotIn("LINEAR_API_KEY", wf)
+        self.assertFalse(os.path.exists(os.path.join(d["claude-github"], ".github/workflows/spec-sync.yml")))
+        self.assertTrue(os.path.exists(os.path.join(d["opencode-claude-gitlab"], ".gitlab/ci/spec-sync.yml")))
+        self.assertIn(".gitlab/ci/spec-sync.yml", open(os.path.join(d["opencode-claude-gitlab"], ".gitlab-ci.yml.example")).read())
+        self.assertTrue(os.path.exists(os.path.join(d["local-only"], "scripts/git-hooks/spec-sync.sh")))
+        self.assertFalse(os.path.exists(os.path.join(d["no-tracker"], "scripts/git-hooks/spec-sync.sh")))
         full = sum(os.path.getsize(os.path.join(d["full"], "AGENTS.md")) for _ in [0])
         small = os.path.getsize(os.path.join(d["no-tracker"], "AGENTS.md"))
         self.assertLess(small, full)
@@ -232,7 +245,6 @@ class Sync(unittest.TestCase):
         self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
         self.assertFalse(self.exists(".claude") or self.exists(".github") or self.exists("infra"))
         self.assertTrue(self.exists(".codex/agents/backend.toml") and self.exists("scripts/agentteam/trackers/local.py"))
-        self.assertNotIn("## Team tasks", open(os.path.join(self.p, "AGENTS.md")).read())
         r = run(cli + ["prune", "--dry-run"], cwd=self.p)
         self.assertIn("Nothing to prune", r.stdout)
 

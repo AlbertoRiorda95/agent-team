@@ -11,8 +11,8 @@ import subprocess
 import urllib.error
 import urllib.request
 
-ROLES = {"designer", "frontend", "backend", "optimizer", "devops", "security"}
-ON_DEMAND = {"optimizer", "security"}
+ROLES = {"designer", "frontend", "backend", "optimizer", "devops", "security", "writer"}
+ON_DEMAND = {"optimizer", "security", "writer"}
 HOLD = "hold"
 MARK_CREATED = "created-by: scripts/create-issues.py"
 
@@ -35,7 +35,8 @@ class Issue:
 
     def __init__(self, ref, id, title, body="", open=True, done=False, labels=None,
                  milestone=None, parent=None, url="", author=None, extra=None):
-        self.ref, self.id, self.title, self.body = str(ref), id, title or "", body or ""
+        # Redmine, and GitHub after an edit on the web, store \r\n: the parsers expect \n
+        self.ref, self.id, self.title, self.body = str(ref), id, title or "", (body or "").replace("\r\n", "\n")
         self.open, self.done = open, done
         self.labels = list(labels or [])
         self.milestone, self.parent, self.url, self.author = milestone, parent, url, author
@@ -111,6 +112,10 @@ class Tracker:
     def set_milestone(self, issue, milestone_ref):
         raise Unsupported("milestones")
 
+    def edit_issue(self, issue, title, body):
+        """Replace the title and the description (body in markdown, as for create_issue)."""
+        raise Unsupported("editing issues")
+
     def link_child(self, parent, child):
         raise Unsupported("sub-issues")
 
@@ -159,12 +164,21 @@ def role_of(issue):
     m = re.search(r"\(the ([a-z]+) task\)", body)
     if m:
         return m.group(1)
-    if re.search(r"(?:`|\{\{)claude-team(?:`|\}\}) job", body):
-        return "team"
     m = re.search(r"^Role:\s*([a-z]+)\s*$", body, re.M)
     if m:
         return m.group(1)
     m = re.search(r" · ([a-z]+): ", title)
+    return m.group(1) if m else None
+
+
+SERVICE = re.compile(r"^\s*\[([a-z0-9][a-z0-9-]*)\]")
+
+
+def service_of(issue):
+    """The service a task touches, in a monorepo: its task text starts with "[orders]"
+    (the Task cell of the spec row, or of a split). None: not tied to one service."""
+    m = re.search(r" · [a-z]+: (\[[^\]]+\])", issue.title) or re.search(r"^## Task\n(\[[^\]]+\])", issue.body, re.M)
+    m = m and SERVICE.match(m.group(1))
     return m.group(1) if m else None
 
 

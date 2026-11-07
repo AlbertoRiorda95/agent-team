@@ -14,12 +14,22 @@
       "helm install*": "deny",
       "helm upgrade*": "deny",
       "docker push*": "deny",
-      "podman push*": "deny"
+      "podman push*": "deny",
+      "npm publish*": "deny",
+      "twine upload*": "deny",
+      "conan upload*": "deny",
+      "poetry publish*": "deny",
+      "uv publish*": "deny",
+      "pnpm publish*": "deny",
+      "yarn publish*": "deny",
+      "gh release create*": "deny",
+      "git push --tags*": "deny"
     },
     "read": {
       "*": "allow",
       ".env": "deny",
       ".env.*": "deny",
+      ".env.example": "allow",
       "secrets/*": "deny",
       "infra/litellm/.env": "deny"
     }

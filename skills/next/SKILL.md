@@ -34,7 +34,10 @@ answer with what you could read.
    waiting, merge requests to review.
 2. **Next**: one or two steps, each with the exact command:
    - design missing or not ready: `/agent-team:design-studio <feature>` (or
-     `project` for the project design);
+     `project` for the project design); with several "Design:" features in
+     the same milestone, `/agent-team:design-studio --milestone <M0>` designs
+     them in one session; add `--to-issues` to go on to the issues and the
+     split, stopping before dispatch;
    - ready specs without issues: `/agent-team:create-issues`;
    - a big issue: `/agent-team:split-issue <n>`;
    - tasks that can start: `/agent-team:dispatch`;

@@ -2,11 +2,13 @@
 
 Agent team turns a repository into a project you run as the lead of a
 development team. The team is made of AI agents (designer, frontend, backend
-and devops for everyday work, optimizer and security when you ask for them);
+and devops for everyday work, optimizer, security and writer when you ask for them);
 you decide what to build, approve the plan, and merge their work.
 
 This manual explains how to install the plugin, set up a project and run it in
-each of the three ways it supports.
+each of the three ways it supports. Read chapters 1 to 4 in order; the words
+it uses are defined at the end of chapter 1
+([Words used in this manual](01-what-it-is.md#words-used-in-this-manual)).
 
 | Chapter | What you find |
 |---|---|
@@ -16,9 +18,14 @@ each of the three ways it supports.
 | [4. Run the project](04-run-the-project.md) | the work loop shared by every scenario: design, issues, split, start, review |
 | [5. Scenario: local](05-scenario-local.md) | the team on your computer, with Claude Code, Codex or OpenCode |
 | [6. Scenario: remote repository](06-scenario-remote.md) | the team in GitHub or GitLab CI, started from issues |
-| [7. Scenario: custom orchestrator](07-scenario-custom.md) | your own tracker and runner: Multica, an orchestrator you write |
+| [7. Scenario: custom orchestrator](07-scenario-custom.md) | your own tracker and runner: Multica (a self-hosted board for agents), an orchestrator you write |
 | [8. Change and upgrade](08-change-and-upgrade.md) | another tracker or tool, roles back, new plugin versions |
 | [9. Reference](09-reference.md) | commands, configuration, labels, CI variables, files, costs |
+| [10. Integrations not yet validated](10-integrations-not-yet-validated.md) | Jira, Linear, GitLab and Multica: built and tested against simulated services, not yet with a real one |
 
 The HTML version of this manual, `docs/manual.html`, is generated from these
 files (see [9. Reference](09-reference.md#this-manual)).
+
+<!-- nav -->
+[1. What Agent team is →](01-what-it-is.md)
+<!-- /nav -->
