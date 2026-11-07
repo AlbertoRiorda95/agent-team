@@ -154,6 +154,11 @@ features, the major for changes that break existing projects.
 - OpenCode on GitHub: the manual did not say to install the OpenCode Agent
   app, which its action needs to open the pull request; and the action shared
   every session on opencode.ai in a public repository (`share: false` now).
+- OpenCode on GitHub: OpenCode removed its GitHub action from its repository,
+  and Dependabot moved the pin to a later `v*` tag without it, so the
+  `opencode` job failed before starting ("Can't find 'action.yml'"). The job
+  now pins the last release of the action (`github-v1.2.28`), which still runs
+  the current `opencode` CLI, and `dependabot.yml` ignores `anomalyco/opencode`.
 - `block-infra-commands.sh` was bypassed by an option before the verb
   (`kubectl -n prod apply`, `npm --registry x publish`, `docker --context x
   push`); it now also blocks `poetry`/`uv`/`yarn`/`pnpm publish`, `gem push`,
