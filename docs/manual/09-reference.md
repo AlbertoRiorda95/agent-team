@@ -186,21 +186,46 @@ role.
 ### The plugin's commands
 
 A command such as `/agent-team:dispatch` costs little to load (its skill is
-under 1,000 words): what costs is the calls that follow, because each one
-re-reads the whole conversation. Measured on the demo project, a dispatch or
-create-issues took 2 to 12 calls of 50,000 to 220,000 tokens each, almost all
-of it the conversation that came before, and under 3,000 tokens of output. So:
+under 1,000 words). What costs is the model calls that follow. The skill does
+not choose what the model reads: every call re-reads the whole conversation
+(system prompt, tools, `AGENTS.md`, `CLAUDE.md`, everything said before), in
+Claude Code, Codex and OpenCode alike. Measured on the demo project, a
+dispatch or a create-issues took 4 to 12 calls of 50,000 to 220,000 tokens
+each, almost all of it that context (mostly cache reads, about a tenth of the
+price of fresh input), with under 3,000 tokens of output.
 
-- **Run them in a short session**, or a fresh one: the same command costs
-  about four times as much at the end of a long session as at its start.
-- **Mechanical commands are two calls**: the plan and, after your yes, the
-  start or the creation. The scripts read the tracker themselves (no separate
-  check), and `dispatch.py --apply --expect <id>` starts only the plan you saw,
-  so nothing is re-run to confirm it.
-- **No session at all** when you only want the plan carried out: in a
-  terminal, `python3 scripts/dispatch.py --ask` and
-  `python3 scripts/create-issues.py --ask` show the plan and ask y/N. They cost
-  no tokens and work the same whatever tool and model you use.
+Inside a session, the mechanical commands (`dispatch`, `create-issues`) now
+take four model calls, the fewest a plan with your yes can take: run the plan,
+summarize it, apply it after your yes, report. They took five or six before:
+the scripts now read the tracker themselves (no separate check), the script
+folder is picked in the same call, and `dispatch.py --apply --expect <id>`
+starts only the plan you saw. That saves a call or two, not the context.
+
+What saves the context:
+
+- **No session at all.** In a terminal, `python3 scripts/dispatch.py --ask`
+  and `python3 scripts/create-issues.py --ask` show the plan and ask y/N.
+  No tokens, whatever tool and model you use.
+- **A shell command from inside the tool**, without a model call:
+
+  | Tool | Shell command | Does the output reach the model? |
+  |---|---|---|
+  | Claude Code | `! python3 scripts/dispatch.py` | yes: it is added to the conversation and read at the next call |
+  | Codex | `!python3 scripts/dispatch.py` (on an empty prompt) | no, it is only shown in the terminal |
+  | OpenCode | `!python3 scripts/dispatch.py` | yes: it is added to the conversation as a tool result |
+
+  Use the forms without `--ask` there (`dispatch.py`, then `dispatch.py
+  --apply --expect <id>`; `create-issues.py --dry-run`, then
+  `create-issues.py`): the tools do not pass keyboard input to the command.
+- **A short session.** The same command costs about four times as much at the
+  end of a long session as at its start. Start a new conversation for it, or
+  shrink the one you have:
+
+  | Tool | New conversation | Summarize the current one |
+  |---|---|---|
+  | Claude Code | `/clear` | `/compact` |
+  | Codex | `/new` | `/compact` |
+  | OpenCode | `/new` (or `/clear`) | `/compact` |
 
 `design-studio`, `split-issue` and `setup` need the model's judgment (an
 interview, a proposal, a review): their cost is the work itself.

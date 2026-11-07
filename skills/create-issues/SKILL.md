@@ -8,7 +8,7 @@ Create the issues of the project's roadmap and ready specs. Talk to the user in
 their language.
 
 Every command below is one shell call, and every call re-reads the whole
-conversation: keep to the two calls of the plan and the creation.
+conversation: keep to the two shell commands of the plan and the creation.
 
 ## 1. Show the plan
 

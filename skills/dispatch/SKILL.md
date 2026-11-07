@@ -7,7 +7,7 @@ argument-hint: "[--per-role N] [--max N] [--milestone M1 | --all]"
 Start the task issues that can run now. Talk to the user in their language.
 
 Every command below is one shell call, and every call re-reads the whole
-conversation: keep to the two calls of the plan and the start, and do not
+conversation: keep to the two shell commands of the plan and the start, and do not
 re-run them to check what they printed.
 
 ## 1. Show the plan
