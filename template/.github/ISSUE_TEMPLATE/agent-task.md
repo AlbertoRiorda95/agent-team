@@ -1,6 +1,6 @@
 ---
 name: Agent task
-about: A task for one agent (agent:<role>) or a team task (agent:team)
+about: A task for one agent (agent:<role>), or for one agent that does every role it touches (agent:team)
 title: ""
 labels: []
 ---
@@ -14,6 +14,3 @@ docs/design/<feature>.md — section: <...>
 
 ## Acceptance criteria
 - [ ] ...
-
-<!-- For a team task (label agent:team), the roles in order: -->
-Roles:

@@ -82,9 +82,8 @@ tasks depend on tasks of another issue comes after it. For each one:
 
 1. `python3 <script> propose <n> <file>`: posts the plan on the issue as a
    comment, so the decision stays recorded where the team sees it.
-2. `python3 <script> create <n>`, or `create <n> --team` if the user chose one
-   team issue. The script creates exactly the plan in the comment it just
-   posted, as sub-issues (GitLab: linked issues; Jira: sub-tasks) in the
+2. `python3 <script> create <n>`. The script creates exactly the plan in the
+   comment it just posted, as sub-issues (GitLab: linked issues; Jira: sub-tasks) in the
    parent's milestone, without labels, and removes `agent:split` from the
    issue if it had it. A dependency `"12:api"` is written in "Depends on" and
    as the tracker's native "blocked by" relation; the script refuses, creating

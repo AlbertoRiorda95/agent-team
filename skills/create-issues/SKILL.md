@@ -1,64 +1,70 @@
 ---
 name: create-issues
-description: Use when the roadmap and ready specs in docs/design/ should become issues. Creates the milestones and issues (GitHub, GitLab, local files, Jira, Linear or Redmine) from the roadmap and the ready specs, but only after showing the plan and getting the user's yes; nothing is created before. Idempotent - existing issues and milestones are skipped, nothing is closed or labeled - so it can be run again at any stage, for example after every design studio session.
+description: Use when the roadmap and ready specs in docs/design/ should become issues. Creates the milestones and issues (GitHub, GitLab, local files, Jira, Linear or Redmine) from the roadmap and the ready specs, but only after showing the plan and getting the user's yes; nothing is created before. Idempotent - existing issues and milestones are skipped, "Design:" issues of features now specified become the feature or its task, nothing is closed or labeled - so it can be run again at any stage, for example after every design studio session.
 argument-hint: "[--team]"
 ---
 
 Create the issues of the project's roadmap and ready specs. Talk to the user in
 their language.
 
-## 1. Preconditions
+Every command below is one shell call, and every call re-reads the whole
+conversation: keep to the two shell commands of the plan and the creation.
 
-- A reachable tracker: run `python3 <scripts>/tracker.py check` (scripts
-  folder chosen as in step 2). By default the tracker is GitHub or GitLab, from
-  the Git remote, with an authenticated `gh` or `glab`; `.agent-team/config.json`
-  can choose local files, Jira, Linear or Redmine (see `docs/general/trackers.md`,
-  or `${CLAUDE_PLUGIN_ROOT}/template/docs/general/trackers.md`). If the check
-  fails, say what to do (push the repository, `gh auth login`, set the
-  tracker's environment variables) and stop.
-- At least `docs/design/project.md` with a `## Roadmap`, or one spec with
-  `ready: yes`. Otherwise there is nothing to create: suggest
-  `/agent-team:design-studio`.
+## 1. Show the plan
 
-## 2. Pick the script
+At least `docs/design/project.md` with a `## Roadmap`, or one spec with
+`ready: yes`, must exist; otherwise suggest `/agent-team:design-studio` and
+stop. Then run, from the project root, in one call (the project's scripts if it
+has them with `scripts/agentteam/`, else the plugin's; add `--team` if the user
+passed it: one `agent:team` issue per ready spec):
 
-Use `scripts/create-issues.py` from the project if it exists together with
-`scripts/agentteam/`, otherwise the plugin's copy
-`${CLAUDE_PLUGIN_ROOT}/template/scripts/create-issues.py`. Run it
-from the project root. If the project's copy differs from the plugin's, the
-project may be on an older template: mention `/agent-team:upgrade`, but use the
-project's copy unless the user says otherwise.
+```bash
+S=scripts; [ -d scripts/agentteam ] || S="${CLAUDE_PLUGIN_ROOT}/template/scripts"; python3 "$S/create-issues.py" --dry-run
+```
 
-## 3. Show the plan
+It reads the tracker itself: by default GitHub or GitLab from the Git remote,
+or what `.agent-team/config.json` chooses (`docs/general/trackers.md`). Exit
+code 2 means the tracker cannot be reached: say what to do (push the
+repository, `gh auth login`, the tracker's variables) and stop; do not run
+`tracker.py check` first. Do not compare the project's scripts with the
+plugin's: that is `/agent-team:upgrade`'s job.
 
-Run `python3 <script> --dry-run` (add `--team` if the user passed it) and
-summarize the output for the user:
+Summarize the output in a few lines, only what it holds:
 
-- milestones to create and those that exist;
-- issues to create, per milestone, with their dependencies;
-- issues that exist or are tracked by the `Issue` column, and those that would
-  get a milestone they do not have;
-- issues created earlier that are no longer in the plan (the script never
-  closes them: the user decides).
-
-If a spec says "Team task possible: yes", ask whether the user wants one
-`agent:team` issue for it (`--team`, one PR) or one issue per task.
+- milestones and issues to create, per milestone, with their dependencies;
+- issues that exist, or would get a milestone they lack;
+- "Design:" issues renamed now that their spec is ready (`rename #81 ...`):
+  with one row the issue becomes that task, with several the feature issue,
+  with the tasks as its sub-issues;
+- issues rewritten from a changed spec row (task not started), and tasks that
+  started before their row changed (the user checks the work or stops it);
+- issues created earlier that are no longer in the plan (never closed by the
+  script: the user decides).
 
 If the output reports milestone issues from the old layout ("M0 · ..." parent
 issues), explain that milestones are now native and offer
-`python3 <script> --migrate --dry-run` first, then `--migrate` on the user's yes.
+`--migrate --dry-run` first, then `--migrate` on the user's yes. If there is
+nothing to create or change, stop here.
 
-## 4. Create
+## 2. Create
 
-Only after the user says yes, run the same command without `--dry-run`. Report
-what was created and linked. Remind the user that no labels were added: an
-agent starts only when they add `agent:<role>` to a task issue, in the order
-of the dependencies, or with `/agent-team:dispatch`.
+Only after the user's yes, run the same command without `--dry-run`. Report
+in a few lines what was created. No labels are added: an agent starts only
+when the user adds `agent:<role>` to a task issue, or with
+`/agent-team:dispatch`.
+
+## Without an agent session
+
+The user can do the same in a terminal, with no tokens:
+`python3 scripts/create-issues.py --ask` shows the plan and asks y/N before
+creating it.
 
 ## What this never does
 
-It never closes, relabels or rewrites an issue; the only change to an existing
-issue is giving a milestone to one that has none. Running it twice creates
+It never closes or relabels an issue. The only changes to existing issues are
+giving a milestone to one that has none, rewriting a "Design:" issue whose
+spec is now ready into its feature or task, and rewriting a task that has not
+started from its changed spec row, as above. Running it twice creates
 nothing new.
 
 ## In Codex or OpenCode

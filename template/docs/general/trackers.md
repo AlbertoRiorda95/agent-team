@@ -29,10 +29,10 @@ are a last plain line `[agent-team] ...` instead of an HTML comment; leave it.
 
 | Starter | What it does | Default on |
 |---|---|---|
-| `label` | adds `agent:<role>`; on GitHub that starts `.github/workflows/agents.yml` | GitHub |
-| `gitlab-pipeline` | adds `agent:<role>` and runs the agent pipeline for the issue | GitLab |
+| `label` | adds `agent:<role>`; on GitHub that starts `.github/workflows/agents.yml` | GitHub, with the `ci-agents` feature |
+| `gitlab-pipeline` | adds `agent:<role>` and runs the agent pipeline for the issue | GitLab, with the `ci-agents` feature |
 | `command` | marks the task, then runs `start_command` with the issue's data | any, when `start_command` is set |
-| `print` | marks the task and prints how to start it by hand | the other trackers |
+| `print` | marks the task and prints how to start it by hand | the other trackers, and GitHub or GitLab without `ci-agents` (agents run locally) |
 
 `command` is the connector for a custom orchestrator: a queue, a
 service, a local `claude -p`. Placeholders: `{number}` (12, PROJ-12), `{id}`

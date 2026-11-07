@@ -152,6 +152,11 @@ class Adapter(core.Tracker):
     def set_milestone(self, issue, milestone_ref):
         self._update(issue, lambda m: m.__setitem__("milestone", milestone_ref))
 
+    def edit_issue(self, issue, title, body):
+        meta, _, comments, path = self._read(self._path(issue.ref))
+        meta["title"] = title
+        self._write(meta, body, comments, path)
+
     def link_child(self, parent, child):
         self._update(child, lambda m: m.__setitem__("parent", int(parent.ref)))
 

@@ -10,16 +10,6 @@ skills:
   - security-review
 color: red
 memory: project
-hooks:
-  PreToolUse:
-    - matcher: "Bash"
-      hooks:
-        - type: command
-          command: "./scripts/hooks/security-scope.sh"
-    - matcher: "Write"
-      hooks:
-        - type: command
-          command: "./scripts/hooks/security-writes.sh"
 ---
 
 Your full role instructions are in `docs/roles/security.md`.

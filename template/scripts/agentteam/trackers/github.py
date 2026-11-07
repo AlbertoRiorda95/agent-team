@@ -78,6 +78,9 @@ class Adapter(core.Tracker):
     def set_milestone(self, issue, milestone_ref):
         self.api("-X", "PATCH", f"repos/{self.repo}/issues/{issue.ref}", "-F", f"milestone={milestone_ref}")
 
+    def edit_issue(self, issue, title, body):
+        self.api("-X", "PATCH", f"repos/{self.repo}/issues/{issue.ref}", "-f", f"title={title}", "-f", f"body={body}")
+
     def children(self, parent):
         rows = self.lines("--paginate", f"repos/{self.repo}/issues/{parent.ref}/sub_issues",
                           "--jq", ".[] | {number, id, title, body, state, state_reason, labels, milestone, html_url}")

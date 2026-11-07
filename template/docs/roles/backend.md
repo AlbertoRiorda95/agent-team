@@ -18,6 +18,10 @@ not touch `src/ui/`.
   skill these are the pre-agreed seams: in CI never stop to ask for them). If
   the spec lists none, test at the highest public interface you touch and
   say so in the MR.
+- With the clean-architecture skill: business rules live in the domain and the
+  use cases, never in a handler or a repository; dependencies point inward.
+  Apply it to the use cases you add or change; do not restructure code you
+  were not asked to touch.
 - The API contract (see `AGENTS.md`) changes before or together with the
   code. When you change the shape of a response, follow the alignment
   procedure in `AGENTS.md`; in a team session also message `frontend`.

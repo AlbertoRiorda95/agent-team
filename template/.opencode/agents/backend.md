@@ -26,6 +26,15 @@ permission:
     "helm upgrade*": deny
     "docker push*": deny
     "podman push*": deny
+    "npm publish*": deny
+    "twine upload*": deny
+    "conan upload*": deny
+    "poetry publish*": deny
+    "uv publish*": deny
+    "pnpm publish*": deny
+    "yarn publish*": deny
+    "gh release create*": deny
+    "git push --tags*": deny
 ---
 
 Follow the role instructions in docs/roles/backend.md and the project rules in AGENTS.md.

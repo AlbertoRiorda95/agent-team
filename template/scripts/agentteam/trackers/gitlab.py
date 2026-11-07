@@ -9,6 +9,13 @@ import os
 from .. import core
 
 
+def above(issue, other):
+    """True when other is the issue this one was split from, or the feature it is a task of."""
+    k = core.key_of(other) or ""
+    return (f"split-of: {other.id} " in issue.body
+            or (k.endswith("#feature") and (core.key_of(issue) or "").startswith(k[:-len("feature")])))
+
+
 class Adapter(core.Tracker):
     name = "gitlab"
 
@@ -70,11 +77,16 @@ class Adapter(core.Tracker):
     def set_milestone(self, issue, milestone_ref):
         self.api("-X", "PUT", f"{self.p}/issues/{issue.ref}", "-f", f"milestone_id={milestone_ref}")
 
+    def edit_issue(self, issue, title, body):
+        self.api("-X", "PUT", f"{self.p}/issues/{issue.ref}", "-f", f"title={title}", "-f", f"description={body}")
+
     def _links(self, issue):
         return [self._issue(i) for i in self.api(f"{self.p}/issues/{issue.ref}/links") or []]
 
     def children(self, parent):
-        return [i for i in self._links(parent) if i.extra.get("link_type") in (None, "relates_to")]
+        # "relates_to" links go both ways: leave out the issue this one is a part of
+        return [i for i in self._links(parent) if i.extra.get("link_type") in (None, "relates_to")
+                and not above(parent, i)]
 
     def link_child(self, parent, child):
         self.api("-X", "POST", f"{self.p}/issues/{parent.ref}/links",

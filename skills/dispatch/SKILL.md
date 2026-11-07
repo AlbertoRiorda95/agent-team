@@ -6,42 +6,57 @@ argument-hint: "[--per-role N] [--max N] [--milestone M1 | --all]"
 
 Start the task issues that can run now. Talk to the user in their language.
 
-## 1. Preconditions
+Every command below is one shell call, and every call re-reads the whole
+conversation: keep to the two shell commands of the plan and the start, and do not
+re-run them to check what they printed.
 
-- The script: `scripts/dispatch.py` in the project if it exists together
-  with `scripts/agentteam/`, otherwise
-  `${CLAUDE_PLUGIN_ROOT}/template/scripts/dispatch.py`. Run it from the
-  project root.
-- A reachable tracker: `python3 <scripts>/tracker.py check`. It also prints
-  the *starter*, which decides what "start" means: the `agent:<role>` label
-  (GitHub), the agent pipeline (GitLab), the project's `start_command` (for
-  example an orchestrator) or a printed instruction. Tell the user which one
-  applies before anything starts.
-- On GitHub the `agent:<role>` labels must exist (`gh label list`); if they
-  do not, offer to run `scripts/create-labels.sh` first.
+## 1. Show the plan
 
-## 2. Show the plan
+Run, from the project root, in one call (the project's scripts if it has them
+with `scripts/agentteam/`, else the plugin's):
 
-Run `python3 <script> $ARGUMENTS` (without `--apply`) and explain the output:
+```bash
+S=scripts; [ -d scripts/agentteam ] || S="${CLAUDE_PLUGIN_ROOT}/template/scripts"; python3 "$S/dispatch.py" $ARGUMENTS
+```
 
-- the scope (by default the first open milestone that still has tasks);
-- what is running now, and what would start;
-- what waits, and for what: an open dependency, or a role already busy;
-- what is never started automatically: optimizer and security (on-demand),
-  issues with the `hold` label, "Design:" issues.
+It reads the tracker itself and prints the tracker and the *starter* (what
+"start" means: the `agent:<role>` label on GitHub, the agent pipeline on GitLab,
+the project's `start_command`, or a printed instruction). If it fails with a
+tracker error, say what to do (`gh auth login`, the tracker's variables in
+`docs/general/trackers.md`) and stop: do not run `tracker.py check` first.
 
-Each start is an agent run, so it costs tokens or subscription quota. The
-defaults are one task per role and three in total; the user can change them
-with `--per-role` and `--max`.
+Tell the user, briefly and only what the output holds:
 
-## 3. Start
+- the starter, and the scope (by default the first open milestone with tasks);
+- what is running, and what would start;
+- what waits and why: an open dependency, a role already busy, a spec not
+  merged into the main branch yet (merge the design merge request), a row
+  removed from its spec (offer to close the issue; never close it yourself);
+- what would be rewritten from a changed spec row before it starts;
+- what is never started automatically (optimizer, security, writer, `hold`,
+  "Design:" issues), only if the output lists any.
 
-Only after the user's yes, run the same command with `--apply`. Report what
-started and what will start next, as the running tasks are merged.
+Each start is an agent run and costs tokens or quota. The defaults are one
+task per role and three in total (`--per-role`, `--max`). If nothing would
+start or be updated, stop here.
+
+## 2. Start
+
+Only after the user's yes, run the same command with `--apply --expect <id>`,
+where `<id>` is the `Plan:` line of the output. If the plan changed in the
+meantime it starts nothing and exits 3: show the new plan and ask again. If a
+start fails because the `agent:<role>` label does not exist (GitHub), offer
+`scripts/create-labels.sh`. Report in a few lines what started.
 
 To make this happen by itself on GitHub every time an issue closes, point the
-user to `.github/workflows/dispatch.yml`: it needs the `AGENT_AUTODISPATCH`
-variable and the `AGENT_DISPATCH_TOKEN` secret described at its top.
+user to `.github/workflows/dispatch.yml` (`AGENT_AUTODISPATCH` and
+`AGENT_DISPATCH_TOKEN`, described at its top).
+
+## Without an agent session
+
+The user can do the same in a terminal, with no tokens:
+`python3 scripts/dispatch.py --ask` shows the plan and asks y/N before
+starting it. Mention it when the user only wants the plan carried out.
 
 ## In Codex or OpenCode
 

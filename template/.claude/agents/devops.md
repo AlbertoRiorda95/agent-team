@@ -10,12 +10,6 @@ skills:
 color: cyan
 memory: project
 permissionMode: default
-hooks:
-  PreToolUse:
-    - matcher: "Bash"
-      hooks:
-        - type: command
-          command: "./scripts/hooks/block-infra-commands.sh"
 ---
 
 Your full role instructions are in `docs/roles/devops.md`.

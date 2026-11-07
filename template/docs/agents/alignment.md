@@ -15,7 +15,7 @@ When you make one:
 3. Do not adapt other roles' code yourself.
 
 What happens next depends on where you run:
-- **Local session (Claude Code with subagents or agent teams):** the lead
+- **Local session (Claude Code with subagents):** the lead
   handles it right away. First designer reviews the change against the specs,
   updates `docs/design/` if needed and writes the follow-up actions per role
   in the entry. Then the lead delegates each action to its role. Finally the
@@ -23,6 +23,5 @@ What happens next depends on where you run:
   the user only when designer sets `decision-needed: yes` (for example a
   breaking API change or a visible UX change).
 - **CI (GitHub Actions, GitLab CI, Multica):** agents never start other
-  agents, except the coordinator of a team task (below). The entry and the
-  label are the signal: the user reviews them and creates the alignment
-  tasks, designer first, then the affected roles.
+  agents. The entry and the label are the signal: the user reviews them and
+  creates the alignment tasks, designer first, then the affected roles.
