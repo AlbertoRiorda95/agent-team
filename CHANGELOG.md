@@ -159,6 +159,11 @@ features, the major for changes that break existing projects.
   `opencode` job failed before starting ("Can't find 'action.yml'"). The job
   now pins the last release of the action (`github-v1.2.28`), which still runs
   the current `opencode` CLI, and `dependabot.yml` ignores `anomalyco/opencode`.
+- OpenCode on GitHub: the action never answers a permission prompt, so the
+  first shell command a role leaves on `ask` (`ls`, `cat`...) made the job wait
+  until its 60-minute timeout. The job now sets `OPENCODE_CONFIG_CONTENT` to deny
+  what would ask; the role's explicit allow and deny rules still apply. GitLab
+  uses `opencode run`, which already rejects them.
 - `block-infra-commands.sh` was bypassed by an option before the verb
   (`kubectl -n prod apply`, `npm --registry x publish`, `docker --context x
   push`); it now also blocks `poetry`/`uv`/`yarn`/`pnpm publish`, `gem push`,
