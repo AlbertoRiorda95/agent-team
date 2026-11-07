@@ -164,6 +164,9 @@ features, the major for changes that break existing projects.
   until its 60-minute timeout. The job now sets `OPENCODE_CONFIG_CONTENT` to deny
   what would ask; the role's explicit allow and deny rules still apply. GitLab
   uses `opencode run`, which already rejects them.
+- OpenCode on GitHub: the CLI ignores the action's `agent` input and ran every
+  task as its `build` agent, without the role's instructions and file limits.
+  The job now sets the role as `default_agent` in `OPENCODE_CONFIG_CONTENT`.
 - `block-infra-commands.sh` was bypassed by an option before the verb
   (`kubectl -n prod apply`, `npm --registry x publish`, `docker --context x
   push`); it now also blocks `poetry`/`uv`/`yarn`/`pnpm publish`, `gem push`,
