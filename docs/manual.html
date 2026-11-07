@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="light dark">
-<meta name="manual-source" content="sha256:2f3cc669192be78a83530e64a96ec4c1fe1c0e0585baa7066ed6e41f97ee5da7">
+<meta name="manual-source" content="sha256:666c7b6f29a9b3f998f9c60183e2bba3fc765c72cb49e6eb90268ea6efff265c">
 <meta name="manual-builder" content="python-markdown 3.11.2">
 <title>Agent team: user manual</title>
 <style>
@@ -3094,6 +3094,26 @@ instructions for tools you do not have.</p>
 <p>To keep costs down: one task per session, handoff notes instead of long
 sessions, MCP servers only on the agents that need them, and few skills per
 role.</p>
+<h3 id="c09-the-plugins-commands">The plugin's commands</h3>
+<p>A command such as <code>/agent-team:dispatch</code> costs little to load (its skill is
+under 1,000 words): what costs is the calls that follow, because each one
+re-reads the whole conversation. Measured on the demo project, a dispatch or
+create-issues took 2 to 12 calls of 50,000 to 220,000 tokens each, almost all
+of it the conversation that came before, and under 3,000 tokens of output. So:</p>
+<ul>
+<li><strong>Run them in a short session</strong>, or a fresh one: the same command costs
+  about four times as much at the end of a long session as at its start.</li>
+<li><strong>Mechanical commands are two calls</strong>: the plan and, after your yes, the
+  start or the creation. The scripts read the tracker themselves (no separate
+  check), and <code>dispatch.py --apply --expect &lt;id&gt;</code> starts only the plan you saw,
+  so nothing is re-run to confirm it.</li>
+<li><strong>No session at all</strong> when you only want the plan carried out: in a
+  terminal, <code>python3 scripts/dispatch.py --ask</code> and
+  <code>python3 scripts/create-issues.py --ask</code> show the plan and ask y/N. They cost
+  no tokens and work the same whatever tool and model you use.</li>
+</ul>
+<p><code>design-studio</code>, <code>split-issue</code> and <code>setup</code> need the model's judgment (an
+interview, a proposal, a review): their cost is the work itself.</p>
 <h2 id="c09-this-manual">This manual</h2>
 <p>For people who change the manual itself, in the plugin's repository; nothing
 to do in your projects. The manual is written in Markdown, one file per chapter in <code>docs/manual/</code>.

@@ -183,6 +183,28 @@ To keep costs down: one task per session, handoff notes instead of long
 sessions, MCP servers only on the agents that need them, and few skills per
 role.
 
+### The plugin's commands
+
+A command such as `/agent-team:dispatch` costs little to load (its skill is
+under 1,000 words): what costs is the calls that follow, because each one
+re-reads the whole conversation. Measured on the demo project, a dispatch or
+create-issues took 2 to 12 calls of 50,000 to 220,000 tokens each, almost all
+of it the conversation that came before, and under 3,000 tokens of output. So:
+
+- **Run them in a short session**, or a fresh one: the same command costs
+  about four times as much at the end of a long session as at its start.
+- **Mechanical commands are two calls**: the plan and, after your yes, the
+  start or the creation. The scripts read the tracker themselves (no separate
+  check), and `dispatch.py --apply --expect <id>` starts only the plan you saw,
+  so nothing is re-run to confirm it.
+- **No session at all** when you only want the plan carried out: in a
+  terminal, `python3 scripts/dispatch.py --ask` and
+  `python3 scripts/create-issues.py --ask` show the plan and ask y/N. They cost
+  no tokens and work the same whatever tool and model you use.
+
+`design-studio`, `split-issue` and `setup` need the model's judgment (an
+interview, a proposal, a review): their cost is the work itself.
+
 ## This manual
 
 For people who change the manual itself, in the plugin's repository; nothing

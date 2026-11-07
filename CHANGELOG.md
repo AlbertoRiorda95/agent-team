@@ -59,6 +59,14 @@ features, the major for changes that break existing projects.
 - Manual: "When another agent has to fix it" (chapter 4): a new task for the
   other role, handing the pull request to another role by changing the
   `agent:` label of its issue, or `agent:team`.
+- Fewer tokens for the mechanical commands. `dispatch` and `create-issues`
+  take two calls, plan and apply: the scripts read the tracker themselves
+  (no `tracker.py check` first), the script folder is picked in the same call,
+  and `dispatch.py` prints a `Plan:` id that `--apply --expect <id>` checks, so
+  a plan that changed starts nothing (exit 3). `--ask` on both scripts shows
+  the plan and asks y/N in a terminal: no agent session, any tool or model.
+  Manual: "The plugin's commands" in chapter 9, with the numbers measured on
+  the demo project.
 - Manual: with a matrix `build-test` (monorepo), branch protection requires
   the summary job (`ci-ok`), not `build-test`.
 - `clean-architecture` skill for the backend, preloaded by `backend`. `setup`
