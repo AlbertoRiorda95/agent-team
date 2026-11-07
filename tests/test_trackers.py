@@ -184,7 +184,11 @@ class TrackerFlow(unittest.TestCase):
         # dispatch: backend 1 and devops 3 start; frontend 2 waits for 1, backend 4 for 3
         rc, out = call("dispatch.py")
         self.assertIn("Would start (2)", out)
-        rc, out = call("dispatch.py", "--apply")
+        pid = out.split("Plan: ")[1].split()[0]
+        rc, out = call("dispatch.py", "--apply", "--expect", "00000000")     # another plan: nothing starts
+        self.assertEqual(rc, 3, out)
+        self.assertFalse(any(core.started(i) for i in trk().issues()), out)
+        rc, out = call("dispatch.py", "--apply", "--expect", pid)
         self.assertEqual(rc, 0, out)
         cur = {i.ref: i for i in trk().issues()}
         self.assertTrue(core.started(cur[t1.ref]) and core.started(cur[t3.ref]))
