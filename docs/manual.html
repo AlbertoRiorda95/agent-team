@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="light dark">
-<meta name="manual-source" content="sha256:62f303d3db10975dbd208af7bd266234613f1b4e8b6e0804761ed059094d6695">
+<meta name="manual-source" content="sha256:49793898ba28b19562fd387864c5f52e9b17b195ab84ff87b903942eb5ffcc6f">
 <meta name="manual-builder" content="python-markdown 3.11.2">
 <title>Agent team: user manual</title>
 <style>
@@ -3099,16 +3099,15 @@ role.</p>
 under 1,000 words). What costs is the model calls that follow. The skill does
 not choose what the model reads: every call re-reads the whole conversation
 (system prompt, tools, <code>AGENTS.md</code>, <code>CLAUDE.md</code>, everything said before), in
-Claude Code, Codex and OpenCode alike. Measured on the demo project, a
-dispatch or a create-issues took 4 to 12 calls of 50,000 to 220,000 tokens
-each, almost all of it that context (mostly cache reads, about a tenth of the
-price of fresh input), with under 3,000 tokens of output.</p>
-<p>Inside a session, the mechanical commands (<code>dispatch</code>, <code>create-issues</code>) now
-take four model calls, the fewest a plan with your yes can take: run the plan,
-summarize it, apply it after your yes, report. They took five or six before:
-the scripts now read the tracker themselves (no separate check), the script
-folder is picked in the same call, and <code>dispatch.py --apply --expect &lt;id&gt;</code>
-starts only the plan you saw. That saves a call or two, not the context.</p>
+Claude Code, Codex and OpenCode alike. Measured on the demo project, the plan
+of a dispatch took about 63,000 tokens in a fresh session and 105,000 to
+276,000 in sessions already under way, for the same two calls and little output:
+the context is the cost.</p>
+<p>Inside a session, the mechanical commands (<code>dispatch</code>, <code>create-issues</code>) take
+four model calls, the fewest a plan with your yes can take: run the plan,
+summarize it, apply it after your yes, report. The scripts read the tracker
+themselves, and <code>dispatch.py --apply --expect &lt;id&gt;</code> starts only the plan you
+saw, so nothing is run again to confirm it.</p>
 <p>What saves the context:</p>
 <ul>
 <li><strong>No session at all.</strong> In a terminal, <code>python3 scripts/dispatch.py --ask</code>

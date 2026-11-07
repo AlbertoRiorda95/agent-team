@@ -189,17 +189,16 @@ A command such as `/agent-team:dispatch` costs little to load (its skill is
 under 1,000 words). What costs is the model calls that follow. The skill does
 not choose what the model reads: every call re-reads the whole conversation
 (system prompt, tools, `AGENTS.md`, `CLAUDE.md`, everything said before), in
-Claude Code, Codex and OpenCode alike. Measured on the demo project, a
-dispatch or a create-issues took 4 to 12 calls of 50,000 to 220,000 tokens
-each, almost all of it that context (mostly cache reads, about a tenth of the
-price of fresh input), with under 3,000 tokens of output.
+Claude Code, Codex and OpenCode alike. Measured on the demo project, the plan
+of a dispatch took about 63,000 tokens in a fresh session and 105,000 to
+276,000 in sessions already under way, for the same two calls and little output:
+the context is the cost.
 
-Inside a session, the mechanical commands (`dispatch`, `create-issues`) now
-take four model calls, the fewest a plan with your yes can take: run the plan,
-summarize it, apply it after your yes, report. They took five or six before:
-the scripts now read the tracker themselves (no separate check), the script
-folder is picked in the same call, and `dispatch.py --apply --expect <id>`
-starts only the plan you saw. That saves a call or two, not the context.
+Inside a session, the mechanical commands (`dispatch`, `create-issues`) take
+four model calls, the fewest a plan with your yes can take: run the plan,
+summarize it, apply it after your yes, report. The scripts read the tracker
+themselves, and `dispatch.py --apply --expect <id>` starts only the plan you
+saw, so nothing is run again to confirm it.
 
 What saves the context:
 
